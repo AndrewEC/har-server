@@ -1,0 +1,29 @@
+log-debug-info: True
+
+request-matching:
+  rules:
+    - method
+    - path
+    - query-params
+
+rewrite-rules:
+  response:
+    - localhost
+  request:
+    - strip-query-params
+  config:
+    excluded-domains:
+      - http://www.w3.org
+    removable-query-params:
+      - w
+      - q
+
+entry-exclusions:
+  rules:
+    - responses-with-bad-status
+    - responses-with-invalid-size
+    - duplicate-requests
+  config:
+    bad-statuses:
+      - 0
+      - 304
