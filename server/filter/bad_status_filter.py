@@ -11,7 +11,8 @@ _log = logging.getLogger(__file__)
 def bad_status_filter(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     statuses = config.exclusions.exclusion_config.bad_statuses
     if len(statuses) == 0:
-        _log.warning('bad-status filter is enabled but not response statuses to filter out have been specified.')
+        _log.warning('bad-status entry filter is enabled but no '
+                     'entry-exclusion.config.bad-statuses has been specified.')
         return file_contents
 
     _log.info(f'Filtering out entries with response status of: [{statuses}]')

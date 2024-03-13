@@ -27,14 +27,18 @@ class ConfigException(Exception):
 
 class RewriteRulesConfig:
 
-    def __init__(self, excluded_domains: List[str], removable_query_params: List[str]):
+    def __init__(self, excluded_domains: List[str] = [], removable_query_params: List[str] = [],
+                 removable_request_headers: List[str] = [], removable_response_headers: List[str] = []):
         self.excluded_domains = excluded_domains
         self.removable_query_params = removable_query_params
+        self.removable_request_headers = removable_request_headers
+        self.removable_response_headers = removable_response_headers
 
 
 class ConfiguredRewriteRules:
 
-    def __init__(self, response_rules: List[str], request_rules: List[str], rule_config: RewriteRulesConfig):
+    def __init__(self, response_rules: List[str] = [], request_rules: List[str] = [],
+                 rule_config: RewriteRulesConfig = RewriteRulesConfig()):
         self.response_rules = response_rules
         self.request_rules = request_rules
         self.rule_config = rule_config
@@ -42,13 +46,13 @@ class ConfiguredRewriteRules:
 
 class ExclusionConfig:
 
-    def __init__(self, bad_statuses: List[int]):
+    def __init__(self, bad_statuses: List[int] = []):
         self.bad_statuses = bad_statuses
 
 
 class ConfiguredExclusions:
 
-    def __init__(self, rules: List[str], exclusion_config: ExclusionConfig):
+    def __init__(self, rules: List[str] = [], exclusion_config: ExclusionConfig = ExclusionConfig()):
         self.rules = rules
         self.exclusion_config = exclusion_config
 
@@ -61,7 +65,7 @@ class MatchConfig:
 
 class Matching:
 
-    def __init__(self, rules: List[str], match_config: MatchConfig):
+    def __init__(self, rules: List[str] = [], match_config: MatchConfig = MatchConfig):
         self.rules = rules
         self.match_config = match_config
 
@@ -69,10 +73,10 @@ class Matching:
 class Config:
 
     def __init__(self):
-        self.log_debug_info = False
-        self.exclusions = ConfiguredExclusions([], ExclusionConfig([]))
-        self.rewrite_rules = ConfiguredRewriteRules([], [], RewriteRulesConfig([], []))
-        self.matching = Matching([], MatchConfig())
+        self.dump_urls = False
+        self.exclusions = ConfiguredExclusions()
+        self.rewrite_rules = ConfiguredRewriteRules()
+        self.matching = Matching()
 
     def load(self, root_path: Path):
         try:
@@ -85,7 +89,7 @@ class Config:
         if parsed is None:
             return
 
-        self.log_debug_info = _get_or_default(parsed, 'log-debug-info', False)
+        self.dump_urls = _get_or_default(parsed, 'dump-urls', False)
 
         self.matching = Matching(
             _get_or_default(parsed, 'request-matching.rules', []),
@@ -104,7 +108,9 @@ class Config:
             _get_or_default(parsed, 'rewrite-rules.request', []),
             RewriteRulesConfig(
                 _get_or_default(parsed, 'rewrite-rules.config.excluded-domains', []),
-                _get_or_default(parsed, 'rewrite-rules.config.removable-query-params', [])
+                _get_or_default(parsed, 'rewrite-rules.config.removable-query-params', []),
+                _get_or_default(parsed, 'rewrite-rules.config.removable-request-headers', []),
+                _get_or_default(parsed, 'rewrite-rules.config.removable-response-headers', [])
             )
         )
 

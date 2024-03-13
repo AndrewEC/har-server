@@ -14,7 +14,7 @@ def _do_parse_har_file(har_path: Path) -> HarFileContent:
         return HarFileContent(har_path, json.loads(contents))
 
 
-def parse_har_file(har_path: Path) -> HarFileContent:
+def _parse_har_file(har_path: Path) -> HarFileContent:
     try:
         return _do_parse_har_file(har_path)
     except Exception as e:
@@ -25,9 +25,12 @@ def parse_har_files(har_root_folder: Path) -> List[HarFileContent]:
     parsed = []
     _log.info(f'Parsing har files from har folder: [{har_root_folder}]')
     for file in har_root_folder.iterdir():
+        if not file.is_file():
+            _log.info(f'Skipping path since it points to a directory: [{file}]')
+            continue
         if not file.suffix == '.har':
             _log.info(f'Skipping file since it does not have a .har extension: [{file}]')
             continue
         _log.info(f'Parsing har file: [{file}]')
-        parsed.append(parse_har_file(file))
+        parsed.append(_parse_har_file(file))
     return parsed

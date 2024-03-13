@@ -1,22 +1,30 @@
-log-debug-info: True
+dump-urls: True
 
 request-matching:
   rules:
     - method
     - path
     - query-params
+    - headers
 
 rewrite-rules:
   response:
     - localhost
+    - remove-headers
   request:
-    - strip-query-params
+    - remove-query-params
+    - remove-headers
   config:
     excluded-domains:
       - http://www.w3.org
     removable-query-params:
       - w
       - q
+    removable-response-headers:
+      - content-type
+      - content-encoding
+    removable-request-headers:
+      - Accept
 
 entry-exclusions:
   rules:

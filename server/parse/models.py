@@ -15,13 +15,6 @@ class HarParseError(Exception):
         super().__init__(message, e)
 
 
-class HarEntryHeader:
-
-    def __init__(self, header: Dict):
-        self.name = header['name']
-        self.value = header['value']
-
-
 class HarEntryRequest:
 
     def __init__(self, request: Dict):
@@ -44,7 +37,7 @@ class HarEntryResponse:
 
     def __init__(self, response: Dict):
         self.status: int = response['status']
-        self.headers = [HarEntryHeader(header) for header in response['headers']]
+        self.headers = {header['name']: header['value'] for header in response['headers']}
         self.content = HarEntryResponseContent(response['content'])
 
 

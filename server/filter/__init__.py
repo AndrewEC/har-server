@@ -1,1 +1,1 @@
-from .filters import apply_entry_filters
+from .filters import apply_entry_filters, EntryExclusionRuleNotFoundException

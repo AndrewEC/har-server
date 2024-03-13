@@ -28,14 +28,19 @@ def get(request: Request, full_path: str):
     if entry is None:
         raise HTTPException(status_code=404, detail='No matching request found.')
 
-    _log.info(f'Found response for [{full_path}] within [{entry.parent.source_file.name}]')
+    _log.info(f'Request URL [{request.url}] matched to [{entry.request.url}] from .har file [{entry.parent.source_file.name}]')
     response = entry.response
     if response.content.encoding == 'base64':
         content = base64.b64decode(response.content.text)
         return Response(content=content, status_code=response.status, media_type=response.content.mime_type)
     else:
         response = apply_response_rules(config, entry.response)
-        return Response(content=response.content.text, status_code=response.status, media_type=response.content.mime_type)
+        return Response(
+            content=response.content.text,
+            status_code=response.status,
+            media_type=response.content.mime_type,
+            headers=response.headers
+        )
 
 
 @click.command()
@@ -50,7 +55,7 @@ def split_har(har: str):
 
     har_file_contents = apply_entry_filters(config, parse_har_files(har_root_folder))
 
-    if config.log_debug_info:
+    if config.dump_urls:
         log_debug_info(har_root_folder, har_file_contents)
 
     route_map.set_entries(har_file_contents)
