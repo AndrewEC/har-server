@@ -19,7 +19,7 @@ for other folders and har files.
 By default, the server runs on port 8000 and can be accessed using http://localhost:8000/
 
 ## Configuration
-There are a number of configuration options available that this document will explain in the next few sections. To
+There are a number of configuration options available that this document will highlight. To
 utilize any of these configuration options just create a `_config.yml` within the folder you are specifying
 when running the server.
 
@@ -27,6 +27,7 @@ A sample `_config.yml` with all available configuration options available can be
 of this project.
 
 ### Configuration Properties:
+* `request-matching.rules` -> The sequentially executed set of predicate functions to determing if an incoming Http request matches a previously recorded request pulled from a har file.
 * `rewrite-rules.request` -> The sequentially executed set of functions to modify an incoming request or a previously recorded request pulled from a har file.
 * `request-matching.rules` -> The sequentially executed set of rules to match an incoming HTTP request to a previously recorded request loaded from a har file.
 * `rewrite-rules.response` -> The sequentially executed set of rules to modify a response from a har file before returning it to the calling Http client.
