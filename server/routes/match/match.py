@@ -26,9 +26,8 @@ class MatchRuleNotFound(Exception):
 
 
 def do_requests_match(config: Config, entry: HarEntryRequest, request: HarEntryRequest) -> bool:
-    rule_matchers = [_get_rule(name) for name in config.matching.rules]
-    if all(matcher(config, entry, request) for matcher in rule_matchers):
-        return True
+    matcher_rules = list(map(_get_rule, config.matching.rules))
+    return all(matcher(config, entry, request) for matcher in matcher_rules)
 
 
 def _get_rule(name: str) -> Callable[[Config, HarEntryRequest, HarEntryRequest], bool]:

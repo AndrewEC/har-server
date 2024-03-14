@@ -5,6 +5,7 @@ import logging
 
 from .models import HarFileContent, HarParseError
 
+
 _log = logging.getLogger(__file__)
 
 
@@ -18,7 +19,7 @@ def _parse_har_file(har_path: Path) -> HarFileContent:
     try:
         return _do_parse_har_file(har_path)
     except Exception as e:
-        raise HarParseError('Could not parse har file.', e)
+        raise HarParseError(f'Could not parse har file [{har_path}]', e)
 
 
 def parse_har_files(har_root_folder: Path) -> List[HarFileContent]:
