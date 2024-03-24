@@ -16,7 +16,7 @@ def remove_header_from_entry_request(config: Config, request: HarEntryRequest) -
 
 
 def _remove_header_from_request(config: Config, request: HarEntryRequest) -> HarEntryRequest:
-    removable_headers = config.rewrite_rules.rule_config.removable_headers
+    removable_headers = config.rewrite_rules.rule_config.removable_request_headers
     if len(removable_headers) == 0:
         _log.info('The remove-request-headers request rewrite rule is enabled but no '
                   'rewrite-rules.config.removable-request-headers array has been configured.')
