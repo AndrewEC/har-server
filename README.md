@@ -34,10 +34,19 @@ of this project.
     * `headers` -> Match requests by their request headers.
 * `rewrite-rules.request` -> The sequentially executed set of functions to modify an incoming request or a previously recorded request pulled from a har file.
     * `remove-query-params` -> Removes query params by name from the incoming and recorded request.
+      * `rewrite-rules.config.removable-query-params` -> The list of query param names (case-sensitive) to be removed from each recorded request.
     * `remove-headers` -> Removes headers by name from the incoming and recorded request.
+      * `rewrite-rules.config.removable-request-headers` -> A list of header names (case-sensitive) to be removed from all incoming and recorded requests before attempting to match them.
 * `rewrite-rules.response` -> The sequentially executed set of rules to modify a response from a har file before returning it to the calling Http client.
     * `localhost` -> Rewrites the host and protocol of all http:// and https:// URLs in any matched response to http://localhost:8000.
+      * `rewrite-rules.config.excluded-domains` -> A list of protocol + host combinations that should be skipped by the `localhost` rewrite rule.
+      * Ex: http://www.w3.org
     * `remove-headers` -> Removes response headers by the header name.
+      * `rewrite-rules.config.removable-response-headers` -> A list of header names (case-sensitive) to be removed from all matched responses before returning said response.
 * `rewrite-rules.config` -> Configuration values to control the behaviour of the request and response rewrite rules.
 * `entry-exclusions.rules` -> A sequentially executed set of rules that will filter out entries from each har file.
+  * `responses-with-bad-status` -> Filter out any responses that have a matching HTTP status.
+    * `entry-exclusions.config.bad-statuses` -> The list of "bad" HTTP status codes to be excluded.
+  * `responses-with-invalid-size` -> Filter out responses that are empty but don't have a 204 response status.
+  * `duplicate-requests` -> Filter out all requests that appear to be effectively equal to another request.
 * `entry-exclusions.config` -> Configuration values to control the behaviour of the exclusion rules.
