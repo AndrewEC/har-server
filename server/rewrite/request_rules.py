@@ -21,7 +21,7 @@ def _get_request_rewrite_rule(name: str) -> Tuple[Callable[[Config, HarEntryRequ
     return _REQUEST_REWRITE_RULES[name]
 
 
-def _apply_request_rules(config: Config, request: HarEntryRequest, index: int) -> HarEntryRequest:
+def _apply_request_rewrite_rules(config: Config, request: HarEntryRequest, index: int) -> HarEntryRequest:
     rules = config.rewrite_rules.request_rules
     if len(rules) == 0:
         return request
@@ -32,9 +32,9 @@ def _apply_request_rules(config: Config, request: HarEntryRequest, index: int) -
     return request_copy
 
 
-def apply_browser_request_rules(config: Config, request: HarEntryRequest) -> HarEntryRequest:
-    return _apply_request_rules(config, request, 0)
+def apply_browser_request_rewrite_rules(config: Config, request: HarEntryRequest) -> HarEntryRequest:
+    return _apply_request_rewrite_rules(config, request, 0)
 
 
-def apply_entry_request_rules(config: Config, request: HarEntryRequest) -> HarEntryRequest:
-    return _apply_request_rules(config, request, 1)
+def apply_entry_request_rewrite_rules(config: Config, request: HarEntryRequest) -> HarEntryRequest:
+    return _apply_request_rewrite_rules(config, request, 1)

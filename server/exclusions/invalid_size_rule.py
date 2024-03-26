@@ -10,7 +10,7 @@ def _has_valid_size(entry: HarEntry) -> bool:
     return (size > 0 and entry.response.status != 204) or (size == 0 and entry.response.status == 204)
 
 
-def invalid_size_filter(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
+def invalid_size_exclusion_rule(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     for file_content in file_contents:
         file_content.entries = list(filter(_has_valid_size, file_content.entries))
     return file_contents

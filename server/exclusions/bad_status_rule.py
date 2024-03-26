@@ -8,7 +8,7 @@ from server.config import Config
 _log = logging.getLogger(__file__)
 
 
-def bad_status_filter(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
+def bad_status_exclusion_rule(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     statuses = config.exclusions.exclusion_config.bad_statuses
     if len(statuses) == 0:
         _log.warning('bad-status entry filter is enabled but no '

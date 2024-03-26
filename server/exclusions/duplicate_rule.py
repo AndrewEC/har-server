@@ -29,7 +29,7 @@ def _remove_content_across_files(config: Config, content: HarFileContent, all_co
     content.entries = list(filter(None, content.entries))
 
 
-def remove_duplicates(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
+def remove_duplicates_exclusion_rule(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     for content in file_contents:
         _remove_duplicates_within_file(config, content)
     for content in file_contents:

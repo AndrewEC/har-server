@@ -5,7 +5,7 @@ import logging
 from fastapi.requests import Request
 
 from server.parse import HarFileContent, HarEntryRequest, HarEntry
-from server.rewrite import apply_browser_request_rules, apply_entry_request_rules
+from server.rewrite import apply_browser_request_rewrite_rules, apply_entry_request_rewrite_rules
 from server.config import Config
 
 from .match import do_requests_match
@@ -34,9 +34,9 @@ class RouteMap:
         return HarEntryRequest(request_options)
 
     def find_entry_for_request(self, config: Config, request: Request) -> HarEntry | None:
-        har_request = apply_browser_request_rules(config, self._as_har_request(request))
+        har_request = apply_browser_request_rewrite_rules(config, self._as_har_request(request))
         for entry in self._entries:
-            modified_request_entry = apply_entry_request_rules(config, entry.request)
+            modified_request_entry = apply_entry_request_rewrite_rules(config, entry.request)
             if do_requests_match(config, modified_request_entry, har_request):
                 return entry
         return None

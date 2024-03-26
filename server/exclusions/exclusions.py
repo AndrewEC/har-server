@@ -4,17 +4,17 @@ import logging
 from server.parse import HarFileContent
 from server.config import Config
 
-from .bad_status_filter import bad_status_filter
-from .invalid_size_filter import invalid_size_filter
-from .duplicate_filter import remove_duplicates
+from .bad_status_rule import bad_status_exclusion_rule
+from .invalid_size_rule import invalid_size_exclusion_rule
+from .duplicate_rule import remove_duplicates_exclusion_rule
 
 
 _log = logging.getLogger(__file__)
 
 _EXCLUSION_RULES: Dict[str, Callable[[Config, List[HarFileContent]], List[HarFileContent]]] = {
-    'responses-with-bad-status': bad_status_filter,
-    'responses-with-invalid-size': invalid_size_filter,
-    'duplicate-requests': remove_duplicates
+    'responses-with-bad-status': bad_status_exclusion_rule,
+    'responses-with-invalid-size': invalid_size_exclusion_rule,
+    'duplicate-requests': remove_duplicates_exclusion_rule
 }
 
 
@@ -46,13 +46,13 @@ def _remove_files_with_no_entries(file_contents: List[HarFileContent]) -> List[H
     return files_with_entries
 
 
-def apply_entry_filters(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
+def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     file_contents = _sort(_remove_files_with_no_entries(file_contents))
     rules = config.exclusions.rules
     if len(rules) == 0:
         _log.info('No entry-exclusions.rules array has been configured. No har file entries will be filtered out.')
         return file_contents
     for rule in rules:
-        _log.info(f'Applying entry filter: [{rule}]')
+        _log.info(f'Applying entry exclusion rule: [{rule}]')
         file_contents = _sort(_remove_files_with_no_entries(_get_exclusion_rule(rule)(config, file_contents)))
     return file_contents

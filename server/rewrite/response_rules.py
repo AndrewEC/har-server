@@ -20,7 +20,7 @@ def _get_response_rewrite_rule(name: str) -> Callable[[Config, HarEntryResponse]
     return _RESPONSE_REWRITE_RULES[name]
 
 
-def apply_response_rules(config: Config, response: HarEntryResponse) -> HarEntryResponse:
+def apply_response_rewrite_rules(config: Config, response: HarEntryResponse) -> HarEntryResponse:
     rules = config.rewrite_rules.response_rules
     if len(rules) == 0:
         return response

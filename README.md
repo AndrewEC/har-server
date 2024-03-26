@@ -44,7 +44,7 @@ of this project.
     * `remove-headers` -> Removes response headers by the header name.
       * `rewrite-rules.config.removable-response-headers` -> A list of header names (case-sensitive) to be removed from all matched responses before returning said response.
 * `rewrite-rules.config` -> Configuration values to control the behaviour of the request and response rewrite rules.
-* `entry-exclusions.rules` -> A sequentially executed set of rules that will filter out entries from each har file.
+* `entry-exclusions.rules` -> A sequentially executed set of rules that will filter out entries from each har file. Entries that are excluded will never be can never be matched or returned by the running har-server.
   * `responses-with-bad-status` -> Filter out any responses that have a matching HTTP status.
     * `entry-exclusions.config.bad-statuses` -> The list of "bad" HTTP status codes to be excluded.
   * `responses-with-invalid-size` -> Filter out responses that are empty but don't have a 204 response status.

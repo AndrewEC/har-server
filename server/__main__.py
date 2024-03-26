@@ -8,9 +8,9 @@ from fastapi.responses import Response
 
 from server.parse import parse_har_files
 from server.routes import RouteMap
-from server.rewrite import apply_response_rules
+from server.rewrite import apply_response_rewrite_rules
 from server.config import Config
-from server.filter import apply_entry_filters
+from server.exclusions import apply_entry_exclusions
 
 from .logging_conf import *  # required to enable logging
 from .debug import log_debug_info
@@ -34,7 +34,7 @@ def get(request: Request, full_path: str):
         content = base64.b64decode(response.content.text)
         return Response(content=content, status_code=response.status, media_type=response.content.mime_type)
     else:
-        response = apply_response_rules(config, entry.response)
+        response = apply_response_rewrite_rules(config, entry.response)
         return Response(
             content=response.content.text,
             status_code=response.status,
@@ -53,7 +53,7 @@ def split_har(har: str):
 
     config.load(har_root_folder)
 
-    har_file_contents = apply_entry_filters(config, parse_har_files(har_root_folder))
+    har_file_contents = apply_entry_exclusions(config, parse_har_files(har_root_folder))
 
     if config.dump_urls:
         log_debug_info(har_root_folder, har_file_contents)
