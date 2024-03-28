@@ -1,4 +1,9 @@
-dump-urls: True
+debug:
+  dump-urls: True
+  log-stack-traces: True
+
+server:
+  port: 8000
 
 request-matching:
   rules:

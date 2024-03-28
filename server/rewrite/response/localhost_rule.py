@@ -116,9 +116,8 @@ def _modify_text(content: str, captured: _Captured, modifier: int, config: Confi
 def rewrite_response_content_urls(config: Config, response: HarEntryResponse) -> HarEntryResponse:
     content = response.content.text
     captor = _Captor()
-    content_length = len(content)
-    for i in range(content_length):
-        captor.next_char(content[i], i)
+    for index, value in enumerate(content):
+        captor.next_char(value, index)
 
     modifier = 0
     for captured in captor.captured:

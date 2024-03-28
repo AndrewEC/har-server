@@ -43,6 +43,14 @@ def get(request: Request, full_path: str):
         )
 
 
+@app.exception_handler(Exception)
+def handle_exception(request: Request, exception: Exception):
+    _log.error(f'Handling uncaught exception: [{exception}]')
+    if config.debug.log_stack:
+        _log.exception(exception)
+    return Response(status_code=500)
+
+
 @click.command()
 @click.argument('har')
 def split_har(har: str):
@@ -55,12 +63,12 @@ def split_har(har: str):
 
     har_file_contents = apply_entry_exclusions(config, parse_har_files(har_root_folder))
 
-    if config.dump_urls:
+    if config.debug.dump_urls:
         log_debug_info(har_root_folder, har_file_contents)
 
     route_map.set_entries(har_file_contents)
 
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=config.port)
 
 
 if __name__ == '__main__':

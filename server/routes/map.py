@@ -20,6 +20,14 @@ class RouteMap:
         self._entries: List[HarEntry] = []
 
     def set_entries(self, contents: List[HarFileContent]):
+        """
+        Sets the list of entries containing the requests to be matched against and the responses to be returned when
+        a request is matched.
+
+        This will take all the entries from all the parsed har files and put them in a single unsorted list.
+
+        :param contents: The list of parsed har files containing the entries to be referenced.
+        """
         self._entries = list(chain(*[content.entries for content in contents]))
 
     def _as_har_request(self, request: Request) -> HarEntryRequest:
@@ -34,6 +42,19 @@ class RouteMap:
         return HarEntryRequest(request_options)
 
     def find_entry_for_request(self, config: Config, request: Request) -> HarEntry | None:
+        """
+        Attempts to find an entry in a har file in which the request associated with said entry matches the request
+        being provided as an input parameter.
+
+        This will immediately return an entry upon a match so no single request will result in more than one match.
+
+        If no match can be found then this will return None.
+
+        :param config: The har-server configuration from which the list of match rules will be pulled.
+        :param request: The incoming Http request to match against the requests from each har entry.
+        :return: The har entry whose recorded request matches the incoming Http request based on the matching rules.
+            If no request matches then this will return None.
+        """
         har_request = apply_browser_request_rewrite_rules(config, self._as_har_request(request))
         for entry in self._entries:
             modified_request_entry = apply_entry_request_rewrite_rules(config, entry.request)

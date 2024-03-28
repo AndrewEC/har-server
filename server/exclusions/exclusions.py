@@ -26,6 +26,14 @@ class EntryExclusionRuleNotFoundException(Exception):
         super().__init__(EntryExclusionRuleNotFoundException._MESSAGE_TEMPLATE.format(name))
 
 
+class ExclusionRuleFailedException(Exception):
+
+    _MESSAGE_TEMPLATE = 'The exclusion rule [{}] failed with an error.'
+
+    def __init__(self, name: str, cause: Exception):
+        super().__init__(ExclusionRuleFailedException._MESSAGE_TEMPLATE.format(name), cause)
+
+
 def _get_exclusion_rule(name: str) -> Callable[[Config, List[HarFileContent]], List[HarFileContent]]:
     if name not in _EXCLUSION_RULES:
         raise EntryExclusionRuleNotFoundException(name)
@@ -47,6 +55,21 @@ def _remove_files_with_no_entries(file_contents: List[HarFileContent]) -> List[H
 
 
 def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
+    """
+    Applies the configured exclusion rules to the har file contents to remove any entries in each har file
+    that match at least one of the exclusion rules.
+
+    This will remove HarFileContent elements that do not have any entries remaining by the end of this method.
+
+    :param config: The server configuration from which the list of exclusion rules will be pulled.
+    :param file_contents: The list of parsed har file contents.
+    :return: The list of parsed har file contents less any har files that no longer have any entries as a result of
+        these exclusion rules.
+    :raise: EntryExclusionRuleNotFoundException if an exclusion rule specified in the configuration could not be found.
+    :raise: ExclusionRuleFailedException if an exclusion rule raised an exception. This exception will contain the
+        original exception that was raised by the exclusion rule.
+    """
+
     file_contents = _sort(_remove_files_with_no_entries(file_contents))
     rules = config.exclusions.rules
     if len(rules) == 0:
@@ -54,5 +77,10 @@ def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) 
         return file_contents
     for rule in rules:
         _log.info(f'Applying entry exclusion rule: [{rule}]')
-        file_contents = _sort(_remove_files_with_no_entries(_get_exclusion_rule(rule)(config, file_contents)))
+        exclusion_rule_function = _get_exclusion_rule(rule)
+        try:
+            entries_post_exclusion_rule = exclusion_rule_function(config, file_contents)
+        except Exception as e:
+            raise ExclusionRuleFailedException(rule, e)
+        file_contents = _sort(_remove_files_with_no_entries(entries_post_exclusion_rule))
     return file_contents

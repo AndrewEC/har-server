@@ -70,15 +70,36 @@ class Matching:
         self.match_config = match_config
 
 
+class Debug:
+
+    def __init__(self, log_stack = False, dump_urls = False):
+        self.log_stack = log_stack
+        self.dump_urls = dump_urls
+
+
 class Config:
 
+    """
+    Global configuration class intended to parse and hold the configuration values from the default
+    _config.yml configuration file.
+    """
+
     def __init__(self):
-        self.dump_urls = False
+        self.debug = Debug()
+        self.port = 8000
         self.exclusions = ConfiguredExclusions()
         self.rewrite_rules = ConfiguredRewriteRules()
         self.matching = Matching()
 
     def load(self, root_path: Path):
+        """
+        Parses the _config.yml file from the har directory specified when running the har-server.
+
+        If no _config.yml file can be found this will effectively do nothing.
+
+        :param root_path: The path to the directory containing the _config.yml file.
+        :raise: ConfigException if an any error occurs while trying to parse the config file.
+        """
         try:
             self._do_load(root_path)
         except Exception as e:
@@ -89,7 +110,12 @@ class Config:
         if parsed is None:
             return
 
-        self.dump_urls = _get_or_default(parsed, 'dump-urls', False)
+        self.dump_urls = _get_or_default(parsed, 'debug.dump-urls', False)
+        self.debug = Debug(
+            _get_or_default(parsed, 'debug.log-stack-traces', False),
+            _get_or_default(parsed, 'debug.dump-urls', False)
+        )
+        self.port = _get_or_default(parsed, 'server.port', 8000)
 
         self.matching = Matching(
             _get_or_default(parsed, 'request-matching.rules', []),
