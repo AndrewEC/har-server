@@ -2,6 +2,7 @@ from typing import List
 from pathlib import Path
 import json
 import logging
+import os
 
 from .models import HarFileContent, HarParseError
 
@@ -39,13 +40,12 @@ def parse_har_files(har_root_folder: Path) -> List[HarFileContent]:
 
     parsed = []
     _log.info(f'Parsing har files from har folder: [{har_root_folder}]')
-    for file in har_root_folder.iterdir():
-        if not file.is_file():
-            _log.info(f'Skipping path since it points to a directory: [{file}]')
-            continue
-        if not file.suffix == '.har':
-            _log.info(f'Skipping file since it does not have a .har extension: [{file}]')
-            continue
-        _log.info(f'Parsing har file: [{file}]')
-        parsed.append(_parse_har_file(file))
+    for root, dirs, files in os.walk(har_root_folder):
+        for file_name in files:
+            if not file_name.endswith('.har'):
+                _log.info(f'Skipping file since it does not have a .har extension: [{file_name}]')
+                continue
+            file_path = Path(root).joinpath(file_name)
+            _log.info(f'Parsing har file: [{file_path}]')
+            parsed.append(_parse_har_file(file_path))
     return parsed

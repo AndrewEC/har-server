@@ -26,7 +26,7 @@ config = Config()
 def get(request: Request, full_path: str):
     entry = route_map.find_entry_for_request(config, request)
     if entry is None:
-        raise HTTPException(status_code=404, detail='No matching request found.')
+        raise HTTPException(status_code=404, detail='No har entry matching request found.')
 
     _log.info(f'Request URL [{request.url}] matched to [{entry.request.url}] from .har file [{entry.parent.source_file.name}]')
     response = entry.response

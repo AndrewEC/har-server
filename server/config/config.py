@@ -110,7 +110,6 @@ class Config:
         if parsed is None:
             return
 
-        self.dump_urls = _get_or_default(parsed, 'debug.dump-urls', False)
         self.debug = Debug(
             _get_or_default(parsed, 'debug.log-stack-traces', False),
             _get_or_default(parsed, 'debug.dump-urls', False)

@@ -40,7 +40,7 @@ def _get_exclusion_rule(name: str) -> Callable[[Config, List[HarFileContent]], L
     return _EXCLUSION_RULES[name]
 
 
-def _sort(file_contents: List[HarFileContent]) -> List[HarFileContent]:
+def _sort_hars_by_name(file_contents: List[HarFileContent]) -> List[HarFileContent]:
     return list(sorted(file_contents, key=lambda file_content: str(file_content.source_file).lower()))
 
 
@@ -70,7 +70,7 @@ def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) 
         original exception that was raised by the exclusion rule.
     """
 
-    file_contents = _sort(_remove_files_with_no_entries(file_contents))
+    file_contents = _sort_hars_by_name(_remove_files_with_no_entries(file_contents))
     rules = config.exclusions.rules
     if len(rules) == 0:
         _log.info('No entry-exclusions.rules array has been configured. No har file entries will be filtered out.')
@@ -82,5 +82,5 @@ def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) 
             entries_post_exclusion_rule = exclusion_rule_function(config, file_contents)
         except Exception as e:
             raise ExclusionRuleFailedException(rule, e)
-        file_contents = _sort(_remove_files_with_no_entries(entries_post_exclusion_rule))
+        file_contents = _sort_hars_by_name(_remove_files_with_no_entries(entries_post_exclusion_rule))
     return file_contents
