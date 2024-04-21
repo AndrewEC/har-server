@@ -16,7 +16,7 @@ _HOST_CHARACTER_NUMBER_MIN = ord('0')
 _HOST_CHARACTER_NUMBER_MAX = ord('9')
 _HOST_CHARACTERS_DOT = ord('.')
 _HOST_CHARACTERS_HYPHEN = ord('-')
-_LOCALHOST = 'http://localhost:8000'
+_LOCALHOST = 'http://localhost:'
 
 
 class _CaptorState(Enum):
@@ -105,12 +105,12 @@ class _Captor:
             self._clear()
 
 
-def _modify_text(content: str, captured: _Captured, modifier: int, config: Config) -> str:
+def _modify_text(content: str, captured: _Captured, modifier: int, config: Config, new_host: str) -> str:
     start_index = captured.start_index - modifier
     domain = content[start_index:start_index + captured.length]
     if domain in config.rewrite_rules.rule_config.excluded_domains:
         return content
-    return content[:start_index] + _LOCALHOST + content[start_index + captured.length:]
+    return content[:start_index] + new_host + content[start_index + captured.length:]
 
 
 def rewrite_response_content_urls(config: Config, response: HarEntryResponse) -> HarEntryResponse:
@@ -119,9 +119,10 @@ def rewrite_response_content_urls(config: Config, response: HarEntryResponse) ->
     for index, value in enumerate(content):
         captor.next_char(value, index)
 
+    new_host = _LOCALHOST + str(config.server.port)
     modifier = 0
     for captured in captor.captured:
-        new_content = _modify_text(content, captured, modifier, config)
+        new_content = _modify_text(content, captured, modifier, config, new_host)
         modifier = modifier + (len(content) - len(new_content))
         content = new_content
 

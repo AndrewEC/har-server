@@ -11,10 +11,8 @@ After running the `CreateVenv.ps1` script the server can be launched using:
 > python -m server "<path_to_har_folder>"
 
 where `<path_to_har_folder>` should be replaced with the relative or absolute path to the folder where the .har files
-you want to serve are located.
-
-This expects that all har files be in the root of the folder. It will not currently look through nested directories
-for other folders and har files.
+you want to serve are located. The .har files can be further nested within the subdirectories of the input
+directory.
 
 By default, the server runs on port 8000 and can be accessed using http://localhost:8000/
 
@@ -27,6 +25,8 @@ A sample `_config.yml` with all available configuration options available can be
 of this project.
 
 ### Configuration Properties:
+* `server.port` -> The port number to bind the server to.
+* `server.open` -> The URL to launch in your default browser once the server has started.
 * `request-matching.rules` -> The sequentially executed set of predicate functions to determine if an incoming HTTP request matches a previously recorded request pulled from a har file.
     * `method` -> Match requests by HTTP method.
     * `path` -> Match requetss by path segments. (This will exclude the host/port and will fully decode the request path.)
@@ -38,7 +38,7 @@ of this project.
     * `remove-headers` -> Removes headers by name from the incoming and recorded request.
       * `rewrite-rules.config.removable-request-headers` -> A list of header names (case-sensitive) to be removed from all incoming and recorded requests before attempting to match them.
 * `rewrite-rules.response` -> The sequentially executed set of rules to modify a response from a har file before returning it to the calling Http client.
-    * `localhost` -> Rewrites the host and protocol of all http:// and https:// URLs in any matched response to http://localhost:8000.
+    * `urls-in-response` -> Rewrites the host and protocol of all http:// and https:// URLs in any matched response to http://localhost:8000.
       * `rewrite-rules.config.excluded-domains` -> A list of protocol + host combinations that should be skipped by the `localhost` rewrite rule.
       * Ex: http://www.w3.org
     * `remove-headers` -> Removes response headers by the header name.

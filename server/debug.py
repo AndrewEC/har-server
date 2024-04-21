@@ -6,7 +6,7 @@ from server.parse import HarFileContent
 
 
 _log = logging.getLogger(__file__)
-_LOG_FILE = '_request_urls.txt'
+_LOG_FILE = '_dump.txt'
 
 
 def _form_source_file_line(file: HarFileContent) -> str:

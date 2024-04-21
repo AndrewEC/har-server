@@ -15,7 +15,7 @@ def _get_or_default(options: Dict, key: str, default: T) -> T:
             options = options[segments[i]]
         return options[segments[-1]]
     except:
-        _log.info(f'Could not read property from config: [{key}].')
+        _log.info(f'Could not read property from config: [{key}]. Using default of [{default}]')
         return default
 
 
@@ -65,14 +65,21 @@ class MatchConfig:
 
 class Matching:
 
-    def __init__(self, rules: List[str] = [], match_config: MatchConfig = MatchConfig):
+    def __init__(self, rules: List[str] = [], match_config: MatchConfig = MatchConfig()):
         self.rules = rules
         self.match_config = match_config
 
 
+class Server:
+
+    def __init__(self, port=8080, open: str = None):
+        self.port = port
+        self.open = open
+
+
 class Debug:
 
-    def __init__(self, log_stack = False, dump_urls = False):
+    def __init__(self, log_stack=False, dump_urls=False):
         self.log_stack = log_stack
         self.dump_urls = dump_urls
 
@@ -86,7 +93,7 @@ class Config:
 
     def __init__(self):
         self.debug = Debug()
-        self.port = 8000
+        self.server = Server()
         self.exclusions = ConfiguredExclusions()
         self.rewrite_rules = ConfiguredRewriteRules()
         self.matching = Matching()
@@ -114,7 +121,11 @@ class Config:
             _get_or_default(parsed, 'debug.log-stack-traces', False),
             _get_or_default(parsed, 'debug.dump-urls', False)
         )
-        self.port = _get_or_default(parsed, 'server.port', 8000)
+
+        self.server = Server(
+            _get_or_default(parsed, 'server.port', 8080),
+            _get_or_default(parsed, 'server.open', None)
+        )
 
         self.matching = Matching(
             _get_or_default(parsed, 'request-matching.rules', []),

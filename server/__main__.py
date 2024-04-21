@@ -12,6 +12,7 @@ from server.rewrite import apply_response_rewrite_rules
 from server.config import Config
 from server.exclusions import apply_entry_exclusions
 
+from .browser_open import open_browser_in_background
 from .logging_conf import *  # required to enable logging
 from .debug import log_debug_info
 
@@ -23,12 +24,14 @@ config = Config()
 
 
 @app.get('/{full_path:path}')
+@app.post('/{full_path:path}')
 def get(request: Request, full_path: str):
     entry = route_map.find_entry_for_request(config, request)
     if entry is None:
         raise HTTPException(status_code=404, detail='No har entry matching request found.')
 
-    _log.info(f'Request URL [{request.url}] matched to [{entry.request.url}] from .har file [{entry.parent.source_file.name}]')
+    _log.info(f'Request [{request.method} {request.url}] matched to [{entry.request.method} {entry.request.url}] '
+              f'from .har file [{entry.parent.source_file.name}]')
     response = entry.response
     if response.content.encoding == 'base64':
         content = base64.b64decode(response.content.text)
@@ -68,7 +71,9 @@ def split_har(har: str):
 
     route_map.set_entries(har_file_contents)
 
-    uvicorn.run(app, host='0.0.0.0', port=config.port)
+    open_browser_in_background(config)
+
+    uvicorn.run(app, host='0.0.0.0', port=config.server.port)
 
 
 if __name__ == '__main__':

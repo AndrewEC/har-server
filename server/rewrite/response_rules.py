@@ -9,7 +9,7 @@ from .errors import ResponseRuleNotFoundException, ResponseRuleFailedException
 
 
 _RESPONSE_REWRITE_RULES: Dict[str, Callable[[Config, HarEntryResponse], HarEntryResponse]] = {
-    'localhost': rewrite_response_content_urls,
+    'urls-in-response': rewrite_response_content_urls,
     'remove-headers': remove_headers_from_response
 }
 

@@ -27,9 +27,6 @@ def parse_har_files(har_root_folder: Path) -> List[HarFileContent]:
     """
     Parses all the files within the har_root_folder that have a .har extension.
 
-    This will only parse .har files at the root of the har_root_folder directory. This will not attempt
-    to traverse and scan any directories nested within the har_root_folder.
-
     :param har_root_folder: The path to the folder where all the .har files are contained.
     :return: The list of parsed har files. This will return the parsed har file content event if the har file
         did not contain any entries. (Meaning the file is effectively empty and won't change the behaviour of the

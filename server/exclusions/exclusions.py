@@ -57,9 +57,10 @@ def _remove_files_with_no_entries(file_contents: List[HarFileContent]) -> List[H
 def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) -> List[HarFileContent]:
     """
     Applies the configured exclusion rules to the har file contents to remove any entries in each har file
-    that match at least one of the exclusion rules.
+    that match at least one of the exclusion rules. This process will mutate the har file contents in place.
 
-    This will remove HarFileContent elements that do not have any entries remaining by the end of this method.
+    This will also remove any har file content in the input file_contents list if there are no entries remaining in the
+    har file content.
 
     :param config: The server configuration from which the list of exclusion rules will be pulled.
     :param file_contents: The list of parsed har file contents.
