@@ -29,5 +29,4 @@ def _remove_params(config: Config, request: HarEntryRequest) -> HarEntryRequest:
         if param not in request.query_params:
             continue
         request.query_params.pop(param)
-
     return request

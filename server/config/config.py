@@ -1,87 +1,19 @@
-from typing import List, Dict, TypeVar
+from typing import Dict, TypeVar, Callable
 import logging
 from pathlib import Path
 import yaml
 
+from .models import (Debug, Server, MatchConfig, Matching, ExclusionConfig, ConfiguredExclusions, RewriteRulesConfig,
+                     ConfiguredRewriteRules)
 
 _log = logging.getLogger(__file__)
 T = TypeVar('T')
-
-
-def _get_or_default(options: Dict, key: str, default: T) -> T:
-    try:
-        segments = key.split('.')
-        for i in range(len(segments) - 1):
-            options = options[segments[i]]
-        return options[segments[-1]]
-    except:
-        _log.info(f'Could not read property from config: [{key}]. Using default of [{default}]')
-        return default
 
 
 class ConfigException(Exception):
 
     def __init__(self, message: str, e: Exception):
         super().__init__(message, e)
-
-
-class RewriteRulesConfig:
-
-    def __init__(self, excluded_domains: List[str] = [], removable_query_params: List[str] = [],
-                 removable_request_headers: List[str] = [], removable_response_headers: List[str] = []):
-        self.excluded_domains = excluded_domains
-        self.removable_query_params = removable_query_params
-        self.removable_request_headers = removable_request_headers
-        self.removable_response_headers = removable_response_headers
-
-
-class ConfiguredRewriteRules:
-
-    def __init__(self, response_rules: List[str] = [], request_rules: List[str] = [],
-                 rule_config: RewriteRulesConfig = RewriteRulesConfig()):
-        self.response_rules = response_rules
-        self.request_rules = request_rules
-        self.rule_config = rule_config
-
-
-class ExclusionConfig:
-
-    def __init__(self, bad_statuses: List[int] = []):
-        self.bad_statuses = bad_statuses
-
-
-class ConfiguredExclusions:
-
-    def __init__(self, rules: List[str] = [], exclusion_config: ExclusionConfig = ExclusionConfig()):
-        self.rules = rules
-        self.exclusion_config = exclusion_config
-
-
-class MatchConfig:
-
-    def __init__(self):
-        pass
-
-
-class Matching:
-
-    def __init__(self, rules: List[str] = [], match_config: MatchConfig = MatchConfig()):
-        self.rules = rules
-        self.match_config = match_config
-
-
-class Server:
-
-    def __init__(self, port=8080, open: str = None):
-        self.port = port
-        self.open = open
-
-
-class Debug:
-
-    def __init__(self, log_stack=False, dump_urls=False):
-        self.log_stack = log_stack
-        self.dump_urls = dump_urls
 
 
 class Config:
@@ -102,10 +34,10 @@ class Config:
         """
         Parses the _config.yml file from the har directory specified when running the har-server.
 
-        If no _config.yml file can be found this will effectively do nothing.
+        If no _config.yml file can be found this will immediately return and the default configs will be used.
 
         :param root_path: The path to the directory containing the _config.yml file.
-        :raise: ConfigException if an any error occurs while trying to parse the config file.
+        :raise ConfigException: if an any error occurs while trying to parse the config file.
         """
         try:
             self._do_load(root_path)
@@ -117,38 +49,57 @@ class Config:
         if parsed is None:
             return
 
+        get_or_default = self._curry_get_or_default(parsed)
+
         self.debug = Debug(
-            _get_or_default(parsed, 'debug.log-stack-traces', False),
-            _get_or_default(parsed, 'debug.dump-urls', False)
+            get_or_default('debug.log-stack-traces', False),
+            get_or_default('debug.dump-urls', False),
+            get_or_default('debug.enable-debug-logs', False)
         )
 
         self.server = Server(
-            _get_or_default(parsed, 'server.port', 8080),
-            _get_or_default(parsed, 'server.open', None)
+            get_or_default('server.port', 8080),
+            get_or_default('server.open', None)
         )
 
         self.matching = Matching(
-            _get_or_default(parsed, 'request-matching.rules', []),
+            get_or_default('request-matching.rules', []),
             MatchConfig()
         )
 
         self.exclusions = ConfiguredExclusions(
-            _get_or_default(parsed, 'entry-exclusions.rules', []),
+            get_or_default('entry-exclusions.rules', []),
             ExclusionConfig(
-                _get_or_default(parsed, 'entry-exclusions.config.bad-statuses', [])
+                get_or_default('entry-exclusions.config.removable-statuses', [])
             )
         )
 
         self.rewrite_rules = ConfiguredRewriteRules(
-            _get_or_default(parsed, 'rewrite-rules.response', []),
-            _get_or_default(parsed, 'rewrite-rules.request', []),
+            get_or_default('rewrite-rules.response', []),
+            get_or_default('rewrite-rules.request', []),
             RewriteRulesConfig(
-                _get_or_default(parsed, 'rewrite-rules.config.excluded-domains', []),
-                _get_or_default(parsed, 'rewrite-rules.config.removable-query-params', []),
-                _get_or_default(parsed, 'rewrite-rules.config.removable-request-headers', []),
-                _get_or_default(parsed, 'rewrite-rules.config.removable-response-headers', [])
+                get_or_default('rewrite-rules.config.excluded-domains', []),
+                get_or_default('rewrite-rules.config.removable-query-params', []),
+                get_or_default('rewrite-rules.config.removable-request-headers', []),
+                get_or_default('rewrite-rules.config.removable-response-headers', []),
+                get_or_default('rewrite-rules.config.removable-request-cookies', [])
             )
         )
+
+    def _get_or_default(self, options: Dict, key: str, default: T) -> T:
+        try:
+            segments = key.split('.')
+            for i in range(len(segments) - 1):
+                options = options[segments[i]]
+            return options[segments[-1]]
+        except:
+            _log.info(f'Could not read property from config: [{key}]. Using default of [{default}]')
+            return default
+
+    def _curry_get_or_default(self, options: Dict) -> Callable[[str, T], T]:
+        def get_or_default(key: str, default: T) -> T:
+            return self._get_or_default(options, key, default)
+        return get_or_default
 
     def _parse_config_yml(self, root_path: Path) -> Dict | None:
         config_path = root_path.joinpath('_config.yml')

@@ -1,2 +1,3 @@
 from .urls_in_response_rule import rewrite_response_content_urls
-from .remove_response_header import remove_headers_from_response
+from .remove_response_header_rule import remove_headers_from_response
+from .remove_cookies_rule import remove_cookies_from_response

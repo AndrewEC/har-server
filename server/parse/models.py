@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Any
 from pathlib import Path
-import urllib.parse
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 
 def _get_or_none(options: Dict, key: str) -> Any | None:
@@ -20,9 +19,10 @@ class HarEntryRequest:
     def __init__(self, request: Dict):
         self.method: str = request['method']
         self.url: str = request['url']
-        self.path: str = unquote(urllib.parse.urlparse(self.url).path)
-        self.query_params: Dict[str, str] = {param['name']: param['value'] for param in request['queryString']}
-        self.headers: Dict[str, str] = {param['name']: param['value'] for param in request['headers']}
+        self.path: str = unquote(urlparse(self.url).path)
+        self.query_params: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['queryString']}
+        self.headers: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['headers']}
+        self.cookies: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['cookies']}
 
 
 class HarEntryResponseContent:
@@ -37,8 +37,9 @@ class HarEntryResponse:
 
     def __init__(self, response: Dict):
         self.status: int = response['status']
-        self.headers = {header['name']: header['value'] for header in response['headers']}
+        self.headers = {header['name'].lower(): header['value'].lower() for header in response['headers']}
         self.content = HarEntryResponseContent(response['content'])
+        self.cookies = {cookie['name'].lower(): cookie['value'].lower() for cookie in response['cookies']}
 
 
 class HarEntry:

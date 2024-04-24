@@ -1,6 +1,7 @@
 debug:
   dump-urls: True
   log-stack-traces: True
+  enable-debug-logs: True
 
 server:
   port: 8080
@@ -20,9 +21,12 @@ rewrite-rules:
   request:
     - remove-query-params
     - remove-headers
+    - remove-cookies
   config:
     excluded-domains:
       - http://www.w3.org
+    removable-cookies:
+      - SESSIONID
     removable-query-params:
       - w
       - q
@@ -34,10 +38,10 @@ rewrite-rules:
 
 entry-exclusions:
   rules:
-    - responses-with-bad-status
+    - responses-with-status
     - responses-with-invalid-size
     - duplicate-requests
   config:
-    bad-statuses:
+    removable-statuses:
       - 0
       - 304

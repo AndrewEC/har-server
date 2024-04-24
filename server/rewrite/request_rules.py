@@ -4,15 +4,22 @@ import copy
 from server.parse import HarEntryRequest
 from server.config import Config
 
-from .request import (remove_query_param_from_request, remove_query_param_from_entry_request,
-                      remove_header_from_request, remove_header_from_entry_request)
+from .request import (
+    remove_query_param_from_request, remove_query_param_from_entry_request,
+    remove_header_from_request, remove_header_from_entry_request,
+    remove_cookie_from_request, remove_cookie_from_entry_request
+)
 from .errors import RequestRuleNotFoundException, RequestRuleFailedException
 
 
 _REQUEST_REWRITE_RULES: Dict[str, Tuple[Callable[[Config, HarEntryRequest], HarEntryRequest], Callable[[Config, HarEntryRequest], HarEntryRequest]]] = {
     'remove-query-params': (remove_query_param_from_request, remove_query_param_from_entry_request),
-    'remove-headers': (remove_header_from_request, remove_header_from_entry_request)
+    'remove-headers': (remove_header_from_request, remove_header_from_entry_request),
+    'remove-cookies': (remove_cookie_from_request, remove_cookie_from_entry_request)
 }
+
+_INCOMING_REQUEST_INDEX = 0
+_ENTRY_REQUEST_INDEX = 1
 
 
 def _get_request_rewrite_rule(name: str) -> Tuple[Callable[[Config, HarEntryRequest], HarEntryRequest], Callable[[Config, HarEntryRequest], HarEntryRequest]]:
@@ -48,10 +55,10 @@ def apply_browser_request_rewrite_rules(config: Config, request: HarEntryRequest
     :param config: The har server configuration from which the list of configured request rewrite rules will be pulled.
     :param request: The incoming Http request to be modified.
     :return: The mutated copy of the input request object.
-    :raise: RequestRuleNotFoundException if one of the request rewrite rules configured could not be found.
-    :raise: RequestRuleFailedException if any of the rewrite rules raised an exception.
+    :raise RequestRuleNotFoundException: if one of the request rewrite rules configured could not be found.
+    :raise RequestRuleFailedException: if any of the rewrite rules raised an exception.
     """
-    return _apply_request_rewrite_rules(config, request, 0)
+    return _apply_request_rewrite_rules(config, request, _INCOMING_REQUEST_INDEX)
 
 
 def apply_entry_request_rewrite_rules(config: Config, request: HarEntryRequest) -> HarEntryRequest:
@@ -66,7 +73,7 @@ def apply_entry_request_rewrite_rules(config: Config, request: HarEntryRequest) 
     :param config: The har server configuration from which the list of configured request rewrite rules will be pulled.
     :param request: The request pulled from a har file to be mutated.
     :return: The mutated copy of the input request object.
-    :raise: RequestRuleNotFoundException if one of the request rewrite rules configured could not be found.
-    :raise: RequestRuleFailedException if any of the rewrite rules raised an exception.
+    :raise RequestRuleNotFoundException: if one of the request rewrite rules configured could not be found.
+    :raise RequestRuleFailedException: if any of the rewrite rules raised an exception.
     """
-    return _apply_request_rewrite_rules(config, request, 1)
+    return _apply_request_rewrite_rules(config, request, _ENTRY_REQUEST_INDEX)

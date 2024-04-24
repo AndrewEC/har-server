@@ -31,13 +31,15 @@ class RouteMap:
         self._entries = list(chain(*[content.entries for content in contents]))
 
     def _as_har_request(self, request: Request) -> HarEntryRequest:
-        query_params = [{'name': key, 'value': str(request.query_params.get(key))} for key in request.query_params.keys()]
-        headers = [{'name': key, 'value': str(request.headers.get(key))} for key in request.headers.keys()]
+        query_params = [{'name': key, 'value': request.query_params.get(key)} for key in request.query_params.keys()]
+        headers = [{'name': key, 'value': request.headers.get(key)} for key in request.headers.keys()]
+        cookies = [{'name': key, 'value': request.cookies.get(key)} for key in request.cookies.keys()]
         request_options = {
             'queryString': query_params,
             'method': request.method,
             'url': str(request.url),
-            'headers': headers
+            'headers': headers,
+            'cookies': cookies
         }
         return HarEntryRequest(request_options)
 

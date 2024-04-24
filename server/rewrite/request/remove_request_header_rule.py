@@ -22,6 +22,9 @@ def _remove_header_from_request(config: Config, request: HarEntryRequest) -> Har
                   'rewrite-rules.config.removable-request-headers array has been configured.')
         return request
 
+    if len(request.headers) == 0:
+        return request
+
     for removable in removable_headers:
         if removable not in request.headers:
             continue

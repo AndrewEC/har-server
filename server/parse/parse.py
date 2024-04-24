@@ -31,7 +31,7 @@ def parse_har_files(har_root_folder: Path) -> List[HarFileContent]:
     :return: The list of parsed har files. This will return the parsed har file content event if the har file
         did not contain any entries. (Meaning the file is effectively empty and won't change the behaviour of the
         har-server)
-    :raise: HarParseError if an error occurs while parsing any of the har files. This error will contain the original
+    :raise HarParseError: if an error occurs while parsing any of the har files. This error will contain the original
         error that caused the parsing to fail.
     """
 

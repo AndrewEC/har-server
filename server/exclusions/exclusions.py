@@ -4,6 +4,7 @@ import logging
 from server.parse import HarFileContent
 from server.config import Config
 
+from .errors import EntryExclusionRuleNotFoundException, ExclusionRuleFailedException
 from .bad_status_rule import bad_status_exclusion_rule
 from .invalid_size_rule import invalid_size_exclusion_rule
 from .duplicate_rule import remove_duplicates_exclusion_rule
@@ -12,26 +13,10 @@ from .duplicate_rule import remove_duplicates_exclusion_rule
 _log = logging.getLogger(__file__)
 
 _EXCLUSION_RULES: Dict[str, Callable[[Config, List[HarFileContent]], List[HarFileContent]]] = {
-    'responses-with-bad-status': bad_status_exclusion_rule,
+    'responses-with-status': bad_status_exclusion_rule,
     'responses-with-invalid-size': invalid_size_exclusion_rule,
     'duplicate-requests': remove_duplicates_exclusion_rule
 }
-
-
-class EntryExclusionRuleNotFoundException(Exception):
-
-    _MESSAGE_TEMPLATE = 'A filter with the name [{}] could not be found.'
-
-    def __init__(self, name: str):
-        super().__init__(EntryExclusionRuleNotFoundException._MESSAGE_TEMPLATE.format(name))
-
-
-class ExclusionRuleFailedException(Exception):
-
-    _MESSAGE_TEMPLATE = 'The exclusion rule [{}] failed with an error.'
-
-    def __init__(self, name: str, cause: Exception):
-        super().__init__(ExclusionRuleFailedException._MESSAGE_TEMPLATE.format(name), cause)
 
 
 def _get_exclusion_rule(name: str) -> Callable[[Config, List[HarFileContent]], List[HarFileContent]]:
@@ -59,15 +44,15 @@ def apply_entry_exclusions(config: Config, file_contents: List[HarFileContent]) 
     Applies the configured exclusion rules to the har file contents to remove any entries in each har file
     that match at least one of the exclusion rules. This process will mutate the har file contents in place.
 
-    This will also remove any har file content in the input file_contents list if there are no entries remaining in the
+    Any har file content in the input file_contents list will be removed if there are no entries remaining in the
     har file content.
 
     :param config: The server configuration from which the list of exclusion rules will be pulled.
     :param file_contents: The list of parsed har file contents.
     :return: The list of parsed har file contents less any har files that no longer have any entries as a result of
         these exclusion rules.
-    :raise: EntryExclusionRuleNotFoundException if an exclusion rule specified in the configuration could not be found.
-    :raise: ExclusionRuleFailedException if an exclusion rule raised an exception. This exception will contain the
+    :raise EntryExclusionRuleNotFoundException: If an exclusion rule specified in the configuration could not be found.
+    :raise ExclusionRuleFailedException: If an exclusion rule raised an exception. This exception will contain the
         original exception that was raised by the exclusion rule.
     """
 

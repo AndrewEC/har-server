@@ -1,4 +1,5 @@
 import base64
+import logging
 
 import click
 import uvicorn
@@ -14,7 +15,7 @@ from server.exclusions import apply_entry_exclusions
 
 from .browser_open import open_browser_in_background
 from .logging_conf import *  # required to enable logging
-from .debug import log_debug_info
+from .debug import log_debug_info, enable_debug_logs
 
 
 _log = logging.getLogger(__file__)
@@ -30,20 +31,23 @@ def get(request: Request, full_path: str):
     if entry is None:
         raise HTTPException(status_code=404, detail='No har entry matching request found.')
 
-    _log.info(f'Request [{request.method} {request.url}] matched to [{entry.request.method} {entry.request.url}] '
-              f'from .har file [{entry.parent.source_file.name}]')
+    _log.debug(f'Request [{request.method} {request.url}] matched to [{entry.request.method} {entry.request.url}] '
+               f'from .har file [{entry.parent.source_file.name}]')
     response = entry.response
     if response.content.encoding == 'base64':
         content = base64.b64decode(response.content.text)
         return Response(content=content, status_code=response.status, media_type=response.content.mime_type)
     else:
         response = apply_response_rewrite_rules(config, entry.response)
-        return Response(
+        api_response = Response(
             content=response.content.text,
             status_code=response.status,
             media_type=response.content.mime_type,
             headers=response.headers
         )
+        for name, value in entry.response.cookies.items():
+            api_response.set_cookie(name, value)
+        return api_response
 
 
 @app.exception_handler(Exception)
@@ -63,6 +67,9 @@ def split_har(har: str):
                      f'Har path: [{har_root_folder}]')
 
     config.load(har_root_folder)
+
+    if config.debug.enable_debug_logs:
+        enable_debug_logs()
 
     har_file_contents = apply_entry_exclusions(config, parse_har_files(har_root_folder))
 

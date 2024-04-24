@@ -1,1 +1,2 @@
-from .exclusions import apply_entry_exclusions, EntryExclusionRuleNotFoundException, ExclusionRuleFailedException
+from .exclusions import apply_entry_exclusions
+from .errors import EntryExclusionRuleNotFoundException, ExclusionRuleFailedException

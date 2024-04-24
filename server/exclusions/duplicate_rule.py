@@ -12,7 +12,7 @@ def _remove_duplicates_within_file(config: Config, content: HarFileContent):
             if i == j or content.entries[i] is None or content.entries[j] is None:
                 continue
             if do_requests_match(config, content.entries[i].request, content.entries[j].request):
-                content.entries[i] = None
+                content.entries[j] = None
     content.entries = list(filter(None, content.entries))
 
 
@@ -22,10 +22,10 @@ def _remove_content_across_files(config: Config, content: HarFileContent, all_co
             continue
         for i in range(len(content.entries)):
             for j in range(len(second_content.entries)):
-                if content.entries[i] is None:
+                if content.entries[i] is None or second_content.entries[j] is None:
                     continue
                 if do_requests_match(config, content.entries[i].request, second_content.entries[j].request):
-                    content.entries[i] = None
+                    second_content.entries[j] = None
     content.entries = list(filter(None, content.entries))
 
 

@@ -4,13 +4,14 @@ import copy
 from server.parse import HarEntryResponse
 from server.config import Config
 
-from .response import rewrite_response_content_urls, remove_headers_from_response
+from .response import rewrite_response_content_urls, remove_headers_from_response, remove_cookies_from_response
 from .errors import ResponseRuleNotFoundException, ResponseRuleFailedException
 
 
 _RESPONSE_REWRITE_RULES: Dict[str, Callable[[Config, HarEntryResponse], HarEntryResponse]] = {
     'urls-in-response': rewrite_response_content_urls,
-    'remove-headers': remove_headers_from_response
+    'remove-headers': remove_headers_from_response,
+    'remove-cookies': remove_cookies_from_response
 }
 
 
@@ -33,8 +34,8 @@ def apply_response_rewrite_rules(config: Config, response: HarEntryResponse) -> 
     :param config: The har-server configuration from which the configured response rewrite rules will be pulled.
     :param response: The response, pulled from a har file entry, to be modified then returned to the consuming client.
     :return: A modified copy of the input har response.
-    :raise: ResponseRuleNotFoundException if any of the configured response rewrite rules could not be found
-    :raise: ResponseRuleFailedException if any of the response rewrite rules raised an exception.
+    :raise ResponseRuleNotFoundException: if any of the configured response rewrite rules could not be found
+    :raise ResponseRuleFailedException: if any of the response rewrite rules raised an exception.
     """
     rules = config.rewrite_rules.response_rules
     if len(rules) == 0:

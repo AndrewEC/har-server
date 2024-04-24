@@ -14,6 +14,9 @@ def remove_headers_from_response(config: Config, response: HarEntryResponse) -> 
                      'rewrite-rules.config.removable-response-headers array is configured.')
         return response
 
+    if len(response.headers) == 0:
+        return response
+
     for removable in removable_headers:
         if removable not in response.headers:
             continue
