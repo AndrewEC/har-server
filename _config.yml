@@ -1,11 +1,8 @@
 debug:
+  enable-debug-logs: True
   dump-urls: True
   log-stack-traces: True
-  enable-debug-logs: True
-
-server:
-  port: 8080
-  open: http://localhost:${server.port}/
+  open-browser: http://localhost:8080/
 
 request-matching:
   rules:
@@ -13,35 +10,46 @@ request-matching:
     - path
     - query-params
     - headers
+    - cookies
 
-rewrite-rules:
-  response:
-    - urls-in-response
-    - remove-headers
+rewrite:
   request:
-    - remove-query-params
-    - remove-headers
-    - remove-cookies
-  config:
-    excluded-domains:
-      - http://www.w3.org
-    removable-cookies:
-      - SESSIONID
-    removable-query-params:
-      - w
-      - q
-    removable-response-headers:
-      - content-type
-      - content-encoding
-    removable-request-headers:
-      - Accept
+    rules:
+      - remove-query-params
+      - remove-headers
+      - remove-cookies
+    config:
+      removable-headers:
+        - content-type
+        - content-length
+        - content-encoding
+      removable-cookies:
+        - SESSIONID
+      removable-query-params:
+        - t
+        - time
+        - r
+  response:
+    rules:
+      - urls-in-response
+      - remove-headers
+      - remove-cookies
+    config:
+      excluded-domains:
+        - http://w3.com/
+      removable-headers:
+        - content-type
+        - content-length
+        - content-encoding
+      removable-cookies:
+        - SESSIONID
 
-entry-exclusions:
+exclusions:
   rules:
     - responses-with-status
     - responses-with-invalid-size
-    - duplicate-requests
   config:
     removable-statuses:
       - 0
       - 304
+      - 500

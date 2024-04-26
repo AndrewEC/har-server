@@ -1,87 +1,22 @@
-import base64
-import logging
-
 import click
 import uvicorn
-from fastapi import FastAPI, HTTPException
-from fastapi.requests import Request
-from fastapi.responses import Response
 
-from server.parse import parse_har_files
-from server.routes import RouteMap
-from server.rewrite import apply_response_rewrite_rules
-from server.config import Config
-from server.exclusions import apply_entry_exclusions
+from server.config import set_root_path
+from server.web import app
 
-from .browser_open import open_browser_in_background
-from .logging_conf import *  # required to enable logging
-from .debug import log_debug_info, enable_debug_logs
-
-
-_log = logging.getLogger(__file__)
-app = FastAPI()
-route_map = RouteMap()
-config = Config()
-
-
-@app.get('/{full_path:path}')
-@app.post('/{full_path:path}')
-def get(request: Request, full_path: str):
-    entry = route_map.find_entry_for_request(config, request)
-    if entry is None:
-        raise HTTPException(status_code=404, detail='No har entry matching request found.')
-
-    _log.debug(f'Request [{request.method} {request.url}] matched to [{entry.request.method} {entry.request.url}] '
-               f'from .har file [{entry.parent.source_file.name}]')
-    response = entry.response
-    if response.content.encoding == 'base64':
-        content = base64.b64decode(response.content.text)
-        return Response(content=content, status_code=response.status, media_type=response.content.mime_type)
-    else:
-        response = apply_response_rewrite_rules(config, entry.response)
-        api_response = Response(
-            content=response.content.text,
-            status_code=response.status,
-            media_type=response.content.mime_type,
-            headers=response.headers
-        )
-        for name, value in entry.response.cookies.items():
-            api_response.set_cookie(name, value)
-        return api_response
-
-
-@app.exception_handler(Exception)
-def handle_exception(request: Request, exception: Exception):
-    _log.error(f'Handling uncaught exception: [{exception}]')
-    if config.debug.log_stack:
-        _log.exception(exception)
-    return Response(status_code=500)
+from .logging_conf import *  # Required to enable logging
 
 
 @click.command()
 @click.argument('har')
-def split_har(har: str):
-    har_root_folder = Path(har)
-    if not har_root_folder.is_dir():
-        return print(f'The har argument must point to a directory containing a list of har files to be processed. '
-                     f'Har path: [{har_root_folder}]')
+def run(har: str):
+    har_folder = Path(har)
+    if not har_folder.is_dir():
+        return print('Har argument must point to a directory.')
+    set_root_path(har_folder)
 
-    config.load(har_root_folder)
-
-    if config.debug.enable_debug_logs:
-        enable_debug_logs()
-
-    har_file_contents = apply_entry_exclusions(config, parse_har_files(har_root_folder))
-
-    if config.debug.dump_urls:
-        log_debug_info(har_root_folder, har_file_contents)
-
-    route_map.set_entries(har_file_contents)
-
-    open_browser_in_background(config)
-
-    uvicorn.run(app, host='0.0.0.0', port=config.server.port)
+    uvicorn.run(app, host='0.0.0.0', port=8080)
 
 
 if __name__ == '__main__':
-    split_har()
+    run()

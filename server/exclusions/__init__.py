@@ -1,2 +1,1 @@
-from .exclusions import apply_entry_exclusions
-from .errors import EntryExclusionRuleNotFoundException, ExclusionRuleFailedException
+from .exclusion_filter import with_exclusion_filter, ExclusionFilter
