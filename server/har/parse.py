@@ -38,7 +38,7 @@ class HarParser:
 
         parsed = []
         har_root_folder = get_root_path()
-        _log.info(f'Parsing har files from har folder: [{har_root_folder}]')
+        _log.info(f'Parsing har files from folder: [{har_root_folder}]')
         for root, dirs, files in os.walk(har_root_folder):
             for file_name in files:
                 if not file_name.endswith('.har'):
@@ -46,7 +46,13 @@ class HarParser:
                     continue
                 file_path = Path(root).joinpath(file_name)
                 _log.info(f'Parsing har file: [{file_path}]')
-                parsed.append(self._parse_har_file(file_path))
+
+                parsed_har_file = self._parse_har_file(file_path)
+                if len(parsed_har_file.entries) == 0:
+                    _log.info(f'Excluding har file since it has no entries: [{file_path}]')
+                    continue
+
+                parsed.append(parsed_har_file)
 
         self._har_file_contents = parsed
 
