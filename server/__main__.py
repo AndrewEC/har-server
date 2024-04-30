@@ -1,10 +1,10 @@
 import click
 import uvicorn
 
-from server.config import set_root_path
-from server.web import app
+from server.core.config import set_root_path
+from server.core.web import app
 
-from .logging_conf import *  # Required to enable logging
+from server.logging_conf import *  # Required to enable logging
 
 
 @click.command()

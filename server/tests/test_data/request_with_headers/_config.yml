@@ -1,0 +1,22 @@
+debug:
+  enable-debug-logs: False
+  dump-urls: False
+  log-stack-traces: False
+
+request-matching:
+  rules:
+    - method
+    - path
+    - headers
+
+rewrite:
+  request:
+    rules:
+      - remove-headers
+    config:
+      removable-headers:
+        - host
+        - accept
+        - accept-encoding
+        - connection
+        - user-agent

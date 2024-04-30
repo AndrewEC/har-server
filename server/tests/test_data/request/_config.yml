@@ -1,0 +1,9 @@
+debug:
+  enable-debug-logs: False
+  dump-urls: False
+  log-stack-traces: False
+
+request-matching:
+  rules:
+    - method
+    - path
