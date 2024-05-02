@@ -8,7 +8,7 @@ from server.core.config import ConfigLoader, with_config_loader
 from server.core.config.models import Matchers
 from server.core.har import HarEntryRequest
 
-from .matchers import do_paths_match, do_cookies_match, do_queries_match, do_headers_match, do_methods_match
+from .rules import do_paths_match, do_cookies_match, do_queries_match, do_headers_match, do_methods_match
 from .errors import MatchRuleFailedException, MatchRuleNotFound
 
 
