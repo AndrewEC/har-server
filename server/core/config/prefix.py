@@ -20,7 +20,7 @@ def prefix(path: str) -> Callable:
     return wrap
 
 
-def get_prefix(cls: Type):
+def get_prefix(cls: Type) -> str | None:
     if not hasattr(cls, _PREFIX_ATTRIBUTE):
-        raise NotPrefixedException(cls)
+        return None
     return getattr(cls, _PREFIX_ATTRIBUTE)

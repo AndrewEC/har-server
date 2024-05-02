@@ -7,16 +7,14 @@ request-matching:
   rules:
     - method
     - path
-    - headers
 
 rewrite:
-  request:
+  response:
     rules:
       - remove-headers
+      - remove-cookies
     config:
       removable-headers:
-        - host
-        - accept
-        - accept-encoding
-        - connection
-        - user-agent
+        - response-header-name
+      removable-cookies:
+        - response-cookie-name

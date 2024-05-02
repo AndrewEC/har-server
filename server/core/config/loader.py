@@ -1,13 +1,14 @@
-from typing import Type, TypeVar, Dict, Any
+from typing import Type, TypeVar, Dict, Any, Annotated
 from functools import lru_cache
 import logging
-import yaml
 import copy
 
-from .functions import make_string
-from .root import get_root_path
-from .prefix import get_prefix
+from fastapi import Depends
+
+from .functions import make_debug_string
+from .prefix import get_prefix, NotPrefixedException
 from .post_construct import get_post_construct_name, MissingPostConstructMethod
+from .parser import ConfigParser, with_config_parser
 
 
 T = TypeVar('T')
@@ -16,9 +17,9 @@ _log = logging.getLogger(__file__)
 
 class ConfigLoader:
 
-    def __init__(self):
+    def __init__(self, config_parser: ConfigParser):
         self._configs: Dict[Type, Any] = {}
-        self._parsed_yml = self._parse_config_yml()
+        self._parsed_yml = config_parser.parse_config_yml()
 
     def read_config(self, model_type: Type[T]) -> T:
         """
@@ -53,7 +54,7 @@ class ConfigLoader:
 
         self._configs[model_type] = model_instance
 
-        _log.info(make_string(model_instance))
+        _log.info(f'Loaded config: [{make_debug_string(model_instance)}]')
 
         return copy.deepcopy(model_instance)
 
@@ -84,22 +85,13 @@ class ConfigLoader:
 
     def _read_configurable_properties(self, model_type: Type) -> Dict[str, str]:
         prefix = get_prefix(model_type)
+        if prefix is None:
+            raise NotPrefixedException(model_type)
+
         properties = [prop for prop in dir(model_type) if not prop.startswith('_')]
         return {prop: f'{prefix}.{prop.replace("_", "-")}' for prop in properties}
 
-    def _parse_config_yml(self) -> Dict | None:
-        config_path = get_root_path().joinpath('_config.yml')
-        if not config_path.is_file():
-            _log.info('No config file found. A config file named _config.yml can be added to the root of the '
-                      '.har directory to customize the app behaviour.')
-            return None
-
-        _log.info(f'Loading configuration from file: [{config_path}]')
-        with open(config_path, 'r', encoding='utf-8') as file:
-            content = '\n'.join(file.readlines())
-        return yaml.safe_load(content)
-
 
 @lru_cache()
-def with_config_loader() -> ConfigLoader:
-    return ConfigLoader()
+def with_config_loader(parser: Annotated[ConfigParser, Depends(with_config_parser)]) -> ConfigLoader:
+    return ConfigLoader(parser)

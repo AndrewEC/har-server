@@ -59,7 +59,7 @@ class ResponseRewriter:
             try:
                 response_copy = rule_function(self._config_loader, response_copy)
             except Exception as e:
-                raise ResponseRuleFailedException(rule_name, e)
+                raise ResponseRuleFailedException(rule_name, e) from e
         return response_copy
 
 

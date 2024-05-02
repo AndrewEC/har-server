@@ -53,7 +53,7 @@ class ExclusionFilter:
                 if exclusion_rule_function(self._config_loader, entry):
                     return True
             except Exception as e:
-                raise ExclusionRuleFailedException(rule, e)
+                raise ExclusionRuleFailedException(rule, e) from e
         return False
 
 

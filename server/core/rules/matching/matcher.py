@@ -8,8 +8,8 @@ from server.core.config import ConfigLoader, with_config_loader
 from server.core.config.models import Matchers
 from server.core.har import HarEntryRequest
 
-from .matchers import (do_paths_match, do_cookies_match, do_queries_match, do_headers_match, do_methods_match,
-                       MatchRuleFailedException, MatchRuleNotFound)
+from .matchers import do_paths_match, do_cookies_match, do_queries_match, do_headers_match, do_methods_match
+from .errors import MatchRuleFailedException, MatchRuleNotFound
 
 
 _log = logging.getLogger(__file__)
@@ -57,7 +57,7 @@ class RequestMatcher:
                 if not matcher_function(self._config_loader, entry, request):
                     return False
             except Exception as e:
-                raise MatchRuleFailedException(rule_name, e)
+                raise MatchRuleFailedException(rule_name, e) from e
         return True
 
     def _get_rule(self, name: str) -> Callable[[ConfigLoader, HarEntryRequest, HarEntryRequest], bool]:

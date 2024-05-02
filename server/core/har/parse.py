@@ -67,7 +67,7 @@ class HarParser:
         try:
             return self._do_parse_har_file(har_path)
         except Exception as e:
-            raise HarParseError(f'Could not parse har file [{har_path}]', e)
+            raise HarParseError(f'Could not parse har file [{har_path}]', e) from e
 
 
 @lru_cache()

@@ -3,7 +3,7 @@ import logging
 
 from fastapi import FastAPI, Request, Depends, HTTPException, Response
 
-from server.core.config import with_config_loader
+from server.core.config import with_config_loader, with_config_parser
 from server.core.config.models import Debug
 from server.core.debug import enable_debug_logs
 from server.core.har import with_har_parser
@@ -37,14 +37,14 @@ def get(request: Request,
 @app.exception_handler(Exception)
 def handle_exception(request: Request, exception: Exception):
     _log.error(f'Handling uncaught exception: [{exception}]')
-    if with_config_loader().read_config(Debug).log_stack_traces:
+    if with_config_loader(with_config_parser()).read_config(Debug).log_stack_traces:
         _log.exception(exception)
     return Response(status_code=500)
 
 
 @app.on_event('startup')
 def startup():
-    config_loader = with_config_loader()
+    config_loader = with_config_loader(with_config_parser())
 
     debug_config = config_loader.read_config(Debug)
     if debug_config.enable_debug_logs:

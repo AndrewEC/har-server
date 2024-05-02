@@ -2,13 +2,15 @@ from typing import Annotated, List
 from functools import lru_cache
 from itertools import chain
 
-from server.core.har import with_har_parser, HarParser, HarFileContent, HarEntryRequest, HarEntry
+from fastapi import Depends
+from fastapi.requests import Request
+
+from server.core.har import with_har_parser, HarParser, HarFileContent, HarEntry
 from server.core.rules.rewrite.request import RequestRewriter, with_request_rewriter
 from server.core.rules.matching import with_request_matcher, RequestMatcher
 from server.core.rules.exclusions import ExclusionFilter, with_exclusion_filter
 
-from fastapi import Depends
-from fastapi.requests import Request
+from .request_mapper import RequestMapper, with_request_mapper
 
 
 class RouteMap:
@@ -17,28 +19,17 @@ class RouteMap:
                  har_parser: HarParser,
                  request_rewriter: RequestRewriter,
                  request_matcher: RequestMatcher,
-                 exclusion_filter: ExclusionFilter):
+                 exclusion_filter: ExclusionFilter,
+                 request_mapper: RequestMapper):
 
         self._entries: List[HarEntry] = self._flatten_entries(har_parser.get_har_file_contents())
         self._request_rewriter = request_rewriter
         self._request_matcher = request_matcher
         self._exclusion_filter = exclusion_filter
+        self._request_mapper = request_mapper
 
     def _flatten_entries(self, contents: List[HarFileContent]) -> List[HarEntry]:
         return list(chain(*[content.entries for content in contents]))
-
-    def _as_har_request(self, request: Request) -> HarEntryRequest:
-        query_params = [{'name': key, 'value': request.query_params.get(key)} for key in request.query_params.keys()]
-        headers = [{'name': key, 'value': request.headers.get(key)} for key in request.headers.keys()]
-        cookies = [{'name': key, 'value': request.cookies.get(key)} for key in request.cookies.keys()]
-        request_options = {
-            'queryString': query_params,
-            'method': request.method,
-            'url': str(request.url),
-            'headers': headers,
-            'cookies': cookies
-        }
-        return HarEntryRequest(request_options)
 
     def find_entry_for_request(self, request: Request) -> HarEntry | None:
         """
@@ -53,12 +44,13 @@ class RouteMap:
         :return: The har entry whose recorded request matches the incoming Http request based on the matching rules.
             If no request matches then this will return None.
         """
-        har_request = self._request_rewriter.apply_browser_request_rewrite_rules(self._as_har_request(request))
+        incoming_request = self._request_mapper.map_to_har_request(request)
+        rewritten_incoming_request = self._request_rewriter.apply_browser_request_rewrite_rules(incoming_request)
         for entry in self._entries:
             if self._exclusion_filter.should_exclude_entry(entry):
                 continue
             modified_request_entry = self._request_rewriter.apply_entry_request_rewrite_rules(entry.request)
-            if self._request_matcher.do_requests_match(modified_request_entry, har_request):
+            if self._request_matcher.do_requests_match(modified_request_entry, rewritten_incoming_request):
                 return entry
         return None
 
@@ -67,6 +59,7 @@ class RouteMap:
 def with_route_map(har_parser: Annotated[HarParser, Depends(with_har_parser)],
                    request_rewriter: Annotated[RequestRewriter, Depends(with_request_rewriter)],
                    request_matcher: Annotated[RequestMatcher, Depends(with_request_matcher)],
-                   exclusion_filter: Annotated[ExclusionFilter, Depends(with_exclusion_filter)]) -> RouteMap:
+                   exclusion_filter: Annotated[ExclusionFilter, Depends(with_exclusion_filter)],
+                   request_mapper: Annotated[RequestMapper, Depends(with_request_mapper)]) -> RouteMap:
 
-    return RouteMap(har_parser, request_rewriter, request_matcher, exclusion_filter)
+    return RouteMap(har_parser, request_rewriter, request_matcher, exclusion_filter, request_mapper)

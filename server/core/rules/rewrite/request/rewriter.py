@@ -49,7 +49,7 @@ class RequestRewriter:
             try:
                 request_copy = rule_function(self._config_loader, request_copy)
             except Exception as e:
-                raise RequestRuleFailedException(rule_name, e)
+                raise RequestRuleFailedException(rule_name, e) from e
         return request_copy
 
     def apply_browser_request_rewrite_rules(self, request: HarEntryRequest) -> HarEntryRequest:
