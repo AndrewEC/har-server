@@ -1,0 +1,3 @@
+[submodule "py-build-utils"]
+	path = py-build-utils
+	url = https://github.com/AndrewEC/py-build-utils.git

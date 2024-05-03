@@ -3,6 +3,10 @@ The har-server is a configurable FastAPI server with the express intention of pa
 from a series of HTTP Archive (.har) files to enable a user to download and keep an offline copy of a dynamic or
 static website.
 
+## Cloning
+To clone the project and the required submodules run:
+> git clone --recurse-submodules https://github.com/AndrewEC/har-server.git
+
 ## Starting the Server
 To run the server first execute the `CreateVenv.ps1` script. This will create a virtual environment, install
 required dependencies, and activate said virtual environment.
@@ -41,7 +45,7 @@ of this project](./_config.yml).
 |                         | remove-query-params         |                                                    | Removes query params by name from the incoming and recorded request.                                                                                                                                                       |
 |                         |                             | rewrite.request.config.removable-query-params      | The list of query param names (case-insensitive) to be removed from each recorded request.                                                                                                                                 |
 |                         | remove-headers              |                                                    | Removes headers by name from the incoming and recorded request.                                                                                                                                                            |
-|                         |                             | rewrite.request.config.removable-request-headers   | A list of header names (case-sensitive) to be removed from all incoming and recorded requests before attempting to match them.                                                                                             |
+|                         |                             | rewrite.request.config.removable-request-headers   | A list of header names (case-insensitive) to be removed from all incoming and recorded requests before attempting to match them.                                                                                           |
 |                         | remove-cookies              |                                                    | Removes cookies by name from the incoming and recorded request.                                                                                                                                                            |
 |                         |                             | rewrite.request.config.removable-request-cookies   | The list of cookie names (case-insensitive) to be removed from each request.                                                                                                                                               |
 | rewrite.response.rule   |                             |                                                    | The sequentially executed set of rules to modify a response from a har file before returning it to the calling Http client.                                                                                                |
@@ -57,3 +61,16 @@ of this project](./_config.yml).
 |                         |                             | exclusions.config.removable-statuses               | The list of "bad" HTTP status codes to be excluded.                                                                                                                                                                        |
 |                         | responses-with-invalid-size |                                                    | Filter out responses that are empty but don't have a 204 response status.                                                                                                                                                  |
 | exclusions.config       |                             |                                                    | Configuration values to control the behaviour of the exclusion rules.                                                                                                                                                      |
+
+## Quality Metrics
+
+To run the unit and integration tests simply run the CreateVenv.ps1 script the run the build script via:
+> python build.py
+
+This build script, in addition to the running the unit and mutation tests, will also generate coverage reports,
+install required dependencies, ensure a proper virtual environment is active, and run Flake8.
+
+Separate mutation and unit test coverage reports will be generated at the following locations:
+
+* Unit Tests - html/index.html
+* Mutation Tests - html/index.html

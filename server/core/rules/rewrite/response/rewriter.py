@@ -42,7 +42,7 @@ class ResponseRewriter:
         response to the rewrite rules, the return said response.
 
         If no response rewrite rules have been configured then this will return the original input response without
-        modification of copying.
+        modification or copying.
 
         :param response: The response, pulled from a har file entry, to be modified then returned to the consuming
             client.

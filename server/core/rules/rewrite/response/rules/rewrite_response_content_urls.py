@@ -199,6 +199,8 @@ def _replace_captured_origin(content: str, captured: _CapturedOrigin, modifier: 
 def _replace_all_captured_origins(content: str,
                                   capture_results: List[_CapturedOrigin],
                                   excluded_domains: List[str]) -> str:
+    # The modifier is used to capture the change in the length of the input content string as each
+    # captured domain is replaced with the localhost domain.
     modifier = 0
     for captured in capture_results:
         new_content = _replace_captured_origin(content, captured, modifier, excluded_domains)

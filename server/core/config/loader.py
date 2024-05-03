@@ -80,7 +80,7 @@ class ConfigLoader:
             for i in range(len(segments) - 1):
                 options = options[segments[i]]
             return options[segments[-1]]
-        except Exception as e:
+        except Exception:
             pass
 
     def _read_configurable_properties(self, model_type: Type) -> Dict[str, str]:
