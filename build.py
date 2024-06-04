@@ -1,7 +1,9 @@
 import click
+
 from buildutils import BuildConfiguration
-from buildutils.plugins import CoveragePlugin, FlakePlugin,\
-    GenericCommandPlugin, GenericCleanPlugin, EnsureVenvActivePlugin, MutationPlugin
+from buildutils.plugins import (CoveragePlugin, FlakePlugin,
+                                GenericCommandPlugin, GenericCleanPlugin, EnsureVenvActivePlugin,
+                                MutationPlugin, alias)
 
 
 @click.command()
@@ -18,6 +20,13 @@ def main(profile: str, plugins: str, list_plugins: bool):
             GenericCommandPlugin('INSTALL', 'Install required dependencies from requirements.txt file.'),
             FlakePlugin(),
             CoveragePlugin(),
+            alias(
+                'integration-test',
+                GenericCommandPlugin(
+                    'INTEGRATION',
+                    'Run integration tests with no code coverage analysis.'
+                )
+            ),
             MutationPlugin()
         )
         .build(profile, plugins, list_plugins)
