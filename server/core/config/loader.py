@@ -89,7 +89,11 @@ class ConfigLoader:
             raise NotPrefixedException(model_type)
 
         properties = [prop for prop in dir(model_type) if not prop.startswith('_')]
-        return {prop: f'{prefix}.{prop.replace("_", "-")}' for prop in properties}
+        return {prop: self._form_property_path(prefix, prop) for prop in properties}
+
+    def _form_property_path(self, prefix: str, property_name: str) -> str:
+        final_property_name = property_name.replace('_', '-')
+        return f'{prefix}.{final_property_name}'
 
 
 @lru_cache()
