@@ -2,13 +2,34 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch
 
 from server.core.config import ConfigLoader
-from server.core.config.models import RemovableStatuses
-from server.core.rules.exclusions.rules import bad_status_exclusion_rule, invalid_size_exclusion_rule
+from server.core.config.models import ExclusionConfig
+from server.core.rules.exclusions.rules import (bad_status_exclusion_rule, invalid_size_exclusion_rule,
+                                                http_method_exclusion_rule)
 
 from server.tests.util import fully_qualified_name
 
 
 class ExclusionRuleTest(unittest.TestCase):
+
+    @patch(fully_qualified_name(ConfigLoader))
+    def test_http_method_exclusion_rule(self, mock_config_loader: ConfigLoader):
+        test_cases = [(False, 'POST'), (True, 'HEAD')]
+
+        for test_case in test_cases:
+            with self.subTest(method=test_case[1]):
+                mock_config_loader.read_config = MagicMock(return_value=Mock(removable_http_methods=['HEAD']))
+
+                entry = Mock(
+                    request=Mock(
+                        method=test_case[1]
+                    )
+                )
+
+                actual = http_method_exclusion_rule(mock_config_loader, entry)
+
+                self.assertEqual(test_case[0], actual)
+
+                mock_config_loader.read_config.assert_called_once_with(ExclusionConfig)
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_bad_status_exclusion_rule(self, mock_config_loader: ConfigLoader):
@@ -28,7 +49,7 @@ class ExclusionRuleTest(unittest.TestCase):
 
                 self.assertEqual(test_case[0], actual)
 
-                mock_config_loader.read_config.assert_called_once_with(RemovableStatuses)
+                mock_config_loader.read_config.assert_called_once_with(ExclusionConfig)
 
     def test_invalid_size_exclusion_rule(self):
         test_cases = [

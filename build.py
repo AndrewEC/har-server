@@ -2,8 +2,7 @@ import click
 
 from buildutils import BuildConfiguration
 from buildutils.plugins import (CoveragePlugin, FlakePlugin,
-                                GenericCommandPlugin, GenericCleanPlugin, EnsureVenvActivePlugin,
-                                MutationPlugin, alias)
+                                GenericCommandPlugin, GenericCleanPlugin, EnsureVenvActivePlugin, alias)
 
 
 @click.command()
@@ -26,8 +25,7 @@ def main(profile: str, plugins: str, list_plugins: bool):
                     'INTEGRATION',
                     'Run integration tests with no code coverage analysis.'
                 )
-            ),
-            MutationPlugin()
+            )
         )
         .build(profile, plugins, list_plugins)
     )

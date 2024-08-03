@@ -1,6 +1,6 @@
 class EntryExclusionRuleNotFoundException(Exception):
 
-    _MESSAGE_TEMPLATE = 'A filter with the name [{}] could not be found.'
+    _MESSAGE_TEMPLATE = 'An exclusion rule with the configured name [{}] could not be found.'
 
     def __init__(self, name: str):
         super().__init__(EntryExclusionRuleNotFoundException._MESSAGE_TEMPLATE.format(name))

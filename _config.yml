@@ -48,7 +48,10 @@ exclusions:
   rules:
     - responses-with-status
     - responses-with-invalid-size
+    - requests-with-http-method
   config:
+    removable-http-methods:
+      - HEAD
     removable-statuses:
       - 0
       - 304

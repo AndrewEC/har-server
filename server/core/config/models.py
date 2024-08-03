@@ -63,7 +63,12 @@ class ExclusionRules:
     rules: List[str] = []
 
 
+@post_construct('post_construct')
 @prefix('exclusions.config')
-class RemovableStatuses:
+class ExclusionConfig:
     removable_statuses: List[int] = []
+    removable_http_methods: List[str] = []
+
+    def post_construct(self):
+        self.removable_http_methods = make_lowercase(self.removable_http_methods)
 # ===== ===== ===== Exclusions ===== ===== =====

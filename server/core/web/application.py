@@ -18,7 +18,12 @@ _log = logging.getLogger(__file__)
 
 
 @app.get('/{full_path:path}')
+@app.head('/{full_path:path}')
 @app.post('/{full_path:path}')
+@app.put('/{full_path:path}')
+@app.delete('/{full_path:path}')
+@app.options('/{full_path:path}')
+@app.patch('/{full_path:path}')
 def get(request: Request,
         full_path: str,
         route_map: Annotated[RouteMap, Depends(with_route_map)],

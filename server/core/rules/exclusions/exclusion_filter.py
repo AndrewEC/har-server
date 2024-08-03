@@ -9,7 +9,7 @@ from server.core.config.models import ExclusionRules
 from server.core.har import HarEntry
 
 from .errors import EntryExclusionRuleNotFoundException, ExclusionRuleFailedException
-from .rules import bad_status_exclusion_rule, invalid_size_exclusion_rule
+from .rules import bad_status_exclusion_rule, invalid_size_exclusion_rule, http_method_exclusion_rule
 
 
 _log = logging.getLogger(__file__)
@@ -19,7 +19,8 @@ class ExclusionFilter:
 
     _EXCLUSION_RULES: Dict[str, Callable[[ConfigLoader, HarEntry], bool]] = {
         'responses-with-status': bad_status_exclusion_rule,
-        'responses-with-invalid-size': invalid_size_exclusion_rule
+        'responses-with-invalid-size': invalid_size_exclusion_rule,
+        'requests-with-http-method': http_method_exclusion_rule
     }
 
     def __init__(self, config_loader: ConfigLoader):
