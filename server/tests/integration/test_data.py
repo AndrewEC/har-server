@@ -2,7 +2,7 @@ from pathlib import Path
 
 from server.core.config import set_root_path, get_root_path
 from server.core.har import with_har_parser
-from server.core.config import with_config_loader
+from server.core.config import with_config_loader, with_config_parser
 from server.core.rules.exclusions import with_exclusion_filter
 from server.core.rules.matching import with_request_matcher
 from server.core.rules.rewrite.response import with_response_rewriter
@@ -15,7 +15,8 @@ _CACHES = [
     with_exclusion_filter,
     with_request_matcher,
     with_response_rewriter,
-    with_request_rewriter
+    with_request_rewriter,
+    with_config_parser
 ]
 
 
