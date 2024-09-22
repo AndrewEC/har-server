@@ -17,6 +17,7 @@ def main(profile: str, plugins: str, list_plugins: bool):
             EnsureVenvActivePlugin(),
             GenericCleanPlugin('CLEAN', 'Remove previous build files.'),
             GenericCommandPlugin('INSTALL', 'Install required dependencies from requirements.txt file.'),
+            GenericCommandPlugin('AUDIT', 'Audit the dependencies in the requirements.txt file for vulnerabilities.'),
             FlakePlugin(),
             CoveragePlugin(),
             alias(
