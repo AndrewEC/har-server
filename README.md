@@ -1,7 +1,7 @@
 # har-server
 The har-server is a configurable FastAPI server with the express intention of parsing and serving content
-from a series of HTTP Archive (.har) files to enable a user to download and keep an offline copy of a dynamic or
-static website.
+from a series of HTTP Archive (.har) files (HAR file) to enable a user to download and keep an offline copy of
+a dynamic or static website.
 
 ## Cloning
 To clone the project and the required submodules run:
@@ -27,6 +27,10 @@ when running the server.
 
 A sample `_config.yml` with all available configuration options available can be found in the [root
 of this project](./_config.yml).
+
+### Header and Query Naming Conventions
+By default, the har-server will treat all header and query parameter names in the configuration and in the
+HAR files as case-insensitive.
 
 ### Configuration Properties:
 
@@ -61,6 +65,21 @@ of this project](./_config.yml).
 |                         |                             | exclusions.config.removable-statuses               | The list of "bad" HTTP status codes to be excluded.                                                                                                                                                                        |
 |                         | responses-with-invalid-size |                                                    | Filter out responses that are empty but don't have a 204 response status.                                                                                                                                                  |
 | exclusions.config       |                             |                                                    | Configuration values to control the behaviour of the exclusion rules.                                                                                                                                                      |
+
+
+### A Note on Response Headers
+The underlying FastAPI server that the har-server is built on top of has logic to automatically set and write certain
+response headers such as the content-type, content-length, and content-encoding. The headers automatically added
+can conflict with the headers of the same name that are part of the response recorded in a HAR file.
+
+To avoid this issue you may need to create a `_config.yml` file and configure the
+`rewrite.response.rules` array to include the `remove-headers` rule and in the
+`rewrite.response.config.removable-headers` array add the `content-type`, `content-length`,
+and `content-encoding` headers.
+
+This configuration will force the server to exclude the headers with said names from the original HAR file response
+and only send the headers set by FastAPI.
+
 
 ## Quality Metrics
 

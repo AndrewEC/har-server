@@ -1,8 +1,15 @@
 import click
 
 from buildutils import BuildConfiguration
-from buildutils.plugins import (CoveragePlugin, FlakePlugin,
-                                GenericCommandPlugin, GenericCleanPlugin, EnsureVenvActivePlugin, alias)
+from buildutils.plugins import (
+    CoveragePlugin,
+    FlakePlugin,
+    GenericCommandPlugin,
+    GenericCleanPlugin,
+    EnsureVenvActivePlugin,
+    alias,
+    group
+)
 
 
 @click.command()
@@ -26,6 +33,11 @@ def main(profile: str, plugins: str, list_plugins: bool):
                     'INTEGRATION',
                     'Run integration tests with no code coverage analysis.'
                 )
+            ),
+            group(
+                'generate-docs',
+                GenericCommandPlugin('PREPARE_DOCS', 'Prepare Sphinx for generating documentation from inline comments.'),
+                GenericCommandPlugin('GENERATE_DOCS', 'Generate documentation from inline comments using Sphinx')
             )
         )
         .build(profile, plugins, list_plugins)

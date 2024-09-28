@@ -1,6 +1,7 @@
 from typing import Dict
 from functools import lru_cache
 import logging
+import copy
 
 import yaml
 
@@ -15,8 +16,19 @@ class ConfigParser:
         self._cached_contents = None
 
     def parse_config_yml(self) -> Dict | None:
+        """
+        Attempts to parse the yml configuration file.
+
+        If the file has been previously parsed this will return a copy of the cached version of the parsed file
+        contents.
+
+        If no configuration file exists in the applications root_path this will return None.
+
+        :return: The parsed contents of the configuration file.
+        """
+
         if self._cached_contents is not None:
-            return self._cached_contents
+            return copy.deepcopy(self._cached_contents)
 
         config_path = get_root_path().joinpath('_config.yml')
         if not config_path.is_file():
