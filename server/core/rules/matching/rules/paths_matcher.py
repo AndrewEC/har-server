@@ -1,6 +1,13 @@
 from server.core.config import ConfigLoader
 from server.core.har import HarEntryRequest
 
+from .base import MatcherRule
 
-def do_paths_match(config: ConfigLoader, entry_request: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
-    return entry_request.path == incoming_request.path
+
+class PathMatcherRule(MatcherRule):
+
+    def load_config(self, config_loader: ConfigLoader):
+        pass
+
+    def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
+        return entry.path == incoming_request.path

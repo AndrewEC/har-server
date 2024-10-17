@@ -5,8 +5,8 @@ import copy
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRewriteRules
-from server.core.rules.rewrite.response import (ResponseRewriter, ResponseRuleFailedException,
-                                                ResponseRuleNotFoundException)
+from server.core.rules.rewrite.response import ResponseRewriter
+from server.core.rules.base import RuleNotFoundException, RuleFailedException
 
 from server.tests.util import fully_qualified_name, fully_qualified_property_name
 
@@ -29,10 +29,8 @@ class ResponseRewriterTest(unittest.TestCase):
         mock_deep_copy.return_value = response_copy
 
         expected = Mock()
-        mock_rule = MagicMock(return_value=expected)
-        mock_rules.return_value = {
-            _RULE_NAME: mock_rule
-        }
+        mock_rule = Mock(rewrite_response=MagicMock(return_value=expected))
+        mock_rules.return_value = [(_RULE_NAME, MagicMock(return_value=mock_rule))]
 
         mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
@@ -42,7 +40,7 @@ class ResponseRewriterTest(unittest.TestCase):
 
         mock_config_loader.read_config.assert_called_once_with(ResponseRewriteRules)
         mock_deep_copy.assert_called_once_with(response)
-        mock_rule.assert_called_once_with(mock_config_loader, response_copy)
+        mock_rule.rewrite_response.assert_called_once_with(response_copy)
 
     @patch(fully_qualified_name(copy.deepcopy))
     @patch(fully_qualified_property_name(ResponseRewriter, '_RESPONSE_REWRITE_RULES'), new_callable=PropertyMock)
@@ -55,21 +53,19 @@ class ResponseRewriterTest(unittest.TestCase):
         response_copy = Mock()
         mock_deep_copy.return_value = response_copy
 
-        mock_rule = MagicMock(side_effect=Exception())
-        mock_rules.return_value = {
-            _RULE_NAME: mock_rule
-        }
+        mock_rule = Mock(rewrite_response=MagicMock(side_effect=Exception()))
+        mock_rules.return_value = [(_RULE_NAME, MagicMock(return_value=mock_rule))]
 
         mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
-        with self.assertRaises(ResponseRuleFailedException) as context:
+        with self.assertRaises(RuleFailedException) as context:
             ResponseRewriter(mock_config_loader).apply_response_rewrite_rules(response)
 
         self.assertIn(_RULE_NAME, str(context.exception))
 
         mock_config_loader.read_config.assert_called_once_with(ResponseRewriteRules)
         mock_deep_copy.assert_called_once_with(response)
-        mock_rule.assert_called_once_with(mock_config_loader, response_copy)
+        mock_rule.rewrite_response.assert_called_once_with(response_copy)
 
     @patch(fully_qualified_name(copy.deepcopy))
     @patch(fully_qualified_name(ConfigLoader))
@@ -79,7 +75,7 @@ class ResponseRewriterTest(unittest.TestCase):
 
         mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
-        with self.assertRaises(ResponseRuleNotFoundException) as context:
+        with self.assertRaises(RuleNotFoundException) as context:
             ResponseRewriter(mock_config_loader).apply_response_rewrite_rules(Mock())
 
         self.assertIn(_RULE_NAME, str(context.exception))

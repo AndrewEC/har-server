@@ -1,6 +1,13 @@
 from server.core.har import HarEntryRequest
 from server.core.config import ConfigLoader
 
+from .base import MatcherRule
 
-def do_methods_match(config: ConfigLoader, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
-    return entry.method == incoming_request.method
+
+class MethodMatcherRule(MatcherRule):
+
+    def load_config(self, config_loader: ConfigLoader):
+        pass
+
+    def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
+        return entry.method == incoming_request.method

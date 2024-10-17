@@ -4,30 +4,32 @@ from server.core.har import HarEntryRequest
 from server.core.config import ConfigLoader
 from server.core.config.models import RequestRewriteConfig
 
+from .base import RequestRewriteRule
+
 
 _log = logging.getLogger(__file__)
 
 
-def remove_query_param_from_request(config: ConfigLoader, request: HarEntryRequest) -> HarEntryRequest:
-    return _remove_params(config, request)
+class RemoveQueryParamsRequestRewriteRule(RequestRewriteRule):
 
+    def __init__(self):
+        self._removable = []
 
-def remove_query_param_from_entry_request(config: ConfigLoader, request: HarEntryRequest) -> HarEntryRequest:
-    return _remove_params(config, request)
+    def load_config(self, config_loader: ConfigLoader):
+        self._removable = config_loader.read_config(RequestRewriteConfig).removable_query_params
+        if len(self._removable) == 0:
+            raise Exception('The remove-query-params request rewrite rule is enabled but no '
+                            'removable-query-params have been configured.')
 
+    def rewrite_incoming_http_request(self, request: HarEntryRequest) -> HarEntryRequest:
+        return self._remove_params(request)
 
-def _remove_params(config: ConfigLoader, request: HarEntryRequest) -> HarEntryRequest:
-    removable = config.read_config(RequestRewriteConfig).removable_query_params
-    if len(removable) == 0:
-        _log.warning('The remove-query-params request rewrite rule is enabled but no '
-                     'removable-query-params have been configured.')
+    def rewrite_har_entry_request(self, request: HarEntryRequest) -> HarEntryRequest:
+        return self._remove_params(request)
+
+    def _remove_params(self, request: HarEntryRequest) -> HarEntryRequest:
+        for param in self._removable:
+            if param not in request.query_params:
+                continue
+            request.query_params.pop(param)
         return request
-
-    if len(request.query_params) == 0:
-        return request
-
-    for param in removable:
-        if param not in request.query_params:
-            continue
-        request.query_params.pop(param)
-    return request

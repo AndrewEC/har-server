@@ -3,7 +3,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 from server.core.config.models import ResponseRuleConfig
 from server.core.config import ConfigLoader
-from server.core.rules.rewrite.response.rules import rewrite_response_content_urls
+from server.core.rules.rewrite.response.rules import ResponseContentUrlResponseRewriteRules
 
 from server.tests.util import fully_qualified_name
 
@@ -32,7 +32,9 @@ class ResponseContentUrlTest(unittest.TestCase):
                 mock_config_loader.read_config.reset_mock()
 
                 response = Mock(content=Mock(text=_CONTENT_TEMPLATE.format(test_case)))
-                actual = rewrite_response_content_urls(mock_config_loader, response)
+                rule = ResponseContentUrlResponseRewriteRules()
+                rule.load_config(mock_config_loader)
+                actual = rule.rewrite_response(response)
 
                 expected = _CONTENT_TEMPLATE.format(_LOCALHOST)
                 self.assertEqual(expected, actual.content.text)
@@ -62,8 +64,11 @@ class ResponseContentUrlTest(unittest.TestCase):
 
                 expected = _CONTENT_TEMPLATE.format(test_case)
                 response = Mock(content=Mock(text=expected))
-                actual = rewrite_response_content_urls(mock_config_loader, response)
+
+                rule = ResponseContentUrlResponseRewriteRules()
+                rule.load_config(mock_config_loader)
+                actual = rule.rewrite_response(response)
 
                 self.assertEqual(expected, actual.content.text)
 
-                mock_config_loader.read_config.assert_not_called()
+                mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)

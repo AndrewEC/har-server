@@ -4,22 +4,25 @@ from server.core.har import HarEntryResponse
 from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRuleConfig
 
+from .base import ResponseRewriteRule
 
 _log = logging.getLogger(__file__)
 
 
-def remove_headers_from_response(config: ConfigLoader, response: HarEntryResponse) -> HarEntryResponse:
-    removable_headers = config.read_config(ResponseRuleConfig).removable_headers
-    if len(removable_headers) == 0:
-        _log.warning('The remove-headers response rewrite rule is enabled but no '
-                     'removable-headers have been configured.')
-        return response
+class RemoveResponseHeaderRewriteRule(ResponseRewriteRule):
 
-    if len(response.headers) == 0:
-        return response
+    def __init__(self):
+        self._removable = []
 
-    for removable in removable_headers:
-        if removable not in response.headers:
-            continue
-        response.headers.pop(removable)
-    return response
+    def load_config(self, config_loader: ConfigLoader):
+        self._removable = config_loader.read_config(ResponseRuleConfig).removable_headers
+        if len(self._removable) == 0:
+            raise Exception('The remove-headers response rewrite rule is enabled but no '
+                            'removable-headers have been configured.')
+
+    def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
+        for removable in self._removable:
+            if removable not in response.headers:
+                continue
+            response.headers.pop(removable)
+        return response

@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import Mock
 
-from server.core.rules.matching.rules import (do_paths_match, do_cookies_match, do_methods_match, do_headers_match,
-                                              do_queries_match)
+from server.core.rules.matching.rules import (PathMatcherRule, CookieMatcherRule, MethodMatcherRule, HeadersMatcherRule,
+                                              QueryMatcherRule)
 
 
 class MatchRulesTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(path=test_case[1])
                 request = Mock(path=test_case[2])
 
-                actual = do_paths_match(None, entry, request)
+                actual = PathMatcherRule().matches(entry, request)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -36,7 +36,7 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(cookies=test_case[1])
                 request = Mock(cookies=test_case[2])
 
-                actual = do_cookies_match(None, request, entry)
+                actual = CookieMatcherRule().matches(request, entry)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -51,7 +51,7 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(method=test_case[1])
                 request = Mock(method=test_case[2])
 
-                actual = do_methods_match(None, request, entry)
+                actual = MethodMatcherRule().matches(request, entry)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -69,7 +69,7 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(headers=test_case[1])
                 request = Mock(headers=test_case[2])
 
-                actual = do_headers_match(None, request, entry)
+                actual = HeadersMatcherRule().matches(request, entry)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -87,6 +87,6 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(query_params=test_case[1])
                 request = Mock(query_params=test_case[2])
 
-                actual = do_queries_match(None, request, entry)
+                actual = QueryMatcherRule().matches(request, entry)
 
                 self.assertEqual(test_case[0], actual)

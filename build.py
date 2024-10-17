@@ -24,7 +24,6 @@ def main(profile: str, plugins: str, list_plugins: bool):
             EnsureVenvActivePlugin(),
             GenericCleanPlugin('CLEAN', 'Remove previous build files.'),
             GenericCommandPlugin('INSTALL', 'Install required dependencies from requirements.txt file.'),
-            GenericCommandPlugin('AUDIT', 'Audit the dependencies in the requirements.txt file for vulnerabilities.'),
             FlakePlugin(),
             CoveragePlugin(),
             alias(
@@ -34,6 +33,7 @@ def main(profile: str, plugins: str, list_plugins: bool):
                     'Run integration tests with no code coverage analysis.'
                 )
             ),
+            GenericCommandPlugin('AUDIT', 'Audit the dependencies in the requirements.txt file for vulnerabilities.'),
             group(
                 'generate-docs',
                 GenericCommandPlugin('PREPARE_DOCS', 'Prepare Sphinx for generating documentation from inline comments.'),

@@ -30,6 +30,7 @@ class RequestRewriteConfig:
     removable_cookies: List[str] = []
     removable_query_params: List[str] = []
     removable_headers: List[str] = []
+    pre_apply: bool = False
 
     def post_construct(self):
         self.removable_cookies = make_lowercase(self.removable_cookies)
@@ -68,6 +69,7 @@ class ExclusionRules:
 class ExclusionConfig:
     removable_statuses: List[int] = []
     removable_http_methods: List[str] = []
+    pre_apply: bool = False
 
     def post_construct(self):
         self.removable_http_methods = make_lowercase(self.removable_http_methods)

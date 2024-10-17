@@ -7,6 +7,8 @@ from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRuleConfig
 from server.core.har import HarEntryResponse
 
+from .base import ResponseRewriteRule
+
 
 _log = logging.getLogger(__file__)
 
@@ -187,37 +189,47 @@ class _UrlOriginCaptor:
                 self._reset()
 
 
-def _replace_captured_origin(content: str, captured: _CapturedOrigin, modifier: int, excluded_domains: List[str]) -> str:
-    start_index = captured.start_index - modifier
-    origin = content[start_index:start_index + captured.length]
-    if origin in excluded_domains:
+class ResponseContentUrlResponseRewriteRules(ResponseRewriteRule):
+
+    def __init__(self):
+        self._excluded_domains = []
+
+    def load_config(self, config_loader: ConfigLoader):
+        self._excluded_domains = config_loader.read_config(ResponseRuleConfig).excluded_domains
+
+    def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
+        content = response.content.text
+        if content is None or len(content) == 0:
+            return response
+
+        capture_results = _UrlOriginCaptor().capture_origin_locations(content).get_capture_results()
+        if len(capture_results) == 0:
+            return response
+
+        response.content.text = self._replace_all_captured_origins(content, capture_results, self._excluded_domains)
+        return response
+
+    def _replace_all_captured_origins(self,
+                                      content: str,
+                                      capture_results: List[_CapturedOrigin],
+                                      excluded_domains: List[str]) -> str:
+        # The modifier is used to capture the change in the length of the input content string as each
+        # captured domain is replaced with the localhost domain.
+        modifier = 0
+        for captured in capture_results:
+            new_content = self._replace_captured_origin(content, captured, modifier, excluded_domains)
+            modifier = modifier + (len(content) - len(new_content))
+            content = new_content
         return content
-    _log.debug(f'Replacing with localhost: [{origin}]')
-    return content[:start_index] + _LOCALHOST + content[start_index + captured.length:]
 
-
-def _replace_all_captured_origins(content: str,
-                                  capture_results: List[_CapturedOrigin],
-                                  excluded_domains: List[str]) -> str:
-    # The modifier is used to capture the change in the length of the input content string as each
-    # captured domain is replaced with the localhost domain.
-    modifier = 0
-    for captured in capture_results:
-        new_content = _replace_captured_origin(content, captured, modifier, excluded_domains)
-        modifier = modifier + (len(content) - len(new_content))
-        content = new_content
-    return content
-
-
-def rewrite_response_content_urls(config: ConfigLoader, response: HarEntryResponse) -> HarEntryResponse:
-    content = response.content.text
-    if content is None or len(content) == 0:
-        return response
-
-    capture_results = _UrlOriginCaptor().capture_origin_locations(content).get_capture_results()
-    if len(capture_results) == 0:
-        return response
-
-    excluded_domains = config.read_config(ResponseRuleConfig).excluded_domains
-    response.content.text = _replace_all_captured_origins(content, capture_results, excluded_domains)
-    return response
+    def _replace_captured_origin(self,
+                                 content: str,
+                                 captured: _CapturedOrigin,
+                                 modifier: int,
+                                 excluded_domains: List[str]) -> str:
+        start_index = captured.start_index - modifier
+        origin = content[start_index:start_index + captured.length]
+        if origin in excluded_domains:
+            return content
+        _log.debug(f'Replacing with localhost: [{origin}]')
+        return content[:start_index] + _LOCALHOST + content[start_index + captured.length:]

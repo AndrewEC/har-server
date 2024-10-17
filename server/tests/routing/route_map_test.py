@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
+from server.core.config import ConfigLoader
+from server.core.config.models import RequestRewriteConfig, ExclusionConfig
 from server.core.rules.matching import RequestMatcher
 from server.core.rules.rewrite.request import RequestRewriter
 from server.core.routing.request_mapper import RequestMapper
@@ -13,6 +15,7 @@ from server.tests.util import fully_qualified_name
 
 class RouteMapTest(unittest.TestCase):
 
+    @patch(fully_qualified_name(ConfigLoader))
     @patch(fully_qualified_name(RequestMatcher))
     @patch(fully_qualified_name(ExclusionFilter))
     @patch(fully_qualified_name(RequestRewriter))
@@ -23,7 +26,10 @@ class RouteMapTest(unittest.TestCase):
                                     mock_request_mapper: RequestMapper,
                                     mock_request_rewriter: RequestRewriter,
                                     mock_exclusion_filter: ExclusionFilter,
-                                    mock_request_matcher: RequestMatcher):
+                                    mock_request_matcher: RequestMatcher,
+                                    mock_config_loader: ConfigLoader):
+
+        mock_config_loader.read_config = MagicMock(side_effect=[ExclusionConfig(), RequestRewriteConfig()])
 
         incoming_request = Mock()
         mock_request_mapper.map_to_har_request = MagicMock(return_value=incoming_request)
@@ -40,7 +46,8 @@ class RouteMapTest(unittest.TestCase):
 
         mock_request_matcher.do_requests_match = MagicMock(return_value=True)
 
-        sut = RouteMap(mock_har_parser, mock_request_rewriter, mock_request_matcher, mock_exclusion_filter, mock_request_mapper)
+        sut = RouteMap(mock_har_parser, mock_request_rewriter, mock_request_matcher, mock_exclusion_filter,
+                       mock_request_mapper, mock_config_loader)
 
         request = Mock()
         actual = sut.find_entry_for_request(request)

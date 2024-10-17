@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, Callable
+from typing import Annotated
 from functools import lru_cache
 import logging
 
@@ -7,31 +7,28 @@ from fastapi import Depends
 from server.core.config import ConfigLoader, with_config_loader
 from server.core.config.models import ExclusionRules
 from server.core.har import HarEntry
+from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .errors import EntryExclusionRuleNotFoundException, ExclusionRuleFailedException
-from .rules import bad_status_exclusion_rule, invalid_size_exclusion_rule, http_method_exclusion_rule
+from .rules import ExclusionRule, BadStatusExclusionRule, InvalidSizeExclusionRule, HttpMethodExclusionRule
 
 
 _log = logging.getLogger(__file__)
 
 
-class ExclusionFilter:
+class ExclusionFilter(RuleContainer[ExclusionRule]):
 
-    _EXCLUSION_RULES: Dict[str, Callable[[ConfigLoader, HarEntry], bool]] = {
-        'responses-with-status': bad_status_exclusion_rule,
-        'responses-with-invalid-size': invalid_size_exclusion_rule,
-        'requests-with-http-method': http_method_exclusion_rule
-    }
+    _EXCLUSION_RULES = [
+        ('responses-with-status', BadStatusExclusionRule),
+        ('responses-with-invalid-size', InvalidSizeExclusionRule),
+        ('requests-with-http-method', HttpMethodExclusionRule)
+    ]
 
     def __init__(self, config_loader: ConfigLoader):
-        self._config_loader = config_loader
-        self._exclusion_rules = self._config_loader.read_config(ExclusionRules).rules
-        _log.info(f'Configured exclusion rules: [{self._exclusion_rules}]')
+        super().__init__('exclusion', ExclusionFilter._EXCLUSION_RULES)
 
-    def _get_exclusion_rule(self, rule_name: str) -> Callable[[ConfigLoader, HarEntry], bool]:
-        if rule_name not in ExclusionFilter._EXCLUSION_RULES:
-            raise EntryExclusionRuleNotFoundException(rule_name)
-        return ExclusionFilter._EXCLUSION_RULES[rule_name]
+        exclusion_rules = config_loader.read_config(ExclusionRules).rules
+        _log.info(f'Configured exclusion rules: [{exclusion_rules}]')
+        self.enable_rules(config_loader, exclusion_rules)
 
     def should_exclude_entry(self, entry: HarEntry) -> bool:
         """
@@ -45,16 +42,15 @@ class ExclusionFilter:
         :param entry: The entry pulled from a har file to test against the exclusion filter rules.
         :return: True if the entry should be excluded, otherwise false.
         """
-        if len(self._exclusion_rules) == 0:
+        if not self.has_any_rules_enabled():
             return False
 
-        for rule in self._exclusion_rules:
-            exclusion_rule_function = self._get_exclusion_rule(rule)
+        for name, rule in self.get_enabled_rules():
             try:
-                if exclusion_rule_function(self._config_loader, entry):
+                if rule.should_filter_out(entry):
                     return True
             except Exception as e:
-                raise ExclusionRuleFailedException(rule, e) from e
+                raise RuleFailedException(self._container_name, name, e) from e
         return False
 
 

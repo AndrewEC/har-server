@@ -3,8 +3,8 @@ from unittest.mock import Mock, MagicMock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ExclusionConfig
-from server.core.rules.exclusions.rules import (bad_status_exclusion_rule, invalid_size_exclusion_rule,
-                                                http_method_exclusion_rule)
+from server.core.rules.exclusions.rules import (BadStatusExclusionRule, InvalidSizeExclusionRule,
+                                                HttpMethodExclusionRule)
 
 from server.tests.util import fully_qualified_name
 
@@ -25,7 +25,9 @@ class ExclusionRuleTest(unittest.TestCase):
                     )
                 )
 
-                actual = http_method_exclusion_rule(mock_config_loader, entry)
+                rule = HttpMethodExclusionRule()
+                rule.load_config(mock_config_loader)
+                actual = rule.should_filter_out(entry)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -45,7 +47,9 @@ class ExclusionRuleTest(unittest.TestCase):
                     )
                 )
 
-                actual = bad_status_exclusion_rule(mock_config_loader, entry)
+                rule = BadStatusExclusionRule()
+                rule.load_config(mock_config_loader)
+                actual = rule.should_filter_out(entry)
 
                 self.assertEqual(test_case[0], actual)
 
@@ -69,5 +73,9 @@ class ExclusionRuleTest(unittest.TestCase):
                         )
                     )
                 )
-                actual = invalid_size_exclusion_rule(None, entry)
+
+                rule = InvalidSizeExclusionRule()
+                rule.load_config(None)
+                actual = rule.should_filter_out(entry)
+                
                 self.assertEqual(test_case[0], actual)

@@ -3,7 +3,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRuleConfig
-from server.core.rules.rewrite.response.rules import remove_headers_from_response, remove_cookies_from_response
+from server.core.rules.rewrite.response.rules import RemoveResponseHeaderRewriteRule, RemoveCookiesResponseRewriteRule
 
 from server.tests.util import fully_qualified_name
 
@@ -23,10 +23,12 @@ class ResponseRewriteRulesTest(unittest.TestCase):
             _NON_REMOVABLE_NAME: 'non-removable-value'
         })
 
-        remove_cookies_from_response(mock_config_loader, response)
+        rule = RemoveCookiesResponseRewriteRule()
+        rule.load_config(mock_config_loader)
+        actual = rule.rewrite_response(response)
 
-        self.assertNotIn(_REMOVABLE_NAME, response.cookies)
-        self.assertIn(_NON_REMOVABLE_NAME, response.cookies)
+        self.assertNotIn(_REMOVABLE_NAME, actual.cookies)
+        self.assertIn(_NON_REMOVABLE_NAME, actual.cookies)
 
         mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
 
@@ -39,9 +41,11 @@ class ResponseRewriteRulesTest(unittest.TestCase):
             _NON_REMOVABLE_NAME: 'non-removable-value'
         })
 
-        remove_headers_from_response(mock_config_loader, response)
+        rule = RemoveResponseHeaderRewriteRule()
+        rule.load_config(mock_config_loader)
+        actual = rule.rewrite_response(response)
 
-        self.assertNotIn(_REMOVABLE_NAME, response.headers)
-        self.assertIn(_NON_REMOVABLE_NAME, response.headers)
+        self.assertNotIn(_REMOVABLE_NAME, actual.headers)
+        self.assertIn(_NON_REMOVABLE_NAME, actual.headers)
 
         mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
