@@ -15,7 +15,10 @@ class RemoveCookiesResponseRewriteRule(ResponseRewriteRule):
     def __init__(self):
         self._removable = []
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'remove-cookies'
+
+    def initialize(self, config_loader: ConfigLoader):
         self._removable = config_loader.read_config(ResponseRuleConfig).removable_cookies
         if len(self._removable) == 0:
             raise Exception('The remove-cookies response rewrite rule is enabled but no '

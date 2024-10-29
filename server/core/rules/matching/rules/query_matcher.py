@@ -7,7 +7,10 @@ from .base import MatcherRule
 
 class QueryMatcherRule(MatcherRule):
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'query-params'
+
+    def initialize(self, config_loader: ConfigLoader):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:

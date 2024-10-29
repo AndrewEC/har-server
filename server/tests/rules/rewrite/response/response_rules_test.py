@@ -24,7 +24,7 @@ class ResponseRewriteRulesTest(unittest.TestCase):
         })
 
         rule = RemoveCookiesResponseRewriteRule()
-        rule.load_config(mock_config_loader)
+        rule.initialize(mock_config_loader)
         actual = rule.rewrite_response(response)
 
         self.assertNotIn(_REMOVABLE_NAME, actual.cookies)
@@ -42,7 +42,7 @@ class ResponseRewriteRulesTest(unittest.TestCase):
         })
 
         rule = RemoveResponseHeaderRewriteRule()
-        rule.load_config(mock_config_loader)
+        rule.initialize(mock_config_loader)
         actual = rule.rewrite_response(response)
 
         self.assertNotIn(_REMOVABLE_NAME, actual.headers)

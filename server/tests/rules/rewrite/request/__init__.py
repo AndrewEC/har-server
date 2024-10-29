@@ -1,0 +1,2 @@
+from .request_rewriter_test import RequestRewriterTest
+from .request_rules_test import RequestRewriteRulesTest

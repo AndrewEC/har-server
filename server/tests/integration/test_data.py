@@ -33,5 +33,5 @@ class TestData:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         set_root_path(self._last_root_path)
-        for cacheable in _CACHES:
-            cacheable.cache_clear()
+        for cache in _CACHES:
+            cache.cache_clear()

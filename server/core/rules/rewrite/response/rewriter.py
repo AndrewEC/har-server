@@ -20,9 +20,9 @@ _log = logging.getLogger(__file__)
 class ResponseRewriter(RuleContainer[ResponseRewriteRule]):
 
     _RESPONSE_REWRITE_RULES = [
-        ('urls-in-response', ResponseContentUrlResponseRewriteRules),
-        ('remove-headers', RemoveResponseHeaderRewriteRule),
-        ('remove-cookies', RemoveCookiesResponseRewriteRule)
+        ResponseContentUrlResponseRewriteRules,
+        RemoveResponseHeaderRewriteRule,
+        RemoveCookiesResponseRewriteRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

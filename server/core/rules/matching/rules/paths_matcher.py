@@ -6,7 +6,10 @@ from .base import MatcherRule
 
 class PathMatcherRule(MatcherRule):
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'path'
+
+    def initialize(self, config_loader: ConfigLoader):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:

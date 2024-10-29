@@ -7,7 +7,10 @@ from .common import do_dicts_contain_same_elements
 
 class CookieMatcherRule(MatcherRule):
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'cookies'
+
+    def initialize(self, config_loader: ConfigLoader):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:

@@ -14,7 +14,10 @@ class RemoveResponseHeaderRewriteRule(ResponseRewriteRule):
     def __init__(self):
         self._removable = []
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'remove-headers'
+
+    def initialize(self, config_loader: ConfigLoader):
         self._removable = config_loader.read_config(ResponseRuleConfig).removable_headers
         if len(self._removable) == 0:
             raise Exception('The remove-headers response rewrite rule is enabled but no '

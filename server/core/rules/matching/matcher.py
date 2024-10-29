@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from functools import lru_cache
 import logging
 
@@ -19,26 +19,18 @@ _log = logging.getLogger(__file__)
 class RequestMatcher(RuleContainer[MatcherRule]):
 
     _MATCHERS = [
-        ('method', MethodMatcherRule),
-        ('path', PathMatcherRule),
-        ('query-params', QueryMatcherRule),
-        ('headers', HeadersMatcherRule),
-        ('cookies', CookieMatcherRule)
+        MethodMatcherRule,
+        PathMatcherRule,
+        QueryMatcherRule,
+        HeadersMatcherRule,
+        CookieMatcherRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):
         super().__init__('request-matcher', RequestMatcher._MATCHERS)
-        applicable_rules = self._get_applicable_rules(config_loader)
-        _log.info(f'Configured request matching rules: [{applicable_rules}]')
-        self.enable_rules(config_loader, applicable_rules)
-
-    def _get_applicable_rules(self, config_loader: ConfigLoader) -> List[str]:
         rules = config_loader.read_config(Matchers).rules
-        if len(rules) > 0:
-            return rules
-        _log.info('No request matching rules have been configured. All available matching rules will be used '
-                  'in default order.')
-        return list(matcher[0] for matcher in RequestMatcher._MATCHERS)
+        _log.info(f'Configured request matching rules: [{rules}]')
+        self.enable_rules(config_loader, rules)
 
     def do_requests_match(self, entry: HarEntryRequest, request: HarEntryRequest) -> bool:
         """

@@ -23,10 +23,13 @@ class RequestMatcherTest(unittest.TestCase):
                 request = Mock()
                 entry = Mock()
 
-                mock_rule = Mock(matches=MagicMock(return_value=test_case))
+                mock_rule = Mock(
+                    get_name=MagicMock(return_value=_RULE_NAME),
+                    matches=MagicMock(return_value=test_case)
+                )
                 mock_rule_type = MagicMock(return_value=mock_rule)
 
-                mock_rules.return_value = [(_RULE_NAME, mock_rule_type)]
+                mock_rules.return_value = [mock_rule_type]
                 mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
                 actual = RequestMatcher(mock_config_loader).do_requests_match(entry, request)
@@ -40,10 +43,13 @@ class RequestMatcherTest(unittest.TestCase):
     def test_do_requests_match_raises_exception_when_rule_raises_exception(self,
                                                                            mock_config_loader: ConfigLoader,
                                                                            mock_rules: MagicMock):
-        mock_rule = Mock(matches=MagicMock(side_effect=Exception()))
+        mock_rule = Mock(
+            get_name=MagicMock(return_value=_RULE_NAME),
+            matches=MagicMock(side_effect=Exception())
+        )
         mock_rule_type = MagicMock(return_value=mock_rule)
 
-        mock_rules.return_value = [(_RULE_NAME, mock_rule_type)]
+        mock_rules.return_value = [mock_rule_type]
         mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
         with self.assertRaises(RuleFailedException) as context:

@@ -15,7 +15,10 @@ class BadStatusExclusionRule(ExclusionRule):
     def __init__(self):
         self._statuses = []
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'responses-with-status'
+
+    def initialize(self, config_loader: ConfigLoader):
         self._statuses = config_loader.read_config(ExclusionConfig).removable_statuses
         if len(self._statuses) == 0:
             raise Exception('responses-with-status entry filter is enabled but no '

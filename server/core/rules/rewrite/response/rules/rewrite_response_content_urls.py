@@ -194,7 +194,10 @@ class ResponseContentUrlResponseRewriteRules(ResponseRewriteRule):
     def __init__(self):
         self._excluded_domains = []
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'urls-in-response'
+
+    def initialize(self, config_loader: ConfigLoader):
         self._excluded_domains = config_loader.read_config(ResponseRuleConfig).excluded_domains
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:

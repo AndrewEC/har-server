@@ -15,7 +15,10 @@ class RemoveQueryParamsRequestRewriteRule(RequestRewriteRule):
     def __init__(self):
         self._removable = []
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'remove-query-params'
+
+    def initialize(self, config_loader: ConfigLoader):
         self._removable = config_loader.read_config(RequestRewriteConfig).removable_query_params
         if len(self._removable) == 0:
             raise Exception('The remove-query-params request rewrite rule is enabled but no '

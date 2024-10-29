@@ -3,43 +3,23 @@ from abc import ABC
 
 from server.core.config import ConfigLoader
 
-from .error import DuplicateRuleException, RuleNotFoundException, RuleInitializationFailed, ContainerRulesAlreadyEnabled
-from .initializable import Initializeable
+from .error import (DuplicateRuleException, RuleNotFoundException,
+                    RuleInitializationFailed, ContainerRulesAlreadyEnabled)
+from .rule_dictionary import RuleDict
+from .rule import Rule
 
 
-T = TypeVar('T', bound=Initializeable)
-
-
-class LowerKeyDict:
-
-    def __init__(self):
-        self._entries = dict()
-
-    def _verify_key(self, item):
-        if type(item) is not str:
-            raise ValueError('LowerKeyDict only supports string keys.')
-
-    def __contains__(self, item):
-        self._verify_key(item)
-        return item.lower() in self._entries
-
-    def __getitem__(self, item):
-        self._verify_key(item)
-        return self._entries[item.lower()]
-
-    def __setitem__(self, key, value):
-        self._verify_key(key)
-        self._entries[key.lower()] = value
+T = TypeVar('T', bound=Rule)
 
 
 class RuleContainer(Generic[T], ABC):
 
-    def __init__(self, container_name: str, rules: List[Tuple[str, Type[T]]]):
+    def __init__(self, container_name: str, rules: List[Type[T]]):
         self._container_name = container_name
-        self._rules = LowerKeyDict()
+        self._rules = RuleDict()
         self._enabled_rules: List[str] = []
         for rule in rules:
-            self._register_rule(rule[0], rule[1])
+            self._register_rule(rule)
 
     def enable_rules(self, config_loader: ConfigLoader, names: List[str]):
         if len(self._enabled_rules) > 0:
@@ -55,15 +35,17 @@ class RuleContainer(Generic[T], ABC):
     def get_enabled_rules(self) -> List[Tuple[str, T]]:
         return [(name, self._get_rule(name)) for name in self._enabled_rules]
 
-    def _register_rule(self, name: str, rule: Type[T]):
+    def _register_rule(self, rule: Type[T]):
+        rule_instance = rule()
+        name = rule_instance.get_name()
         if name in self._rules:
             raise DuplicateRuleException(self._container_name, name)
-        self._rules[name] = rule()
+        self._rules[name] = rule_instance
 
     def _initialize_rule(self, config_loader: ConfigLoader, name: str):
         rule = self._get_rule(name)
         try:
-            rule.load_config(config_loader)
+            rule.initialize(config_loader)
         except Exception as e:
             raise RuleInitializationFailed(self._container_name, name, e) from e
         self._enabled_rules.append(name)

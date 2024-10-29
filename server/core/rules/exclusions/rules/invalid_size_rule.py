@@ -6,7 +6,10 @@ from .base import ExclusionRule
 
 class InvalidSizeExclusionRule(ExclusionRule):
 
-    def load_config(self, config_loader: ConfigLoader):
+    def get_name(self) -> str:
+        return 'responses-with-invalid-size'
+
+    def initialize(self, config_loader: ConfigLoader):
         pass
 
     def should_filter_out(self, entry: HarEntry) -> bool:

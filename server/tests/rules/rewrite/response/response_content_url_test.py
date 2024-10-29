@@ -33,7 +33,7 @@ class ResponseContentUrlTest(unittest.TestCase):
 
                 response = Mock(content=Mock(text=_CONTENT_TEMPLATE.format(test_case)))
                 rule = ResponseContentUrlResponseRewriteRules()
-                rule.load_config(mock_config_loader)
+                rule.initialize(mock_config_loader)
                 actual = rule.rewrite_response(response)
 
                 expected = _CONTENT_TEMPLATE.format(_LOCALHOST)
@@ -66,7 +66,7 @@ class ResponseContentUrlTest(unittest.TestCase):
                 response = Mock(content=Mock(text=expected))
 
                 rule = ResponseContentUrlResponseRewriteRules()
-                rule.load_config(mock_config_loader)
+                rule.initialize(mock_config_loader)
                 actual = rule.rewrite_response(response)
 
                 self.assertEqual(expected, actual.content.text)

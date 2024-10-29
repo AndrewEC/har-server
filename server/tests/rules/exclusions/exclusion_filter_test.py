@@ -24,9 +24,11 @@ class ExclusionFilterTest(unittest.TestCase):
             with self.subTest(should_filter=result):
                 mock_config_loader.read_config.reset_mock()
 
-                mock_rule = Mock(should_filter_out=MagicMock(return_value=result))
-                mock_rule_type = MagicMock(return_value=mock_rule)
-                mock_rules.return_value = [(_RULE_NAME, mock_rule_type)]
+                mock_rule = Mock(
+                    get_name=MagicMock(return_value=_RULE_NAME),
+                    should_filter_out=MagicMock(return_value=result)
+                )
+                mock_rules.return_value = [MagicMock(return_value=mock_rule)]
 
                 mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
 
@@ -44,9 +46,11 @@ class ExclusionFilterTest(unittest.TestCase):
                                                                                         mock_rules: MagicMock):
 
         mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
-        mock_rule = Mock(should_filter_out=MagicMock(side_effect=Exception()))
-        mock_rule_type = MagicMock(return_value=mock_rule)
-        mock_rules.return_value = [(_RULE_NAME, mock_rule_type)]
+        mock_rule = Mock(
+            get_name=MagicMock(return_value=_RULE_NAME),
+            should_filter_out=MagicMock(side_effect=Exception())
+        )
+        mock_rules.return_value = [MagicMock(return_value=mock_rule)]
 
         entry = Mock()
         with self.assertRaises(RuleFailedException) as context:

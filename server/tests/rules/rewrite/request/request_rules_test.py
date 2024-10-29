@@ -26,7 +26,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
         })
 
         rule = RemoveQueryParamsRequestRewriteRule()
-        rule.load_config(mock_config_loader)
+        rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.query_params))
@@ -45,7 +45,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
         })
 
         rule = RemoveCookieRequestRewriteRule()
-        rule.load_config(mock_config_loader)
+        rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.cookies))
@@ -64,7 +64,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
         })
 
         rule = RemoveRequestHeaderRequestRewriteRule()
-        rule.load_config(mock_config_loader)
+        rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.headers))

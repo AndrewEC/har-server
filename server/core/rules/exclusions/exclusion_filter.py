@@ -18,9 +18,9 @@ _log = logging.getLogger(__file__)
 class ExclusionFilter(RuleContainer[ExclusionRule]):
 
     _EXCLUSION_RULES = [
-        ('responses-with-status', BadStatusExclusionRule),
-        ('responses-with-invalid-size', InvalidSizeExclusionRule),
-        ('requests-with-http-method', HttpMethodExclusionRule)
+        BadStatusExclusionRule,
+        InvalidSizeExclusionRule,
+        HttpMethodExclusionRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

@@ -26,9 +26,9 @@ class ModificationType(Enum):
 class RequestRewriter(RuleContainer[RequestRewriteRule]):
 
     _REQUEST_REWRITE_RULES = [
-        ('remove-query-params', RemoveQueryParamsRequestRewriteRule),
-        ('remove-headers', RemoveRequestHeaderRequestRewriteRule),
-        ('remove-cookies', RemoveCookieRequestRewriteRule)
+        RemoveQueryParamsRequestRewriteRule,
+        RemoveRequestHeaderRequestRewriteRule,
+        RemoveCookieRequestRewriteRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

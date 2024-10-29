@@ -26,7 +26,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 )
 
                 rule = HttpMethodExclusionRule()
-                rule.load_config(mock_config_loader)
+                rule.initialize(mock_config_loader)
                 actual = rule.should_filter_out(entry)
 
                 self.assertEqual(test_case[0], actual)
@@ -48,7 +48,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 )
 
                 rule = BadStatusExclusionRule()
-                rule.load_config(mock_config_loader)
+                rule.initialize(mock_config_loader)
                 actual = rule.should_filter_out(entry)
 
                 self.assertEqual(test_case[0], actual)
@@ -75,7 +75,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 )
 
                 rule = InvalidSizeExclusionRule()
-                rule.load_config(None)
+                rule.initialize(None)
                 actual = rule.should_filter_out(entry)
                 
                 self.assertEqual(test_case[0], actual)
