@@ -1,6 +1,6 @@
 import unittest
 
-from server.core.config.post_construct import get_post_construct_name, post_construct
+from server.core.config.post_construct import _get_post_construct_name, post_construct
 
 
 _POST_CONSTRUCT_NAME = 'post_construct_name'
@@ -18,8 +18,8 @@ class _TestModel2:
 class PostConstructTests(unittest.TestCase):
 
     def test_get_post_construct_name(self):
-        actual = get_post_construct_name(_TestModel)
+        actual = _get_post_construct_name(_TestModel)
         self.assertEqual(_POST_CONSTRUCT_NAME, actual)
 
-        self.assertIsNone(get_post_construct_name(_TestModel2))
+        self.assertIsNone(_get_post_construct_name(_TestModel2))
 

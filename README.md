@@ -86,10 +86,5 @@ and only send the headers set by FastAPI.
 To run the unit and integration tests simply run the CreateVenv.ps1 script the run the build script via:
 > python build.py
 
-This build script, in addition to the running the unit and mutation tests, will also generate coverage reports,
+This build script, in addition to the running unit tests, will also generate coverage reports,
 install required dependencies, ensure a proper virtual environment is active, and run Flake8.
-
-Separate mutation and unit test coverage reports will be generated at the following locations:
-
-* Unit Tests - html/index.html
-* Mutation Tests - html/index.html

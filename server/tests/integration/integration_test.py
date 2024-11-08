@@ -35,8 +35,10 @@ class IntegrationTests(unittest.TestCase):
                 self.assertEqual(200, response.status_code)
                 self.assertEqual('Test Rewrite Response', response.content.decode('utf-8'))
 
+                self.assertFalse('request-header-name' in response.headers)
                 self.assertTrue('second-response-header-name' in response.headers)
                 self.assertEqual('second-response-header-value', response.headers['second-response-header-name'])
 
+                self.assertFalse('response-cookie-name' in response.cookies)
                 self.assertTrue('second-response-cookie-name' in response.cookies)
                 self.assertEqual('second-response-cookie-value', response.cookies['second-response-cookie-name'])

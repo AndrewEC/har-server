@@ -3,15 +3,16 @@ from functools import lru_cache
 import logging
 import copy
 
+from pydantic import BaseModel
 from fastapi import Depends
 
 from .functions import make_debug_string
 from .prefix import get_prefix, NotPrefixedException
-from .post_construct import get_post_construct_name, MissingPostConstructMethod
+from .post_construct import invoke_post_construct
 from .parser import ConfigParser, with_config_parser
 
 
-T = TypeVar('T')
+T = TypeVar('T', bound=BaseModel)
 _log = logging.getLogger(__file__)
 
 
@@ -46,11 +47,10 @@ class ConfigLoader:
         if model_type in self._configs:
             return copy.deepcopy(self._configs[model_type])
 
-        configurable_properties = self._read_configurable_properties(model_type)
-        model_instance = model_type()
+        properties = self._read_configured_properties(model_type)
+        model_instance = model_type(**properties)
 
-        self._populate(model_instance, configurable_properties)
-        self._try_invoke_post_construct(model_instance)
+        invoke_post_construct(model_instance)
 
         self._configs[model_type] = model_instance
 
@@ -58,22 +58,7 @@ class ConfigLoader:
 
         return copy.deepcopy(model_instance)
 
-    def _populate(self, model_instance: T, configurable_properties: Dict[str, str]):
-        for name, path in configurable_properties.items():
-            value = self._read_property(path)
-            if value is None:
-                continue
-            setattr(model_instance, name, value)
-
-    def _try_invoke_post_construct(self, model_instance: T):
-        method_name = get_post_construct_name(model_instance)
-        if method_name is None:
-            return
-        if not hasattr(model_instance, method_name):
-            raise MissingPostConstructMethod(method_name, model_instance)
-        getattr(model_instance, method_name)()
-
-    def _read_property(self, property_path: str) -> Any:
+    def _read_property_from_yml(self, property_path: str) -> Any:
         try:
             options = self._parsed_yml
             segments = property_path.split('.')
@@ -83,13 +68,14 @@ class ConfigLoader:
         except Exception:
             pass
 
-    def _read_configurable_properties(self, model_type: Type) -> Dict[str, str]:
+    def _read_configured_properties(self, model_type: Type[T]) -> Dict[str, Any]:
         prefix = get_prefix(model_type)
         if prefix is None:
             raise NotPrefixedException(model_type)
 
-        properties = [prop for prop in dir(model_type) if not prop.startswith('_')]
-        return {prop: self._form_property_path(prefix, prop) for prop in properties}
+        properties = [prop for prop in model_type.model_fields if not prop.startswith('_')]
+        property_values = {prop: self._read_property_from_yml(self._form_property_path(prefix, prop)) for prop in properties}
+        return {name: value for name, value in property_values.items() if value is not None}
 
     def _form_property_path(self, prefix: str, property_name: str) -> str:
         final_property_name = property_name.replace('_', '-')

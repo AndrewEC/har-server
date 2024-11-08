@@ -1,32 +1,34 @@
 from typing import List
 
+from pydantic import BaseModel
+
 from .prefix import prefix
 from .post_construct import post_construct
 from .functions import make_lowercase
 
 
 @prefix('debug')
-class Debug:
-    enable_debug_logs = False
-    dump_urls = False
-    log_stack_traces = False
+class Debug(BaseModel):
+    enable_debug_logs: bool = False
+    dump_urls: bool = False
+    log_stack_traces: bool = False
     open_browser: str | None = None
 
 
 @prefix('request-matching')
-class Matchers:
+class Matchers(BaseModel):
     rules: List[str] = []
 
 
 # ===== ===== ===== Request Rewrite ===== ===== =====
 @prefix('rewrite.request')
-class RequestRewriteRules:
+class RequestRewriteRules(BaseModel):
     rules: List[str] = []
 
 
 @post_construct('post_construct')
 @prefix('rewrite.request.config')
-class RequestRewriteConfig:
+class RequestRewriteConfig(BaseModel):
     removable_cookies: List[str] = []
     removable_query_params: List[str] = []
     removable_headers: List[str] = []
@@ -41,13 +43,13 @@ class RequestRewriteConfig:
 
 # ===== ===== ===== Response Rewrite ===== ===== =====
 @prefix('rewrite.response')
-class ResponseRewriteRules:
+class ResponseRewriteRules(BaseModel):
     rules: List[str] = []
 
 
 @post_construct('post_construct')
 @prefix('rewrite.response.config')
-class ResponseRuleConfig:
+class ResponseRuleConfig(BaseModel):
     excluded_domains: List[str] = []
     removable_headers: List[str] = []
     removable_cookies: List[str] = []
@@ -60,13 +62,13 @@ class ResponseRuleConfig:
 
 # ===== ===== ===== Exclusions ===== ===== =====
 @prefix('exclusions')
-class ExclusionRules:
+class ExclusionRules(BaseModel):
     rules: List[str] = []
 
 
 @post_construct('post_construct')
 @prefix('exclusions.config')
-class ExclusionConfig:
+class ExclusionConfig(BaseModel):
     removable_statuses: List[int] = []
     removable_http_methods: List[str] = []
     pre_apply: bool = False

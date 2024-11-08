@@ -41,7 +41,7 @@ class ConfigParser:
             content = '\n'.join(file.readlines())
 
         self._cached_contents = yaml.safe_load(content)
-        return self._cached_contents
+        return copy.deepcopy(self._cached_contents)
 
 
 @lru_cache()

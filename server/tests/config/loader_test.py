@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from pydantic import BaseModel
+
 from server.core.config import prefix, ConfigLoader, ConfigParser, post_construct
 
 from server.tests.util import fully_qualified_name
@@ -11,15 +13,15 @@ _NON_DEFAULT_VALUE = 'non_default_value'
 
 
 @prefix('prefix')
-class _TestModel:
+class _TestModel(BaseModel):
     string: str = _DEFAULT_VALUE
 
 
 @post_construct('post_construct')
 @prefix('prefix')
-class _TestModelWithPostConstruct:
+class _TestModelWithPostConstruct(BaseModel):
     string: str = _DEFAULT_VALUE
-    called = False
+    called: bool = False
 
     def post_construct(self):
         self.called = True

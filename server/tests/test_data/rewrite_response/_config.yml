@@ -1,5 +1,5 @@
 debug:
-  enable-debug-logs: False
+  enable-debug-logs: True
   dump-urls: False
   log-stack-traces: False
 
