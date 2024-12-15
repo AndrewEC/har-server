@@ -23,7 +23,7 @@ class ModificationType(Enum):
     ENTRY = 2
 
 
-class RequestRewriter(RuleContainer[RequestRewriteRule]):
+class RequestRewriter:
 
     _REQUEST_REWRITE_RULES = [
         RemoveQueryParamsRequestRewriteRule,
@@ -32,24 +32,27 @@ class RequestRewriter(RuleContainer[RequestRewriteRule]):
     ]
 
     def __init__(self, config_loader: ConfigLoader):
-        super().__init__('request-rewrite', RequestRewriter._REQUEST_REWRITE_RULES)
+        self._rule_container = RuleContainer[RequestRewriteRule]('request-rewrite', RequestRewriter._REQUEST_REWRITE_RULES)
+
         rewrite_rules = config_loader.read_config(RequestRewriteRules).rules
         _log.info(f'Configured request rewrite rules: [{rewrite_rules}]')
-        self.enable_rules(config_loader, rewrite_rules)
+        self._rule_container.enable_rules(config_loader, rewrite_rules)
 
-    def _apply_request_rewrite_rules(self, request: HarEntryRequest, modification_type: ModificationType) -> HarEntryRequest:
-        if not self.has_any_rules_enabled():
+    def _apply_request_rewrite_rules(self, request: HarEntryRequest, modification_type: ModificationType)\
+            -> HarEntryRequest:
+
+        if not self._rule_container.has_any_rules_enabled():
             return request
 
         request_copy = copy.deepcopy(request)
-        for name, rule in self.get_enabled_rules():
+        for name, rule in self._rule_container.get_enabled_rules().items():
             try:
                 if modification_type == ModificationType.ENTRY:
                     request_copy = rule.rewrite_har_entry_request(request_copy)
                 else:
                     request_copy = rule.rewrite_incoming_http_request(request_copy)
             except Exception as e:
-                raise RuleFailedException(self._container_name, name, e) from e
+                raise RuleFailedException(self._rule_container.get_name(), name, e) from e
         return request_copy
 
     def apply_browser_request_rewrite_rules(self, request: HarEntryRequest) -> HarEntryRequest:

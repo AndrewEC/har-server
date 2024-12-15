@@ -15,7 +15,7 @@ from .rules import ExclusionRule, BadStatusExclusionRule, InvalidSizeExclusionRu
 _log = logging.getLogger(__file__)
 
 
-class ExclusionFilter(RuleContainer[ExclusionRule]):
+class ExclusionFilter:
 
     _EXCLUSION_RULES = [
         BadStatusExclusionRule,
@@ -24,33 +24,35 @@ class ExclusionFilter(RuleContainer[ExclusionRule]):
     ]
 
     def __init__(self, config_loader: ConfigLoader):
-        super().__init__('exclusion', ExclusionFilter._EXCLUSION_RULES)
+        self._rule_container = RuleContainer[ExclusionRule]('exclusion', ExclusionFilter._EXCLUSION_RULES)
 
         exclusion_rules = config_loader.read_config(ExclusionRules).rules
         _log.info(f'Configured exclusion rules: [{exclusion_rules}]')
-        self.enable_rules(config_loader, exclusion_rules)
+        self._rule_container.enable_rules(config_loader, exclusion_rules)
 
     def should_exclude_entry(self, entry: HarEntry) -> bool:
         """
-        Iterates through, and applies all, exclusion filters to the entry to determine if the entry should be excluded.
+        Iterates through and applies all exclusion filters to the entry to determine if the entry
+        should be excluded.
 
         If this returns true then the input entry should be excluded and not be tested against an
         incoming request to determine if the request matches.
 
-        This will return immediately as soon as the first exclusion rule determines the entry should be excluded.
+        This will return immediately as soon as the first exclusion rule determines the entry
+        should be excluded.
 
         :param entry: The entry pulled from a har file to test against the exclusion filter rules.
         :return: True if the entry should be excluded, otherwise false.
         """
-        if not self.has_any_rules_enabled():
+        if not self._rule_container.has_any_rules_enabled():
             return False
 
-        for name, rule in self.get_enabled_rules():
+        for name, rule in self._rule_container.get_enabled_rules().items():
             try:
                 if rule.should_filter_out(entry):
                     return True
             except Exception as e:
-                raise RuleFailedException(self._container_name, name, e) from e
+                raise RuleFailedException(self._rule_container.get_name(), name, e) from e
         return False
 
 

@@ -51,8 +51,7 @@ def handle_exception(request: Request, exception: Exception):
 def startup():
     config_loader = with_config_loader(with_config_parser())
 
-    debug_config = config_loader.read_config(Debug)
-    if debug_config.enable_debug_logs:
+    if config_loader.read_config(Debug).enable_debug_logs:
         enable_debug_logs()
 
     with_har_parser().get_har_file_contents()

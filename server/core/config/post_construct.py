@@ -7,7 +7,7 @@ _POST_CONSTRUCT_PROPERTY = '__post_construct_name__'
 
 class InvalidPostConstructMethod(Exception, ABC):
 
-    _MESSAGE_TEMPLATE = '{} Method [{}] was configured on type [{}]'
+    _MESSAGE_TEMPLATE = '{} Method [{}] was configured on type [{}].'
 
     def __init__(self, sub_message: str, name: str, configurable: Any):
         super().__init__(InvalidPostConstructMethod._MESSAGE_TEMPLATE.format(sub_message, name, type(configurable).__name__))

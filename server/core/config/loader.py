@@ -2,6 +2,7 @@ from typing import Type, TypeVar, Dict, Any, Annotated
 from functools import lru_cache
 import logging
 import copy
+from threading import Lock
 
 from pydantic import BaseModel
 from fastapi import Depends
@@ -19,6 +20,7 @@ _log = logging.getLogger(__file__)
 class ConfigLoader:
 
     def __init__(self, config_parser: ConfigParser):
+        self._lock = Lock()
         self._configs: Dict[Type, Any] = {}
         self._parsed_yml = config_parser.parse_config_yml()
 
@@ -44,6 +46,10 @@ class ConfigLoader:
         :return: A deep copy of the populated instance of model_type.
         """
 
+        with self._lock:
+            return self._read_config(model_type)
+
+    def _read_config(self, model_type: Type[T]) -> T:
         if model_type in self._configs:
             return copy.deepcopy(self._configs[model_type])
 
@@ -59,6 +65,9 @@ class ConfigLoader:
         return copy.deepcopy(model_instance)
 
     def _read_property_from_yml(self, property_path: str) -> Any:
+        if self._parsed_yml is None:
+            return None
+
         try:
             options = self._parsed_yml
             segments = property_path.split('.')
@@ -66,7 +75,7 @@ class ConfigLoader:
                 options = options[segments[i]]
             return options[segments[-1]]
         except Exception:
-            pass
+            return None
 
     def _read_configured_properties(self, model_type: Type[T]) -> Dict[str, Any]:
         prefix = get_prefix(model_type)

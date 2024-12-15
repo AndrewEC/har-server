@@ -17,7 +17,7 @@ from .rules import (ResponseContentUrlResponseRewriteRules, RemoveResponseHeader
 _log = logging.getLogger(__file__)
 
 
-class ResponseRewriter(RuleContainer[ResponseRewriteRule]):
+class ResponseRewriter:
 
     _RESPONSE_REWRITE_RULES = [
         ResponseContentUrlResponseRewriteRules,
@@ -26,10 +26,14 @@ class ResponseRewriter(RuleContainer[ResponseRewriteRule]):
     ]
 
     def __init__(self, config_loader: ConfigLoader):
-        super().__init__('response-rewrite', ResponseRewriter._RESPONSE_REWRITE_RULES)
+        self._rule_container = RuleContainer[ResponseRewriteRule](
+            'response-rewrite',
+            ResponseRewriter._RESPONSE_REWRITE_RULES
+        )
+
         rules = config_loader.read_config(ResponseRewriteRules).rules
         _log.info(f'Configured response rewrite rules: [{rules}]')
-        self.enable_rules(config_loader, rules)
+        self._rule_container.enable_rules(config_loader, rules)
 
     def apply_response_rewrite_rules(self, response: HarEntryResponse) -> HarEntryResponse:
         """
@@ -47,15 +51,15 @@ class ResponseRewriter(RuleContainer[ResponseRewriteRule]):
         :raise ResponseRuleNotFoundException: if any of the configured response rewrite rules could not be found
         :raise ResponseRuleFailedException: if any of the response rewrite rules raised an exception.
         """
-        if not self.has_any_rules_enabled():
+        if not self._rule_container.has_any_rules_enabled():
             return response
 
         response_copy = copy.deepcopy(response)
-        for name, rule in self.get_enabled_rules():
+        for name, rule in self._rule_container.get_enabled_rules().items():
             try:
                 response_copy = rule.rewrite_response(response_copy)
             except Exception as e:
-                raise RuleFailedException(self._container_name, name, e) from e
+                raise RuleFailedException(self._rule_container.get_name(), name, e) from e
         return response_copy
 
 

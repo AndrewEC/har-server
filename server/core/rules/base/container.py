@@ -1,10 +1,9 @@
-from typing import Generic, TypeVar, Type, List, Tuple
-from abc import ABC
+from typing import Generic, TypeVar, Type, List, Dict
 
 from server.core.config import ConfigLoader
 
 from .error import (DuplicateRuleException, RuleNotFoundException,
-                    RuleInitializationFailed, ContainerRulesAlreadyEnabled)
+                    RuleInitializationFailedException, ContainerRulesAlreadyEnabledException)
 from .rule_dictionary import RuleDict
 from .rule import Rule
 
@@ -12,7 +11,7 @@ from .rule import Rule
 T = TypeVar('T', bound=Rule)
 
 
-class RuleContainer(Generic[T], ABC):
+class RuleContainer(Generic[T]):
 
     def __init__(self, container_name: str, rules: List[Type[T]]):
         self._container_name = container_name
@@ -21,9 +20,32 @@ class RuleContainer(Generic[T], ABC):
         for rule in rules:
             self._register_rule(rule)
 
+    def get_name(self):
+        return self._container_name
+
     def enable_rules(self, config_loader: ConfigLoader, names: List[str]):
-        if len(self._enabled_rules) > 0:
-            raise ContainerRulesAlreadyEnabled(self._container_name)
+        """
+        Enables one or more of the registered rules. When a rule is being enabled
+        the config_loader will be used to give the rule a chance to initialize and load
+        any required configuration values.
+
+        This method should only be called once. If this method was previously invoked,
+        and at least one rule was successfully enabled, this will raise
+        ContainerRulesAlreadyEnabled.
+
+        :param config_loader: The config loader that will be passed to each of the rules
+            being enabled so each rule has a chance to load any required configuration
+            values.
+        :param names: The names of the rules to be enabled.
+        :raises ContainerRulesAlreadyEnabledException: Raised if this method has already
+            been invoked and at least one rule has been enabled.
+        :raises RuleNotFoundException: Raised if any of the input names specified does
+            not map to a known rule.
+        :raises RuleInitializationFailedException: Raised if any of the rules raises
+            an exception when attempting to initialize.
+        """
+        if self.has_any_rules_enabled():
+            raise ContainerRulesAlreadyEnabledException(self._container_name)
         for name in names:
             self._initialize_rule(config_loader, name)
 
@@ -32,8 +54,14 @@ class RuleContainer(Generic[T], ABC):
             raise RuleNotFoundException(self._container_name, name)
         return self._rules[name]
 
-    def get_enabled_rules(self) -> List[Tuple[str, T]]:
-        return [(name, self._get_rule(name)) for name in self._enabled_rules]
+    def get_enabled_rules(self) -> Dict[str, T]:
+        """
+        Gets a dict of the currently enabled rules and all their names.
+
+        :return: A dictionary containing a mapping of the rules (values) and their
+            respective names (keys).
+        """
+        return {name: self._get_rule(name)for name in self._enabled_rules}
 
     def _register_rule(self, rule: Type[T]):
         rule_instance = rule()
@@ -47,8 +75,13 @@ class RuleContainer(Generic[T], ABC):
         try:
             rule.initialize(config_loader)
         except Exception as e:
-            raise RuleInitializationFailed(self._container_name, name, e) from e
+            raise RuleInitializationFailedException(self._container_name, name, e) from e
         self._enabled_rules.append(name)
 
     def has_any_rules_enabled(self) -> bool:
+        """
+        Indicates if this contain has at least one rule that has been successfully enabled.
+
+        :return: True if at least one rule is enabled. Otherwise, false.
+        """
         return len(self._enabled_rules) > 0

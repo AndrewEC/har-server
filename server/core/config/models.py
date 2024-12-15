@@ -10,7 +10,6 @@ from .functions import make_lowercase
 @prefix('debug')
 class Debug(BaseModel):
     enable_debug_logs: bool = False
-    dump_urls: bool = False
     log_stack_traces: bool = False
     open_browser: str | None = None
 

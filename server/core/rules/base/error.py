@@ -22,17 +22,17 @@ class RuleFailedException(Exception):
         super().__init__(RuleFailedException._MESSAGE_TEMPLATE.format(name, container_name, cause))
 
 
-class RuleInitializationFailed(Exception):
+class RuleInitializationFailedException(Exception):
 
     _MESSAGE_TEMPLATE = 'Failed to initialize rule of type [{}] with name [{}]. Cause: [{}]'
 
     def __init__(self, container_name: str, name: str, cause: Exception):
-        super().__init__(RuleInitializationFailed._MESSAGE_TEMPLATE.format(container_name, name, cause), cause)
+        super().__init__(RuleInitializationFailedException._MESSAGE_TEMPLATE.format(container_name, name, cause), cause)
 
 
-class ContainerRulesAlreadyEnabled(Exception):
+class ContainerRulesAlreadyEnabledException(Exception):
 
     _MESSAGE_TEMPLATE = 'Container [{}] rules have already been enabled.'
 
     def __init__(self, container_name: str):
-        super().__init__(ContainerRulesAlreadyEnabled._MESSAGE_TEMPLATE.format(container_name))
+        super().__init__(ContainerRulesAlreadyEnabledException._MESSAGE_TEMPLATE.format(container_name))

@@ -2,6 +2,7 @@ from typing import Dict
 from functools import lru_cache
 import logging
 import copy
+from threading import Lock
 
 import yaml
 
@@ -14,6 +15,7 @@ class ConfigParser:
 
     def __init__(self):
         self._cached_contents = None
+        self._lock = Lock()
 
     def parse_config_yml(self) -> Dict | None:
         """
@@ -26,7 +28,10 @@ class ConfigParser:
 
         :return: The parsed contents of the configuration file.
         """
+        with self._lock:
+            return self._parse_config_yml()
 
+    def _parse_config_yml(self) -> Dict | None:
         if self._cached_contents is not None:
             return copy.deepcopy(self._cached_contents)
 

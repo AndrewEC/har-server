@@ -16,7 +16,7 @@ from .rules import (MethodMatcherRule, PathMatcherRule, QueryMatcherRule, Header
 _log = logging.getLogger(__file__)
 
 
-class RequestMatcher(RuleContainer[MatcherRule]):
+class RequestMatcher:
 
     _MATCHERS = [
         MethodMatcherRule,
@@ -27,10 +27,11 @@ class RequestMatcher(RuleContainer[MatcherRule]):
     ]
 
     def __init__(self, config_loader: ConfigLoader):
-        super().__init__('request-matcher', RequestMatcher._MATCHERS)
+        self._rule_container = RuleContainer[MatcherRule]('request-matcher', RequestMatcher._MATCHERS)
+
         rules = config_loader.read_config(Matchers).rules
         _log.info(f'Configured request matching rules: [{rules}]')
-        self.enable_rules(config_loader, rules)
+        self._rule_container.enable_rules(config_loader, rules)
 
     def do_requests_match(self, entry: HarEntryRequest, request: HarEntryRequest) -> bool:
         """
@@ -44,12 +45,12 @@ class RequestMatcher(RuleContainer[MatcherRule]):
         :raise MatchRuleFailedException: if any of the matchers raised an exception.
         """
 
-        for name, rule in self.get_enabled_rules():
+        for name, rule in self._rule_container.get_enabled_rules().items():
             try:
                 if not rule.matches(entry, request):
                     return False
             except Exception as e:
-                raise RuleFailedException(self._container_name, name, e) from e
+                raise RuleFailedException(self._rule_container.get_name(), name, e) from e
         return True
 
 

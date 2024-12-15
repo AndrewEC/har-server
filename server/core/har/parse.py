@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import logging
 import os
+from threading import Lock
 
 from server.core.config import get_root_path
 from .models import HarFileContent, HarParseError
@@ -16,6 +17,7 @@ class HarParser:
 
     def __init__(self):
         self._har_file_contents = None
+        self._lock = Lock()
 
     def get_har_file_contents(self) -> List[HarFileContent]:
         """
@@ -33,6 +35,10 @@ class HarParser:
             the original error that caused the parsing to fail.
         """
 
+        with self._lock:
+            return self._do_get_har_file_contents()
+
+    def _do_get_har_file_contents(self) -> List[HarFileContent]:
         if self._har_file_contents is not None:
             return self._har_file_contents
 
