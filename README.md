@@ -68,7 +68,7 @@ HAR files as case-insensitive.
 
 
 ### A Note on Response Headers
-The underlying FastAPI server that the har-server is built on top of has logic to automatically set and write certain
+The underlying FastAPI server that har-server is built on top of has logic to automatically set and write certain
 response headers such as the content-type, content-length, and content-encoding. The headers automatically added
 can conflict with the headers of the same name that are part of the response recorded in a HAR file.
 

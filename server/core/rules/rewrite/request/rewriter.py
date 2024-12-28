@@ -32,7 +32,10 @@ class RequestRewriter:
     ]
 
     def __init__(self, config_loader: ConfigLoader):
-        self._rule_container = RuleContainer[RequestRewriteRule]('request-rewrite', RequestRewriter._REQUEST_REWRITE_RULES)
+        self._rule_container = RuleContainer[RequestRewriteRule](
+            'request-rewrite',
+            RequestRewriter._REQUEST_REWRITE_RULES
+        )
 
         rewrite_rules = config_loader.read_config(RequestRewriteRules).rules
         _log.info(f'Configured request rewrite rules: [{rewrite_rules}]')

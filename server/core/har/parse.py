@@ -50,6 +50,7 @@ class HarParser:
                 if not file_name.endswith('.har'):
                     _log.info(f'Skipping file since it does not have a .har extension: [{file_name}]')
                     continue
+
                 file_path = Path(root).joinpath(file_name)
                 _log.info(f'Parsing har file: [{file_path}]')
 

@@ -9,8 +9,14 @@ from server.core.config.models import Matchers
 from server.core.har import HarEntryRequest
 from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .rules import (MethodMatcherRule, PathMatcherRule, QueryMatcherRule, HeadersMatcherRule, CookieMatcherRule,
-                    MatcherRule)
+from .rules import (
+    MethodMatcherRule,
+    PathMatcherRule,
+    QueryMatcherRule,
+    HeadersMatcherRule,
+    CookieMatcherRule,
+    MatcherRule
+)
 
 
 _log = logging.getLogger(__file__)
