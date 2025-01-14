@@ -1,0 +1,9 @@
+rewrite:
+  response:
+    rules:
+      - remove-headers
+    config:
+      removable-headers:
+        - content-type
+        - content-length
+        - content-encoding

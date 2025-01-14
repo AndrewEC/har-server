@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from server.core.web.transformer import ResponseTransformer
 from server.core.rules.rewrite.response import ResponseRewriter
@@ -22,7 +22,7 @@ class ResponseTransformerTest(unittest.TestCase):
             headers={'header-name': 'header-value'},
             cookies={'cookie-name': 'cookie-value'}
         )
-        mock_response_rewriter.apply_response_rewrite_rules = MagicMock(return_value=rewritten_response)
+        mock_response_rewriter.apply_response_rewrite_rules = Mock(return_value=rewritten_response)
 
         actual = ResponseTransformer(mock_response_rewriter).map_to_fastapi_response(initial_response)
 

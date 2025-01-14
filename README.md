@@ -80,6 +80,8 @@ and `content-encoding` headers.
 This configuration will force the server to exclude the headers with said names from the original HAR file response
 and only send the headers set by FastAPI.
 
+A sample of this particular configuration can be found at [_config_min.yml](./_config_min.yml)
+
 
 ## Quality Metrics
 

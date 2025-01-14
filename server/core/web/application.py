@@ -5,15 +5,13 @@ from fastapi import FastAPI, Request, Depends, HTTPException, Response
 
 from server.core.config import with_config_loader, with_config_parser
 from server.core.config.models import Debug
-from server.core.debug import enable_debug_logs
-from server.core.har import with_har_parser
 from server.core.routing import RouteMap, with_route_map
 
 from .transformer import with_response_transformer, ResponseTransformer
-from .browser_open import open_browser_in_background
+from .lifespan import lifespan
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 _log = logging.getLogger(__file__)
 
 
@@ -45,15 +43,3 @@ def handle_exception(request: Request, exception: Exception):
     if with_config_loader(with_config_parser()).read_config(Debug).log_stack_traces:
         _log.exception(exception)
     return Response(status_code=500)
-
-
-@app.on_event('startup')
-def startup():
-    config_loader = with_config_loader(with_config_parser())
-
-    if config_loader.read_config(Debug).enable_debug_logs:
-        enable_debug_logs()
-
-    with_har_parser().get_har_file_contents()
-
-    open_browser_in_background(config_loader)

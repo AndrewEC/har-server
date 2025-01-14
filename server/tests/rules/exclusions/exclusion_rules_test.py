@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ExclusionConfig
@@ -17,7 +17,7 @@ class ExclusionRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(method=test_case[1]):
-                mock_config_loader.read_config = MagicMock(return_value=Mock(removable_http_methods=['HEAD']))
+                mock_config_loader.read_config = Mock(return_value=Mock(removable_http_methods=['HEAD']))
 
                 entry = Mock(
                     request=Mock(
@@ -29,6 +29,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 rule.initialize(mock_config_loader)
                 actual = rule.should_filter_out(entry)
 
+                self.assertEqual('requests-with-http-method', rule.get_name())
                 self.assertEqual(test_case[0], actual)
 
                 mock_config_loader.read_config.assert_called_once_with(ExclusionConfig)
@@ -39,7 +40,7 @@ class ExclusionRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(status=test_case[1], filter_out=test_case[0]):
-                mock_config_loader.read_config = MagicMock(return_value=Mock(removable_statuses=[304]))
+                mock_config_loader.read_config = Mock(return_value=Mock(removable_statuses=[304]))
 
                 entry = Mock(
                     response=Mock(

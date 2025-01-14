@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRuleConfig
@@ -16,7 +16,7 @@ class ResponseRewriteRulesTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_cookies_from_response(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(removable_cookies=[_REMOVABLE_NAME]))
+        mock_config_loader.read_config = Mock(return_value=Mock(removable_cookies=[_REMOVABLE_NAME]))
 
         response = Mock(cookies={
             _REMOVABLE_NAME: 'removable-value',
@@ -34,7 +34,7 @@ class ResponseRewriteRulesTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_headers_from_response(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(removable_headers=[_REMOVABLE_NAME]))
+        mock_config_loader.read_config = Mock(return_value=Mock(removable_headers=[_REMOVABLE_NAME]))
 
         response = Mock(headers={
             _REMOVABLE_NAME: 'removable-value',

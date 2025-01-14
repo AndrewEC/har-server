@@ -1,8 +1,13 @@
 import unittest
 from unittest.mock import Mock
 
-from server.core.rules.matching.rules import (PathMatcherRule, CookieMatcherRule, MethodMatcherRule, HeadersMatcherRule,
-                                              QueryMatcherRule)
+from server.core.rules.matching.rules import (
+    PathMatcherRule,
+    CookieMatcherRule,
+    MethodMatcherRule,
+    HeadersMatcherRule,
+    QueryMatcherRule
+)
 
 
 class MatchRulesTest(unittest.TestCase):

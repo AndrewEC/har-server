@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import RequestRewriteConfig
@@ -18,7 +18,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_query_param_from_entry_request(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(removable_query_params=[_REMOVABLE_PARAM]))
+        mock_config_loader.read_config = Mock(return_value=Mock(removable_query_params=[_REMOVABLE_PARAM]))
 
         request = Mock(query_params={
             _REMOVABLE_PARAM: 'removable-value',
@@ -37,7 +37,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_cookie_from_entry_request(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(removable_cookies=[_REMOVABLE_PARAM]))
+        mock_config_loader.read_config = Mock(return_value=Mock(removable_cookies=[_REMOVABLE_PARAM]))
 
         request = Mock(cookies={
             _REMOVABLE_PARAM: 'removable-value',
@@ -56,7 +56,7 @@ class RequestRewriteRulesTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_header_from_entry_request(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(removable_headers=[_REMOVABLE_PARAM]))
+        mock_config_loader.read_config = Mock(return_value=Mock(removable_headers=[_REMOVABLE_PARAM]))
 
         request = Mock(headers={
             _REMOVABLE_PARAM: 'removable-value',

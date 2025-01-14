@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
 from pydantic import BaseModel
 
@@ -35,7 +35,7 @@ class LoaderTests(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigParser))
     def test_read_config(self, mock_config_parser: ConfigParser):
-        mock_config_parser.parse_config_yml = MagicMock(return_value={'prefix': {'string': _NON_DEFAULT_VALUE}})
+        mock_config_parser.parse_config_yml = Mock(return_value={'prefix': {'string': _NON_DEFAULT_VALUE}})
 
         actual = ConfigLoader(mock_config_parser).read_config(_TestModel)
 
@@ -44,7 +44,7 @@ class LoaderTests(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigParser))
     def test_read_config_with_post_construct(self, mock_config_parser: ConfigParser):
-        mock_config_parser.parse_config_yml = MagicMock(return_value={'prefix': {'string': _NON_DEFAULT_VALUE}})
+        mock_config_parser.parse_config_yml = Mock(return_value={'prefix': {'string': _NON_DEFAULT_VALUE}})
 
         actual = ConfigLoader(mock_config_parser).read_config(_TestModelWithPostConstruct)
 
@@ -54,7 +54,7 @@ class LoaderTests(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigParser))
     def test_read_config_returns_default_when_property_not_found_in_config(self, mock_config_parser: ConfigParser):
-        mock_config_parser.parse_config_yml = MagicMock(return_value={})
+        mock_config_parser.parse_config_yml = Mock(return_value={})
 
         actual = ConfigLoader(mock_config_parser).read_config(_TestModel)
 

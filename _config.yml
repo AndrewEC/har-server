@@ -1,6 +1,5 @@
 debug:
   enable-debug-logs: True
-  dump-urls: True
   log-stack-traces: True
   open-browser: http://localhost:8080/
 
@@ -19,6 +18,7 @@ rewrite:
       - remove-headers
       - remove-cookies
     config:
+      pre-apply: True
       removable-headers:
         - content-type
         - content-length
@@ -50,6 +50,7 @@ exclusions:
     - responses-with-invalid-size
     - requests-with-http-method
   config:
+    pre-apply: True
     removable-http-methods:
       - HEAD
     removable-statuses:

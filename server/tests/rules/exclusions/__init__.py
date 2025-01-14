@@ -1,1 +1,2 @@
 from .exclusion_filter_test import ExclusionFilterTest
+from .exclusion_rules_test import ExclusionRuleTest

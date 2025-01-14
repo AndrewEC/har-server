@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
+from unittest.mock import Mock, patch, PropertyMock
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ExclusionRules
@@ -18,19 +18,19 @@ class ExclusionFilterTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_should_exclude_entry(self,
                                   mock_config_loader: ConfigLoader,
-                                  mock_rules: MagicMock):
+                                  mock_rules: Mock):
 
         for result in [True, False]:
             with self.subTest(should_filter=result):
                 mock_config_loader.read_config.reset_mock()
 
                 mock_rule = Mock(
-                    get_name=MagicMock(return_value=_RULE_NAME),
-                    should_filter_out=MagicMock(return_value=result)
+                    get_name=Mock(return_value=_RULE_NAME),
+                    should_filter_out=Mock(return_value=result)
                 )
-                mock_rules.return_value = [MagicMock(return_value=mock_rule)]
+                mock_rules.return_value = [Mock(return_value=mock_rule)]
 
-                mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
+                mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
 
                 entry = Mock()
                 actual = ExclusionFilter(mock_config_loader).should_exclude_entry(entry)
@@ -43,14 +43,14 @@ class ExclusionFilterTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_should_exclude_entry_raises_exception_when_exclusion_rule_raises_exception(self,
                                                                                         mock_config_loader: ConfigLoader,
-                                                                                        mock_rules: MagicMock):
+                                                                                        mock_rules: Mock):
 
-        mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
+        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
         mock_rule = Mock(
-            get_name=MagicMock(return_value=_RULE_NAME),
-            should_filter_out=MagicMock(side_effect=Exception())
+            get_name=Mock(return_value=_RULE_NAME),
+            should_filter_out=Mock(side_effect=Exception())
         )
-        mock_rules.return_value = [MagicMock(return_value=mock_rule)]
+        mock_rules.return_value = [Mock(return_value=mock_rule)]
 
         entry = Mock()
         with self.assertRaises(RuleFailedException) as context:

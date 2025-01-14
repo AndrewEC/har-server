@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
+from unittest.mock import Mock, patch, PropertyMock
 
 import copy
 
@@ -21,21 +21,21 @@ class RequestRewriterTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_apply_browser_request_rewrite_rules(self,
                                                  mock_config_loader: ConfigLoader,
-                                                 mock_rules: MagicMock,
-                                                 mock_deep_copy: MagicMock):
+                                                 mock_rules: Mock,
+                                                 mock_deep_copy: Mock):
 
-        mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
+        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
 
         request_copy = Mock()
         mock_deep_copy.return_value = request_copy
 
         expected = Mock()
         mock_rule = Mock(
-            get_name=MagicMock(return_value=_RULE_NAME),
-            rewrite_incoming_http_request=MagicMock(return_value=expected),
-            rewrite_har_entry_request=MagicMock()
+            get_name=Mock(return_value=_RULE_NAME),
+            rewrite_incoming_http_request=Mock(return_value=expected),
+            rewrite_har_entry_request=Mock()
         )
-        mock_rules.return_value = [MagicMock(return_value=mock_rule)]
+        mock_rules.return_value = [Mock(return_value=mock_rule)]
 
         request = Mock()
         actual = RequestRewriter(mock_config_loader).apply_browser_request_rewrite_rules(request)
@@ -52,17 +52,17 @@ class RequestRewriterTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_apply_entry_request_rewrite_rules(self,
                                                mock_config_loader: ConfigLoader,
-                                               mock_rules: MagicMock,
-                                               mock_deep_copy: MagicMock):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
+                                               mock_rules: Mock,
+                                               mock_deep_copy: Mock):
+        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
 
         expected = Mock()
         mock_rule = Mock(
-            get_name=MagicMock(return_value=_RULE_NAME),
-            rewrite_incoming_http_request=MagicMock(),
-            rewrite_har_entry_request=MagicMock(return_value=expected)
+            get_name=Mock(return_value=_RULE_NAME),
+            rewrite_incoming_http_request=Mock(),
+            rewrite_har_entry_request=Mock(return_value=expected)
         )
-        mock_rules.return_value = [MagicMock(return_value=mock_rule)]
+        mock_rules.return_value = [Mock(return_value=mock_rule)]
 
         request_copy = Mock()
         mock_deep_copy.return_value = request_copy
@@ -82,16 +82,16 @@ class RequestRewriterTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_apply_browser_request_rewrite_rules_raises_exception_when_rule_raises_exception(self,
                                                                                              mock_config_loader: ConfigLoader,
-                                                                                             mock_rules: MagicMock,
-                                                                                             mock_deep_copy: MagicMock):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(rules=[_RULE_NAME]))
+                                                                                             mock_rules: Mock,
+                                                                                             mock_deep_copy: Mock):
+        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
 
         mock_rule = Mock(
-            get_name=MagicMock(return_value=_RULE_NAME),
-            rewrite_incoming_http_request=MagicMock(side_effect=Exception()),
-            rewrite_har_entry_request=MagicMock()
+            get_name=Mock(return_value=_RULE_NAME),
+            rewrite_incoming_http_request=Mock(side_effect=Exception()),
+            rewrite_har_entry_request=Mock()
         )
-        mock_rules.return_value = [MagicMock(return_value=mock_rule)]
+        mock_rules.return_value = [Mock(return_value=mock_rule)]
 
         request_copy = Mock()
         mock_deep_copy.return_value = request_copy

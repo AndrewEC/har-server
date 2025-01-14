@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from server.core.config.models import ResponseRuleConfig
 from server.core.config import ConfigLoader
@@ -16,7 +16,7 @@ class ResponseContentUrlTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(excluded_domains=[]))
+        mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=[]))
 
         test_cases = [
             'https://www.google.ca',
@@ -43,7 +43,7 @@ class ResponseContentUrlTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls_negative_cases(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = MagicMock(return_value=Mock(excluded_domains=['http://www.google.com']))
+        mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=['http://www.google.com']))
 
         test_cases = [
             '//.',

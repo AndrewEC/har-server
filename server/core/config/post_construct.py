@@ -36,14 +36,14 @@ def post_construct(name: str) -> Callable:
     return wrap
 
 
-def _get_post_construct_name(cls: Type) -> str | None:
+def _get_post_construct_method_name(cls: Type) -> str | None:
     if not hasattr(cls, _POST_CONSTRUCT_PROPERTY):
         return None
     return getattr(cls, _POST_CONSTRUCT_PROPERTY)
 
 
 def invoke_post_construct(instance: Any):
-    method_name = _get_post_construct_name(instance)
+    method_name = _get_post_construct_method_name(instance)
     if method_name is None:
         return
 
