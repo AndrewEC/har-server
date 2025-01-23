@@ -59,3 +59,4 @@ class ExclusionFilterTest(unittest.TestCase):
         self.assertIn(_RULE_NAME, str(context.exception))
 
         mock_config_loader.read_config.assert_called_once_with(ExclusionRules)
+        mock_rule.should_filter_out.assert_called_once_with(entry)

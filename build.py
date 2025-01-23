@@ -7,8 +7,7 @@ from buildutils.plugins import (
     GenericCommandPlugin,
     GenericCleanPlugin,
     EnsureVenvActivePlugin,
-    alias,
-    group
+    alias
 )
 
 
@@ -33,12 +32,7 @@ def main(profile: str, plugins: str, list_plugins: bool):
                     'Run integration tests with no code coverage analysis.'
                 )
             ),
-            GenericCommandPlugin('AUDIT', 'Audit the dependencies in the requirements.txt file for vulnerabilities.'),
-            group(
-                'generate-docs',
-                GenericCommandPlugin('PREPARE_DOCS', 'Prepare Sphinx for generating documentation from inline comments.'),
-                GenericCommandPlugin('GENERATE_DOCS', 'Generate documentation from inline comments using Sphinx')
-            )
+            GenericCommandPlugin('AUDIT', 'Audit the dependencies in the requirements.txt file for vulnerabilities.')
         )
         .build(profile, plugins, list_plugins)
     )
