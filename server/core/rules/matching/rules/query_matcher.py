@@ -1,8 +1,12 @@
+import logging
+
 from server.core.config import ConfigLoader
 from server.core.har import HarEntryRequest
 
-from .common import do_dicts_contain_same_elements
 from .base import MatcherRule
+
+
+_log = logging.getLogger(__file__)
 
 
 class QueryMatcherRule(MatcherRule):
@@ -14,4 +18,5 @@ class QueryMatcherRule(MatcherRule):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
-        return do_dicts_contain_same_elements(entry.query_params, incoming_request.query_params)
+        _log.debug(f'Comparing entry query [{entry.query_params}] to incoming query [{incoming_request.query_params}].')
+        return entry.query_params == incoming_request.query_params

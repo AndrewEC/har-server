@@ -6,7 +6,8 @@ from server.core.rules.matching.rules import (
     CookieMatcherRule,
     MethodMatcherRule,
     HeadersMatcherRule,
-    QueryMatcherRule
+    QueryMatcherRule,
+    BodyMatcherRule
 )
 
 
@@ -93,5 +94,23 @@ class MatchRulesTest(unittest.TestCase):
                 request = Mock(query_params=test_case[2])
 
                 actual = QueryMatcherRule().matches(request, entry)
+
+                self.assertEqual(test_case[0], actual)
+
+    def test_do_bodies_match(self):
+        test_cases = [
+            (True, {}, {}),
+            (True, None, None),
+            (False, None, {}),
+            (False, {}, None),
+            (False, {}, {'name': 'name'})
+        ]
+
+        for test_case in test_cases:
+            with self.subTest(should_match=test_case[0]):
+                entry = Mock(body=test_case[1])
+                request = Mock(body=test_case[2])
+
+                actual = BodyMatcherRule().matches(request, entry)
 
                 self.assertEqual(test_case[0], actual)

@@ -1,8 +1,12 @@
+import logging
+
 from server.core.config import ConfigLoader
 from server.core.har import HarEntryRequest
 
 from .base import MatcherRule
-from .common import do_dicts_contain_same_elements
+
+
+_log = logging.getLogger(__file__)
 
 
 class HeadersMatcherRule(MatcherRule):
@@ -14,4 +18,5 @@ class HeadersMatcherRule(MatcherRule):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
-        return do_dicts_contain_same_elements(entry.headers, incoming_request.headers)
+        _log.debug(f'Comparing entry headers [{entry.headers}] to incoming header [{incoming_request.headers}].')
+        return entry.headers == incoming_request.headers

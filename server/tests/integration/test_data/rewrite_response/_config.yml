@@ -1,7 +1,6 @@
 debug:
   enable-debug-logs: True
-  dump-urls: False
-  log-stack-traces: False
+  log-stack-traces: True
 
 request-matching:
   rules:

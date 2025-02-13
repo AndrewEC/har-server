@@ -22,12 +22,12 @@ _log = logging.getLogger(__file__)
 @app.delete('/{full_path:path}')
 @app.options('/{full_path:path}')
 @app.patch('/{full_path:path}')
-def get(request: Request,
-        full_path: str,
-        route_map: Annotated[RouteMap, Depends(with_route_map)],
-        response_transformer: Annotated[ResponseTransformer, Depends(with_response_transformer)]):
+async def get(request: Request,
+              full_path: str,
+              route_map: Annotated[RouteMap, Depends(with_route_map)],
+              response_transformer: Annotated[ResponseTransformer, Depends(with_response_transformer)]):
 
-    entry = route_map.find_entry_for_request(request)
+    entry = await route_map.find_entry_for_request(request)
     if entry is None:
         raise HTTPException(status_code=404, detail='No har entry matching request found.')
 

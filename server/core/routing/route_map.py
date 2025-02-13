@@ -56,7 +56,7 @@ class RouteMap:
 
         return entries
 
-    def find_entry_for_request(self, request: Request) -> HarEntry | None:
+    async def find_entry_for_request(self, request: Request) -> HarEntry | None:
         """
         Attempts to find an entry in a har file in which the request associated with said entry matches the request
         being provided as an input parameter.
@@ -69,7 +69,7 @@ class RouteMap:
         :return: The har entry whose recorded request matches the incoming Http request based on the matching rules.
             If no request matches then this will return None.
         """
-        incoming_request = self._request_mapper.map_to_har_request(request)
+        incoming_request = await self._request_mapper.map_to_har_request(request)
         rewritten_incoming_request = self._request_rewriter.apply_browser_request_rewrite_rules(incoming_request)
         for entry in self._entries:
             if not self._pre_apply_exclusion_rules and self._exclusion_filter.should_exclude_entry(entry):

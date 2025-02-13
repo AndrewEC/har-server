@@ -37,7 +37,6 @@ HAR files as case-insensitive.
 | Property                | Rule Name                   | Rule Config                                        | Description                                                                                                                                                                                                                |
 |-------------------------|-----------------------------|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | debug.enable-debug-logs |                             |                                                    | Enable more granular logging statements.                                                                                                                                                                                   |
-| debug.dump-urls         |                             |                                                    | Dump the URLs loaded from the .har files after all exclusion rules have been executed.                                                                                                                                     |
 | debug.log-stack-traces  |                             |                                                    | Log the full stack trace whenever an exception is thrown while the server is running.                                                                                                                                      |
 | debug.open-browser      |                             |                                                    | The URL to launch in your default browser once the server has started.                                                                                                                                                     |
 | request-matching.rules  |                             |                                                    | The sequentially executed set of predicate functions to determine if an incoming HTTP request matches a previously recorded request pulled from a har file.                                                                |
@@ -45,6 +44,7 @@ HAR files as case-insensitive.
 |                         | path                        |                                                    | Match requets by path segments. (This will exclude the host/port and will fully decode the request path.)                                                                                                                  |
 |                         | query-params                |                                                    | Match requests by their query parameters. (This will fully decode all query parameters before matching.)                                                                                                                   |
 |                         | headers                     |                                                    | Match requests by their request headers.                                                                                                                                                                                   |
+|                         | json-body                   |                                                    | Match requests by their JSON body. This will only match requests with an application/json mime type.                                                                                                                       |
 | rewrite.request.rule    |                             |                                                    | The sequentially executed set of functions to modify an incoming request or a previously recorded request pulled from a har file.                                                                                          |
 |                         | remove-query-params         |                                                    | Removes query params by name from the incoming and recorded request.                                                                                                                                                       |
 |                         |                             | rewrite.request.config.removable-query-params      | The list of query param names (case-insensitive) to be removed from each recorded request.                                                                                                                                 |
@@ -68,25 +68,20 @@ HAR files as case-insensitive.
 
 
 ### A Note on Response Headers
-The underlying FastAPI server that har-server is built on top of has logic to automatically set and write certain
+The underlying FastAPI server, that har-server is built on top of, has logic to automatically populate select
 response headers such as the content-type, content-length, and content-encoding. The headers automatically added
 can conflict with the headers of the same name that are part of the response recorded in a HAR file.
 
-To avoid this issue you may need to create a `_config.yml` file and configure the
-`rewrite.response.rules` array to include the `remove-headers` rule and in the
-`rewrite.response.config.removable-headers` array add the `content-type`, `content-length`,
-and `content-encoding` headers.
-
-This configuration will force the server to exclude the headers with said names from the original HAR file response
-and only send the headers set by FastAPI.
-
-A sample of this particular configuration can be found at [_config_min.yml](./_config_min.yml)
+To avoid this issue you may need to create a _config.yml file in the root of the Http Archive folder with a
+configuration like what is provided in the [_config_min.yml](./_config_min.yml) sample. The configuration
+provided in the sample YAML file will force the har-server to exclude the problematic headers from the Http Archive
+response entry and will only return the headers automatically set by the FastAPI server.
 
 
 ## Quality Metrics
 
-To run the unit and integration tests simply run the CreateVenv.ps1 script the run the build script via:
+Various quality metrics can be gathered by first running the `CreateVenv.ps1` script then by executing the following:
 > python build.py
 
-This build script, in addition to the running unit tests, will also generate coverage reports,
-install required dependencies, ensure a proper virtual environment is active, and run Flake8.
+This build script will ensure the proper virtual environment is active, install dependencies, run unit tests
+with code coverage assertions, flake8, and perform dependency audits.

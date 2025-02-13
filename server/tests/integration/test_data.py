@@ -23,7 +23,7 @@ _CACHES = [
 class TestData:
 
     def __init__(self, folder_name: str):
-        self._test_data_path = Path(__file__).absolute().parent.parent.joinpath('test_data').joinpath(folder_name)
+        self._test_data_path = Path(__file__).absolute().parent.joinpath('test_data').joinpath(folder_name)
         if not self._test_data_path.is_dir():
             raise Exception(f'Could not find test data path: [{self._test_data_path}].')
         self._last_root_path = get_root_path()

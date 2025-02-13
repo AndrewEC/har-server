@@ -1,8 +1,12 @@
+import logging
+
 from server.core.har import HarEntryRequest
 from server.core.config import ConfigLoader
 
 from .base import MatcherRule
-from .common import do_dicts_contain_same_elements
+
+
+_log = logging.getLogger(__file__)
 
 
 class CookieMatcherRule(MatcherRule):
@@ -14,4 +18,5 @@ class CookieMatcherRule(MatcherRule):
         pass
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
-        return do_dicts_contain_same_elements(entry.cookies, incoming_request.cookies)
+        _log.debug(f'Comparing entry cookies [{entry.cookies}] to incoming cookies [{incoming_request.cookies}].')
+        return entry.cookies == incoming_request.cookies

@@ -4,16 +4,16 @@ from server.core.config import ConfigLoader
 
 from .error import (DuplicateRuleException, RuleNotFoundException,
                     RuleInitializationFailedException, ContainerRulesAlreadyEnabledException)
-from .rule_dictionary import RuleDict
+from .rule_dict import RuleDict
 from .rule import Rule
 
 
-T = TypeVar('T', bound=Rule)
+_T = TypeVar('_T', bound=Rule)
 
 
-class RuleContainer(Generic[T]):
+class RuleContainer(Generic[_T]):
 
-    def __init__(self, container_name: str, rules: List[Type[T]]):
+    def __init__(self, container_name: str, rules: List[Type[_T]]):
         self._container_name = container_name
         self._rules = RuleDict()
         self._enabled_rules: List[str] = []
@@ -49,21 +49,21 @@ class RuleContainer(Generic[T]):
         for name in names:
             self._initialize_rule(config_loader, name)
 
-    def _get_rule(self, name: str) -> T:
+    def _get_rule(self, name: str) -> _T:
         if name not in self._rules:
             raise RuleNotFoundException(self._container_name, name)
         return self._rules[name]
 
-    def get_enabled_rules(self) -> Dict[str, T]:
+    def get_enabled_rules(self) -> Dict[str, _T]:
         """
         Gets a dict of the currently enabled rules and all their names.
 
         :return: A dictionary containing a mapping of the rules (values) and their
             respective names (keys).
         """
-        return {name: self._get_rule(name)for name in self._enabled_rules}
+        return {name: self._get_rule(name) for name in self._enabled_rules}
 
-    def _register_rule(self, rule: Type[T]):
+    def _register_rule(self, rule: Type[_T]):
         rule_instance = rule()
         name = rule_instance.get_name()
         if name in self._rules:

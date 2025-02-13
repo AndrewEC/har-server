@@ -1,8 +1,9 @@
 import logging
 
 from server.core.har import HarEntryRequest
-from server.core.config import ConfigLoader
+from server.core.config import ConfigLoader, get_prop_config_path
 from server.core.config.models import RequestRewriteConfig
+from server.core.rules.base import MissingConfigPropertyException
 
 from .base import RequestRewriteRule
 
@@ -21,8 +22,8 @@ class RemoveRequestHeaderRequestRewriteRule(RequestRewriteRule):
     def initialize(self, config_loader: ConfigLoader):
         self._removable_headers = config_loader.read_config(RequestRewriteConfig).removable_headers
         if len(self._removable_headers) == 0:
-            raise Exception('The remove-headers request rewrite rule is enabled but no '
-                            'removable-headers have been configured.')
+            property_path = get_prop_config_path(RequestRewriteConfig, 'removable_headers')
+            raise MissingConfigPropertyException(self.get_name(), property_path)
 
     def rewrite_incoming_http_request(self, request: HarEntryRequest) -> HarEntryRequest:
         return self._remove_header_from_request(request)

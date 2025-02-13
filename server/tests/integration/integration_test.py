@@ -14,10 +14,14 @@ class IntegrationTests(unittest.TestCase):
         with TestData('request_matching'):
             with TestClient(app) as client:
                 client.cookies = {'request-cookie-name': 'request-cookie-value'}
-                response = client.get(
+                response = client.post(
                     '/matching/endpoint',
                     headers={'request-header-name': 'request-header-value'},
-                    params={'query-param-name': 'query-param-value'}
+                    params={'query-param-name': 'query-param-value'},
+                    json={
+                        'name': 'test_name',
+                        'password': 'test_password'
+                    }
                 )
                 self.assertEqual(200, response.status_code)
                 self.assertEqual('Test Matching Response', response.content.decode('utf-8'))

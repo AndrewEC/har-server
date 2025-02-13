@@ -2,10 +2,24 @@ from __future__ import annotations
 from typing import Dict, Any
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+import json
 
 
 def _get_or_none(options: Dict, key: str) -> Any | None:
     return options[key] if key in options else None
+
+
+def _parse_request_body(request: Dict) -> Dict | None:
+    post_data = _get_or_none(request, 'postData')
+    if post_data is None:
+        return None
+
+    mimetype = _get_or_none(post_data, 'mimeType')
+    if mimetype is None or mimetype != 'application/json':
+        return
+
+    text = _get_or_none(post_data, 'text')
+    return json.loads(text) if text is not None else None
 
 
 class HarParseError(Exception):
@@ -23,6 +37,7 @@ class HarEntryRequest:
         self.query_params: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['queryString']}
         self.headers: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['headers']}
         self.cookies: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['cookies']}
+        self.body = _parse_request_body(request)
 
 
 class HarEntryResponseContent:

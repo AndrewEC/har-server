@@ -8,12 +8,12 @@ from pydantic import BaseModel
 from fastapi import Depends
 
 from .functions import make_debug_string
-from .prefix import get_prefix, NotPrefixedException
+from .prefix import get_prop_config_path
 from .post_construct import invoke_post_construct
 from .parser import ConfigParser, with_config_parser
 
 
-T = TypeVar('T', bound=BaseModel)
+_T = TypeVar('_T', bound=BaseModel)
 _log = logging.getLogger(__file__)
 
 
@@ -24,7 +24,7 @@ class ConfigLoader:
         self._configs: Dict[Type, Any] = {}
         self._parsed_yml = config_parser.parse_config_yml()
 
-    def read_config(self, model_type: Type[T]) -> T:
+    def read_config(self, model_type: Type[_T]) -> _T:
         """
         Instantiates the model_type and populates it with values pulled from the globally
         parsed yaml file. This will always return a copy of the instantiated and populated model.
@@ -49,7 +49,7 @@ class ConfigLoader:
         with self._lock:
             return self._read_config(model_type)
 
-    def _read_config(self, model_type: Type[T]) -> T:
+    def _read_config(self, model_type: Type[_T]) -> _T:
         if model_type in self._configs:
             return copy.deepcopy(self._configs[model_type])
 
@@ -64,6 +64,11 @@ class ConfigLoader:
 
         return copy.deepcopy(model_instance)
 
+    def _read_configured_properties(self, model_type: Type[_T]) -> Dict[str, Any]:
+        properties = [prop for prop in model_type.model_fields if not prop.startswith('_')]
+        property_values = {prop: self._read_property_from_yml(get_prop_config_path(model_type, prop)) for prop in properties}
+        return {name: value for name, value in property_values.items() if value is not None}
+
     def _read_property_from_yml(self, property_path: str) -> Any:
         if self._parsed_yml is None:
             return None
@@ -76,19 +81,6 @@ class ConfigLoader:
             return options[segments[-1]]
         except Exception:
             return None
-
-    def _read_configured_properties(self, model_type: Type[T]) -> Dict[str, Any]:
-        prefix = get_prefix(model_type)
-        if prefix is None:
-            raise NotPrefixedException(model_type)
-
-        properties = [prop for prop in model_type.model_fields if not prop.startswith('_')]
-        property_values = {prop: self._read_property_from_yml(self._form_property_path(prefix, prop)) for prop in properties}
-        return {name: value for name, value in property_values.items() if value is not None}
-
-    def _form_property_path(self, prefix: str, property_name: str) -> str:
-        final_property_name = property_name.replace('_', '-')
-        return f'{prefix}.{final_property_name}'
 
 
 @lru_cache()

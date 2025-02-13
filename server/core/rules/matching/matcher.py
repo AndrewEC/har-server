@@ -15,7 +15,8 @@ from .rules import (
     QueryMatcherRule,
     HeadersMatcherRule,
     CookieMatcherRule,
-    MatcherRule
+    MatcherRule,
+    BodyMatcherRule
 )
 
 
@@ -29,7 +30,8 @@ class RequestMatcher:
         PathMatcherRule,
         QueryMatcherRule,
         HeadersMatcherRule,
-        CookieMatcherRule
+        CookieMatcherRule,
+        BodyMatcherRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

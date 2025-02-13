@@ -1,6 +1,6 @@
 debug:
-  enable-debug-logs: False
-  log-stack-traces: False
+  enable-debug-logs: True
+  log-stack-traces: True
 
 request-matching:
   rules:
@@ -9,9 +9,22 @@ request-matching:
     - headers
     - cookies
     - query-params
+    - json-body
 
 rewrite:
   request:
+    rules:
+      - remove-headers
+    config:
+      removable-headers:
+        - host
+        - accept
+        - accept-encoding
+        - connection
+        - content-length
+        - user-agent
+        - cookie
+  response:
     rules:
       - remove-headers
     config:
