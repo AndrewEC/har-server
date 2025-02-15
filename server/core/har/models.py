@@ -34,9 +34,9 @@ class HarEntryRequest:
         self.method: str = request['method']
         self.url: str = request['url']
         self.path: str = unquote(urlparse(self.url).path)
-        self.query_params: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['queryString']}
-        self.headers: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['headers']}
-        self.cookies: Dict[str, str] = {param['name'].lower(): param['value'].lower() for param in request['cookies']}
+        self.query_params: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['queryString']}
+        self.headers: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['headers']}
+        self.cookies: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['cookies']}
         self.body = _parse_request_body(request)
 
 
@@ -52,9 +52,9 @@ class HarEntryResponse:
 
     def __init__(self, response: Dict):
         self.status: int = response['status']
-        self.headers = {header['name'].lower(): header['value'].lower() for header in response['headers']}
+        self.headers = {header['name'].lower(): header['value'] for header in response['headers']}
         self.content = HarEntryResponseContent(response['content'])
-        self.cookies = {cookie['name'].lower(): cookie['value'].lower() for cookie in response['cookies']}
+        self.cookies = {cookie['name'].lower(): cookie['value'] for cookie in response['cookies']}
 
 
 class HarEntry:
