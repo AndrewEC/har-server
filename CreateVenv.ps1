@@ -11,6 +11,4 @@ if (Test-Path $EnvFolder -PathType Container) {
     python -m venv $EnvFolder `
         && Invoke-Expression "./$EnvFolder/Scripts/Activate.ps1" `
         && pip install -r requirements.txt
-
-    Set-Location ./py-build-utils && pip install . && Set-Location ..
 }
