@@ -5,3 +5,4 @@ htmlcov
 html
 _mutmutbed
 build
+.coverage
