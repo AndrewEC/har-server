@@ -57,8 +57,8 @@ def get_prop_config_path(cls: Type[_T], property_name: str) -> str:
     Gets the full path to the property. The full path is a combination of the
     return value of get_prefix plus the property name.
 
-    This requires the input type, cls, to be decorated with @prefix. If the input
-    type is not then this will raise a NotPrefixedException.
+    This requires the input type, cls, to be decorated with @prefix and for the
+    property_name to exist on the cls type.
 
     :param cls: The prefixed type.
     :param property_name: The name of the property to get the config path to.

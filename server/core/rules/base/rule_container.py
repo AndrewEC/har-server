@@ -80,7 +80,7 @@ class RuleContainer(Generic[_T]):
 
     def has_any_rules_enabled(self) -> bool:
         """
-        Indicates if this contain has at least one rule that has been successfully enabled.
+        Indicates if this container has at least one rule that has been successfully enabled.
 
         :return: True if at least one rule is enabled. Otherwise, false.
         """

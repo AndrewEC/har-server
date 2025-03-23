@@ -9,7 +9,7 @@ class RequestMapperTest(unittest.IsolatedAsyncioTestCase):
     async def test_map_to_har_request(self):
         request = AsyncMock(
             query_params={'query_param_name': 'query_param_value'},
-            headers={'header_name': 'header_value'},
+            headers={'header_name': 'header_value', 'content-type': 'application/json'},
             cookies={'cookie_name': 'cookie_value'},
             url='http://www.test.com',
             method='POST',

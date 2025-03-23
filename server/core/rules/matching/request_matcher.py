@@ -46,6 +46,8 @@ class RequestMatcher:
         This attempts to apply the configured matchers to test the har entry request against the incoming Http request
         to determine if the incoming Http request matches the har entry request.
 
+        This will return false upon any matcher rule not matching the incoming request.
+
         :param entry: The request pulled from a har file to be tested against the incoming Http request.
         :param request: The incoming Http request to be tested against the entry request.
         :return: True if the incoming Http request matching the har entry request. Otherwise, false.

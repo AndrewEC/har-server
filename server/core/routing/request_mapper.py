@@ -1,3 +1,4 @@
+from typing import Dict
 from functools import lru_cache
 import json
 import logging
@@ -15,7 +16,7 @@ class RequestMapper:
     async def map_to_har_request(self, request: Request) -> HarEntryRequest:
         """
         Maps an incoming FastAPI request object to a har entry request. This will copy over the
-        query params, headers, cookies, http method, and url.
+        query params, headers, cookies, http method, json body, and url.
 
         :param request: The incoming FastAPI Http request.
         :return: The har entry request object.
@@ -34,15 +35,20 @@ class RequestMapper:
         }
 
         request_body = await request.body()
-        if request_body is not None and len(request_body) > 0:
+        if request_body is not None and len(request_body) > 0 and self._is_json_request_body(request_options):
             request_options['postData'] = {
                 'text': json.dumps(json.loads(request_body)),
                 'mimeType': 'application/json'
             }
 
-        _log.debug(f'Mapping request body to har entry: [{request_options}]')
+        _log.debug(f'Mapping request options to har entry: [{request_options}]')
 
         return HarEntryRequest(request_options)
+
+    def _is_json_request_body(self, request: Dict[str, str]) -> bool:
+        headers = request['headers']
+        content_type_header = next((header for header in headers if 'content-type' == header['name'].lower()), None)
+        return content_type_header is not None and 'application/json' in content_type_header['value']
 
 
 @lru_cache()
