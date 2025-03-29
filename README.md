@@ -8,10 +8,10 @@ To clone the project and the required submodules run:
 > git clone --recurse-submodules https://github.com/AndrewEC/har-server.git
 
 ## Starting the Server
-To run the server first execute the `CreateVenv.ps1` script. This will create a virtual environment, install
+To run the server first execute the `RunScript.ps1 Install` script. This will create a virtual environment, install
 required dependencies, and activate said virtual environment.
 
-After running the `CreateVenv.ps1` script the server can be launched using:
+After running the `RunScript.ps1 Install` script the server can be launched using:
 > python -m server "<path_to_har_folder>"
 
 where `<path_to_har_folder>` should be replaced with the relative or absolute path to the folder where the .har files
@@ -80,8 +80,7 @@ response entry and will only return the headers automatically set by the FastAPI
 
 ## Quality Metrics
 
-Various quality metrics can be gathered by first running the `CreateVenv.ps1` script then by executing the following:
-> python build.py
+Various quality metrics can be gathered by running the `RunScript.ps1 All` script. 
 
 This build script will ensure the proper virtual environment is active, install dependencies, run unit tests
 with code coverage assertions, flake8, and perform dependency audits.
