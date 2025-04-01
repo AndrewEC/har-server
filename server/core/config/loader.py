@@ -10,7 +10,7 @@ from fastapi import Depends
 from .functions import make_debug_string
 from .prefix import get_prop_config_path
 from .post_construct import invoke_post_construct
-from .parser import ConfigParser, with_config_parser
+from .config_parser import ConfigParser, with_config_parser
 
 
 _T = TypeVar('_T', bound=BaseModel)

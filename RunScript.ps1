@@ -1,5 +1,6 @@
 param(
     [ValidateSet(
+        "Activate",
         "All",
         "Audit",
         "Flake",

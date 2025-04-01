@@ -1,6 +1,5 @@
 from typing import Dict
 from functools import lru_cache
-import json
 import logging
 
 from fastapi import Request
@@ -37,7 +36,7 @@ class RequestMapper:
         request_body = await request.body()
         if request_body is not None and len(request_body) > 0 and self._is_json_request_body(request_options):
             request_options['postData'] = {
-                'text': json.dumps(json.loads(request_body)),
+                'text': request_body,
                 'mimeType': 'application/json'
             }
 

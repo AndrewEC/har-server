@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import Mock, patch, AsyncMock
 
 from server.core.config import ConfigLoader
-from server.core.config.models import RequestRewriteConfig, ExclusionConfig
 from server.core.rules.matching import RequestMatcher
 from server.core.rules.rewrite.request import RequestRewriter
 from server.core.routing.request_mapper import RequestMapper
@@ -28,42 +27,47 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
                                           mock_exclusion_filter: ExclusionFilter,
                                           mock_request_matcher: RequestMatcher,
                                           mock_config_loader: ConfigLoader):
+        pre_apply_values = [True, False]
+        for pre_apply_value in pre_apply_values:
+            with self.subTest(pre_apply=pre_apply_value):
 
-        mock_config_loader.read_config = Mock(side_effect=[ExclusionConfig(), RequestRewriteConfig()])
+                mock_rewrite_config = Mock(pre_apply=pre_apply_value)
+                mock_exclusion_config = Mock(pre_apply=pre_apply_value)
+                mock_config_loader.read_config = Mock(side_effect=[mock_exclusion_config, mock_rewrite_config])
 
-        incoming_request = Mock()
-        mock_request_mapper.map_to_har_request = AsyncMock(return_value=incoming_request)
+                incoming_request = Mock()
+                mock_request_mapper.map_to_har_request = AsyncMock(return_value=incoming_request)
 
-        rewritten_incoming_request = Mock()
-        rewritten_entry_request = Mock()
-        mock_request_rewriter.apply_browser_request_rewrite_rules = Mock(return_value=rewritten_incoming_request)
-        mock_request_rewriter.apply_entry_request_rewrite_rules = Mock(return_value=rewritten_entry_request)
+                rewritten_incoming_request = Mock()
+                rewritten_entry_request = Mock()
+                mock_request_rewriter.apply_browser_request_rewrite_rules = Mock(return_value=rewritten_incoming_request)
+                mock_request_rewriter.apply_entry_request_rewrite_rules = Mock(return_value=rewritten_entry_request)
 
-        mock_exclusion_filter.should_exclude_entry = Mock(return_value=False)
+                mock_exclusion_filter.should_exclude_entry = Mock(return_value=False)
 
-        har_entry = Mock(request=Mock())
-        mock_har_parser.get_har_file_contents = Mock(return_value=[Mock(entries=[har_entry])])
+                har_entry_request = Mock()
+                har_entry = Mock(request=har_entry_request)
+                mock_har_parser.get_har_file_contents = Mock(return_value=[Mock(entries=[har_entry])])
 
-        mock_request_matcher.do_requests_match = Mock(return_value=True)
+                mock_request_matcher.do_requests_match = Mock(return_value=True)
 
-        sut = RouteMap(
-            mock_har_parser,
-            mock_request_rewriter,
-            mock_request_matcher,
-            mock_exclusion_filter,
-            mock_request_mapper,
-            mock_config_loader
-        )
+                sut = RouteMap(
+                    mock_har_parser,
+                    mock_request_rewriter,
+                    mock_request_matcher,
+                    mock_exclusion_filter,
+                    mock_request_mapper,
+                    mock_config_loader
+                )
 
-        request = Mock()
-        actual = await sut.find_entry_for_request(request)
+                request = Mock()
+                actual = await sut.find_entry_for_request(request)
 
-        self.assertIsNotNone(actual)
+                self.assertIsNotNone(actual)
 
-        mock_har_parser.get_har_file_contents.assert_called_once()
-        mock_request_mapper.map_to_har_request.assert_called_once_with(request)
-        mock_request_rewriter.apply_browser_request_rewrite_rules.assert_called_once_with(incoming_request)
-        mock_request_rewriter.apply_entry_request_rewrite_rules.assert_called_once_with(har_entry.request)
-        mock_exclusion_filter.should_exclude_entry.assert_called_once_with(har_entry)
-        mock_request_matcher.do_requests_match.assert_called_once_with(rewritten_entry_request, rewritten_incoming_request)
-
+                mock_har_parser.get_har_file_contents.assert_called_once()
+                mock_request_mapper.map_to_har_request.assert_called_once_with(request)
+                mock_request_rewriter.apply_browser_request_rewrite_rules.assert_called_once_with(incoming_request)
+                mock_exclusion_filter.should_exclude_entry.assert_called_once_with(har_entry)
+                mock_request_matcher.do_requests_match.assert_called_once_with(rewritten_entry_request, rewritten_incoming_request)
+                mock_request_rewriter.apply_entry_request_rewrite_rules.assert_called_once_with(har_entry_request)

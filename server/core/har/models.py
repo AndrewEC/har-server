@@ -5,20 +5,16 @@ from urllib.parse import unquote, urlparse
 import json
 
 
-def _get_or_none(options: Dict, key: str) -> Any | None:
-    return options[key] if key in options else None
-
-
 def _parse_request_body(request: Dict) -> Dict | None:
-    post_data = _get_or_none(request, 'postData')
+    post_data = request.get('postData')
     if post_data is None:
         return None
 
-    mimetype = _get_or_none(post_data, 'mimeType')
+    mimetype = post_data.get('mimeType')
     if mimetype is None or mimetype != 'application/json':
         return
 
-    text = _get_or_none(post_data, 'text')
+    text = post_data.get('text')
     return json.loads(text) if text is not None else None
 
 
@@ -43,9 +39,9 @@ class HarEntryRequest:
 class HarEntryResponseContent:
 
     def __init__(self, content: Dict):
-        self.mime_type: str | None = _get_or_none(content, 'mimeType')
-        self.encoding: str | None = _get_or_none(content, 'encoding')
-        self.text: str | None = _get_or_none(content, 'text')
+        self.mime_type: str | None = content.get('mimeType')
+        self.encoding: str | None = content.get('encoding')
+        self.text: str | None = content.get('text')
 
 
 class HarEntryResponse:
