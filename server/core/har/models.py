@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any
+from typing import Dict
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 import json

@@ -14,7 +14,7 @@ _REMOVABLE_PARAM = 'removable-param'
 _NON_REMOVABLE_PARAM = 'non-removable-param'
 
 
-class RequestRewriteRulesTest(unittest.TestCase):
+class RequestRewriteRuleTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_query_param_from_entry_request(self, mock_config_loader: ConfigLoader):

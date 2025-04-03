@@ -7,7 +7,7 @@ from server.core.config import with_config_loader, with_config_parser
 from server.core.config.models import Debug
 from server.core.routing import RouteMap, with_route_map
 
-from .transformer import with_response_transformer, ResponseTransformer
+from .response_transformer import with_response_transformer, ResponseTransformer
 from .lifespan import lifespan
 
 

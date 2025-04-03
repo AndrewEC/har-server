@@ -10,7 +10,7 @@ from server.core.config.models import ResponseRewriteRules
 from server.core.har import HarEntryResponse
 from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .rules import (ResponseContentUrlResponseRewriteRules, RemoveResponseHeaderRewriteRule,
+from .rules import (RewriteUrlResponseRewriteRule, RemoveHeaderResponseRewriteRule,
                     RemoveCookiesResponseRewriteRule, ResponseRewriteRule)
 
 
@@ -20,8 +20,8 @@ _log = logging.getLogger(__file__)
 class ResponseRewriter:
 
     _RESPONSE_REWRITE_RULES = [
-        ResponseContentUrlResponseRewriteRules,
-        RemoveResponseHeaderRewriteRule,
+        RewriteUrlResponseRewriteRule,
+        RemoveHeaderResponseRewriteRule,
         RemoveCookiesResponseRewriteRule
     ]
 

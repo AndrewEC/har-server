@@ -10,7 +10,7 @@ from .base import ResponseRewriteRule
 _log = logging.getLogger(__file__)
 
 
-class RemoveResponseHeaderRewriteRule(ResponseRewriteRule):
+class RemoveHeaderResponseRewriteRule(ResponseRewriteRule):
 
     def __init__(self):
         self._removable = []

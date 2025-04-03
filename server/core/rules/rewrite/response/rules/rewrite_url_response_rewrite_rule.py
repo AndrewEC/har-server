@@ -16,7 +16,7 @@ _log = logging.getLogger(__file__)
 _LOCALHOST = 'http://localhost:8080'
 
 
-class ResponseContentUrlResponseRewriteRules(ResponseRewriteRule):
+class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
 
     def __init__(self):
         self._excluded_domains = []

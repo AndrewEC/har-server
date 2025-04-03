@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from server.core.web.transformer import ResponseTransformer
+from server.core.web.response_transformer import ResponseTransformer
 from server.core.rules.rewrite.response import ResponseRewriter
 
 from server.tests.util import fully_qualified_name

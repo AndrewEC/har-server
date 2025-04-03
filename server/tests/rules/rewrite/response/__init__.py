@@ -1,3 +1,3 @@
-from .response_content_url_test import ResponseContentUrlTest
+from .rewrite_url_response_rewrite_rule_test import RewriteUrlResponseRewriteRuleTest
 from .response_rewriter_test import ResponseRewriterTest
-from .response_rules_test import ResponseRewriteRulesTest
+from .response_rewrite_rule_test import ResponseRewriteRuleTest

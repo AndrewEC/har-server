@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 from server.core.config.models import ResponseRuleConfig
 from server.core.config import ConfigLoader
-from server.core.rules.rewrite.response.rules import ResponseContentUrlResponseRewriteRules
+from server.core.rules.rewrite.response.rules import RewriteUrlResponseRewriteRule
 
 from server.tests.util import fully_qualified_name
 
@@ -12,7 +12,7 @@ _CONTENT_TEMPLATE = 'Replace url ({}) with localhost.'
 _LOCALHOST = 'http://localhost:8080'
 
 
-class ResponseContentUrlTest(unittest.TestCase):
+class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls(self, mock_config_loader: ConfigLoader):
@@ -32,7 +32,7 @@ class ResponseContentUrlTest(unittest.TestCase):
                 mock_config_loader.read_config.reset_mock()
 
                 response = Mock(content=Mock(text=_CONTENT_TEMPLATE.format(test_case)))
-                rule = ResponseContentUrlResponseRewriteRules()
+                rule = RewriteUrlResponseRewriteRule()
                 rule.initialize(mock_config_loader)
                 actual = rule.rewrite_response(response)
 
@@ -65,7 +65,7 @@ class ResponseContentUrlTest(unittest.TestCase):
                 expected = _CONTENT_TEMPLATE.format(test_case)
                 response = Mock(content=Mock(text=expected))
 
-                rule = ResponseContentUrlResponseRewriteRules()
+                rule = RewriteUrlResponseRewriteRule()
                 rule.initialize(mock_config_loader)
                 actual = rule.rewrite_response(response)
 

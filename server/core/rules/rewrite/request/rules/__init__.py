@@ -1,4 +1,4 @@
-from .remove_cookies_rule import RemoveCookieRequestRewriteRule
-from .remove_query_param_rule import RemoveQueryParamsRequestRewriteRule
-from .remove_request_header_rule import RemoveRequestHeaderRequestRewriteRule
+from .remove_cookie_request_rewrite_rule import RemoveCookieRequestRewriteRule
+from .remove_query_params_request_rewrite_rule import RemoveQueryParamsRequestRewriteRule
+from .remove_request_header_request_rewrite_rule import RemoveRequestHeaderRequestRewriteRule
 from .base import RequestRewriteRule

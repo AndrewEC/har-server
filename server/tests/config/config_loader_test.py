@@ -31,7 +31,7 @@ class _InvalidTestModel:
     pass
 
 
-class LoaderTests(unittest.TestCase):
+class ConfigLoaderTests(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigParser))
     def test_read_config(self, mock_config_parser: ConfigParser):

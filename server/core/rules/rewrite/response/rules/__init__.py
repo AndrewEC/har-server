@@ -1,4 +1,4 @@
-from .remove_cookies_rule import RemoveCookiesResponseRewriteRule
-from .remove_response_header_rule import RemoveResponseHeaderRewriteRule
-from .rewrite_response_content_urls import ResponseContentUrlResponseRewriteRules
+from .remove_cookies_response_rewrite_rule import RemoveCookiesResponseRewriteRule
+from .remove_header_response_rewrite_rule import RemoveHeaderResponseRewriteRule
+from .rewrite_url_response_rewrite_rule import RewriteUrlResponseRewriteRule
 from .base import ResponseRewriteRule

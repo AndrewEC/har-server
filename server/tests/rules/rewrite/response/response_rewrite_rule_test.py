@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 from server.core.config import ConfigLoader
 from server.core.config.models import ResponseRuleConfig
-from server.core.rules.rewrite.response.rules import RemoveResponseHeaderRewriteRule, RemoveCookiesResponseRewriteRule
+from server.core.rules.rewrite.response.rules import RemoveHeaderResponseRewriteRule, RemoveCookiesResponseRewriteRule
 
 from server.tests.util import fully_qualified_name
 
@@ -12,7 +12,7 @@ _REMOVABLE_NAME = 'removable-name'
 _NON_REMOVABLE_NAME = 'non-removable-name'
 
 
-class ResponseRewriteRulesTest(unittest.TestCase):
+class ResponseRewriteRuleTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_cookies_from_response(self, mock_config_loader: ConfigLoader):
@@ -41,7 +41,7 @@ class ResponseRewriteRulesTest(unittest.TestCase):
             _NON_REMOVABLE_NAME: 'non-removable-value'
         })
 
-        rule = RemoveResponseHeaderRewriteRule()
+        rule = RemoveHeaderResponseRewriteRule()
         rule.initialize(mock_config_loader)
         actual = rule.rewrite_response(response)
 
