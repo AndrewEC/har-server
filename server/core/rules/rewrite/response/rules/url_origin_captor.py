@@ -67,8 +67,8 @@ class UrlOriginCaptor:
                             'Use a new instance of _UrlOriginCaptor instead.')
         self._run_once = True
 
-        for index, value in enumerate(value):
-            self._current_capture_function(value, index)
+        for index, character in enumerate(value):
+            self._current_capture_function(character, index)
         return self
 
     def get_capture_results(self) -> List[CapturedOrigin]:

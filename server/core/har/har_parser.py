@@ -45,7 +45,7 @@ class HarParser:
         parsed = []
         har_root_folder = get_root_path()
         _log.info(f'Parsing har files from folder: [{har_root_folder}]')
-        for root, dirs, files in os.walk(har_root_folder):
+        for root, _, files in os.walk(har_root_folder):
             for file_name in files:
                 if not file_name.endswith('.har'):
                     _log.info(f'Skipping file since it does not have a .har extension: [{file_name}]')

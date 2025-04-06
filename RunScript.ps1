@@ -11,12 +11,7 @@ param(
     [string]$ScriptAction
 )
 
-. ./build-scripts/Activate.ps1
-. ./build-scripts/Audit.ps1
-. ./build-scripts/Flake.ps1
-. ./build-scripts/Other.ps1
-. ./build-scripts/Install.ps1
-. ./build-scripts/Test.ps1
+Import-Module ./PyBuildScripts
 
 Invoke-ActivateScript
 
