@@ -28,7 +28,7 @@ class ResponseTransformerTest(unittest.TestCase):
 
         self.assertEqual(rewritten_response.status, actual.status_code)
         self.assertEqual(rewritten_response.content.mime_type, actual.media_type)
-        self.assertEqual(rewritten_response.content.text, actual.body.decode('utf-8'))
+        self.assertEqual(rewritten_response.content.text, actual.body.decode('utf-8')) # type: ignore
 
         for header in rewritten_response.headers:
             self.assertIn(header, actual.headers)

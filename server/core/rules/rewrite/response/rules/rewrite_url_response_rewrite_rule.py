@@ -19,7 +19,7 @@ _LOCALHOST = 'http://localhost:8080'
 class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
 
     def __init__(self):
-        self._excluded_domains = []
+        self._excluded_domains: List[str] = []
 
     def get_name(self) -> str:
         return 'urls-in-response'
@@ -32,7 +32,7 @@ class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
         if content is None or len(content) == 0:
             return response
 
-        capture_results = UrlOriginCaptor().capture_origin_locations(content).get_capture_results()
+        capture_results = UrlOriginCaptor(content).capture_origin_locations().get_capture_results()
         if len(capture_results) == 0:
             return response
 

@@ -76,7 +76,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 )
 
                 rule = InvalidSizeExclusionRule()
-                rule.initialize(None)
+                rule.initialize(None) # type: ignore
                 actual = rule.should_filter_out(entry)
                 
                 self.assertEqual(test_case[0], actual)

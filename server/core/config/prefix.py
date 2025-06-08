@@ -12,7 +12,7 @@ class InvalidPropertyException(Exception):
 
     _MESSAGE_TEMPLATE = 'Type [{}] does not have requested property [{}]'
 
-    def __init__(self, cls: Type, property_name: str):
+    def __init__(self, cls: Type[Any], property_name: str):
         super().__init__(InvalidPropertyException._MESSAGE_TEMPLATE.format(cls, property_name))
 
 
@@ -25,7 +25,7 @@ class NotPrefixedException(Exception):
         super().__init__(NotPrefixedException._MESSAGE_TEMPLATE.format(type(cls).__name__))
 
 
-def prefix(path: str) -> Callable:
+def prefix(path: str) -> Callable[[Any], Any]:
     """
     Adds a __property_path_prefix__ property the decorated type with the value
     equal to the input path.
@@ -39,7 +39,7 @@ def prefix(path: str) -> Callable:
     return wrap
 
 
-def get_prefix(cls: Type) -> str | None:
+def get_prefix(cls: Type[Any]) -> str | None:
     """
     Returns the value of the __property_path_prefix__ property if said property
     is present on the input type, otherwise None.

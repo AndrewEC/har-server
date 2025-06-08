@@ -20,7 +20,11 @@ class ResponseTransformer:
             return self._map_text_response(response)
 
     def _map_base64_response(self, response: HarEntryResponse) -> Response:
-        content = base64.b64decode(response.content.text)
+        if (response.content.text is not None):
+            content = base64.b64decode(response.content.text)
+        else:
+            content = ''
+
         return Response(
             content=content,
             status_code=response.status,

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 from pathlib import Path
 
 import unittest
@@ -58,7 +58,7 @@ class HarParserTest(unittest.TestCase):
             "query-param-name": "query-param-value"
         }, query_params)
 
-        request_body = request.body
+        request_body: Dict[Any, Any] = request.body # type: ignore
         self.assertIsNotNone(request_body)
 
         request_body_name = request_body.get('name')

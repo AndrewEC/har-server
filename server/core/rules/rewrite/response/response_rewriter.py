@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List, Type
 from functools import lru_cache
 import copy
 import logging
@@ -10,8 +10,12 @@ from server.core.config.models import ResponseRewriteRules
 from server.core.har import HarEntryResponse
 from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .rules import (RewriteUrlResponseRewriteRule, RemoveHeaderResponseRewriteRule,
-                    RemoveCookiesResponseRewriteRule, ResponseRewriteRule)
+from .rules import (
+    RewriteUrlResponseRewriteRule,
+    RemoveHeaderResponseRewriteRule,
+    RemoveCookiesResponseRewriteRule,
+    ResponseRewriteRule
+)
 
 
 _log = logging.getLogger(__file__)
@@ -19,7 +23,7 @@ _log = logging.getLogger(__file__)
 
 class ResponseRewriter:
 
-    _RESPONSE_REWRITE_RULES = [
+    _RESPONSE_REWRITE_RULES: List[Type[ResponseRewriteRule]] = [
         RewriteUrlResponseRewriteRule,
         RemoveHeaderResponseRewriteRule,
         RemoveCookiesResponseRewriteRule

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 from functools import lru_cache
 import logging
 import copy
@@ -14,10 +14,10 @@ _log = logging.getLogger(__file__)
 class ConfigParser:
 
     def __init__(self):
-        self._cached_contents = None
+        self._cached_contents: Dict[Any, Any] | None = None
         self._lock = Lock()
 
-    def parse_config_yml(self) -> Dict | None:
+    def parse_config_yml(self) -> Dict[Any, Any] | None:
         """
         Attempts to parse the yml configuration file.
 
@@ -31,7 +31,7 @@ class ConfigParser:
         with self._lock:
             return self._parse_config_yml()
 
-    def _parse_config_yml(self) -> Dict | None:
+    def _parse_config_yml(self) -> Dict[Any, Any] | None:
         if self._cached_contents is not None:
             return copy.deepcopy(self._cached_contents)
 

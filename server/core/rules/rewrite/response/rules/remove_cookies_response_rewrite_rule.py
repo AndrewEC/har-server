@@ -1,4 +1,4 @@
-import logging
+from typing import List
 
 from server.core.har import HarEntryResponse
 from server.core.config import ConfigLoader, get_prop_config_path
@@ -8,13 +8,10 @@ from server.core.rules.base import MissingConfigPropertyException
 from .base import ResponseRewriteRule
 
 
-_log = logging.getLogger(__file__)
-
-
 class RemoveCookiesResponseRewriteRule(ResponseRewriteRule):
 
     def __init__(self):
-        self._removable = []
+        self._removable: List[str] = []
 
     def get_name(self) -> str:
         return 'remove-cookies'

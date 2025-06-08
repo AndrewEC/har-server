@@ -25,18 +25,18 @@ class NonCallablePostConstructMethod(InvalidPostConstructMethod):
 
     _SUB_MESSAGE = 'A post_construct method was found but is not callable. It may not be a method.'
 
-    def __init__(self, name, configurable: Any):
+    def __init__(self, name: str, configurable: Any):
         super().__init__(NonCallablePostConstructMethod._SUB_MESSAGE, name, configurable)
 
 
-def post_construct(name: str) -> Callable:
-    def wrap(cls: Type) -> Type:
+def post_construct(name: str) -> Callable[[Any], Any]:
+    def wrap(cls: Type[Any]) -> Type[Any]:
         setattr(cls, _POST_CONSTRUCT_PROPERTY, name)
         return cls
     return wrap
 
 
-def _get_post_construct_method_name(cls: Type) -> str | None:
+def _get_post_construct_method_name(cls: Type[Any]) -> str | None:
     if not hasattr(cls, _POST_CONSTRUCT_PROPERTY):
         return None
     return getattr(cls, _POST_CONSTRUCT_PROPERTY)

@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import Dict
+from typing import Dict, Any
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 import json
 
 
-def _parse_request_body(request: Dict) -> Dict | None:
+def _parse_request_body(request: Dict[Any, Any]) -> Dict[Any, Any] | None:
     post_data = request.get('postData')
     if post_data is None:
         return None
@@ -26,7 +26,7 @@ class HarParseError(Exception):
 
 class HarEntryRequest:
 
-    def __init__(self, request: Dict):
+    def __init__(self, request: Dict[Any, Any]):
         self.method: str = request['method']
         self.url: str = request['url']
         self.path: str = unquote(urlparse(self.url).path)
@@ -38,7 +38,7 @@ class HarEntryRequest:
 
 class HarEntryResponseContent:
 
-    def __init__(self, content: Dict):
+    def __init__(self, content: Dict[Any, Any]):
         self.mime_type: str | None = content.get('mimeType')
         self.encoding: str | None = content.get('encoding')
         self.text: str | None = content.get('text')
@@ -46,7 +46,7 @@ class HarEntryResponseContent:
 
 class HarEntryResponse:
 
-    def __init__(self, response: Dict):
+    def __init__(self, response: Dict[Any, Any]):
         self.status: int = response['status']
         self.headers = {header['name'].lower(): header['value'] for header in response['headers']}
         self.content = HarEntryResponseContent(response['content'])
@@ -55,7 +55,7 @@ class HarEntryResponse:
 
 class HarEntry:
 
-    def __init__(self, parent: HarFileContent, entry: Dict):
+    def __init__(self, parent: HarFileContent, entry: Dict[Any, Any]):
         self.parent = parent
         self.request = HarEntryRequest(entry['request'])
         self.response = HarEntryResponse(entry['response'])
@@ -63,7 +63,7 @@ class HarEntry:
 
 class HarFileContent:
 
-    def __init__(self, file: Path, contents: Dict):
+    def __init__(self, file: Path, contents: Dict[Any, Any]):
         self.source_file = file
         self.title: str = contents['log']['pages'][0]['title']
         self.entries = [HarEntry(self, entry) for entry in contents['log']['entries']]

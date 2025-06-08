@@ -27,10 +27,6 @@ class _TestModelWithPostConstruct(BaseModel):
         self.called = True
 
 
-class _InvalidTestModel:
-    pass
-
-
 class ConfigLoaderTests(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigParser))

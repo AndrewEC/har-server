@@ -11,4 +11,4 @@ def set_root_path(path: Path | None):
 
 def get_root_path() -> Path:
     global _root_path
-    return _root_path
+    return _root_path  # type: ignore

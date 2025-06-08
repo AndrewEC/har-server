@@ -1,4 +1,6 @@
+from typing import Any, List, Type
 from pathlib import Path
+from types import TracebackType
 
 from server.core.config import set_root_path, get_root_path
 from server.core.har import with_har_parser
@@ -9,7 +11,7 @@ from server.core.rules.rewrite.response import with_response_rewriter
 from server.core.rules.rewrite.request import with_request_rewriter
 
 
-_CACHES = [
+_CACHES: List[Any] = [
     with_har_parser,
     with_config_loader,
     with_exclusion_filter,
@@ -31,7 +33,7 @@ class TestData:
     def __enter__(self):
         set_root_path(self._test_data_path)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None):
         set_root_path(self._last_root_path)
         for cache in _CACHES:
             cache.cache_clear()

@@ -16,15 +16,17 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls(self, mock_config_loader: ConfigLoader):
+
         mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=[]))
 
         test_cases = [
-            'https://www.google.ca',
-            'https://www.google.ca:443',
-            'http://www.test.com',
-            'http://www.testing.com:443',
+            'https://www.mock.ca',
+            'https://www.mock.ca:443',
+            'http://www.mock.com',
+            'http://www.mock.com:443',
             '//www.mock.com',
-            '//www.mock.com:443'
+            '//www.mock.com:443',
+            'http://subdomain.mock.com'
         ]
 
         for test_case in test_cases:
@@ -42,7 +44,8 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
                 mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
 
     @patch(fully_qualified_name(ConfigLoader))
-    def test_rewrite_response_content_urls_negative_cases(self, mock_config_loader: ConfigLoader):
+    def test_rewrite_response_content_urls_replaces_nothing_when_no_origin_is_found(self, mock_config_loader: ConfigLoader):
+
         mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=['http://www.google.com']))
 
         test_cases = [
@@ -53,9 +56,8 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
             'https://.',
             'http://:',
             'https://:',
-            'http://wwwgooglecom',
-            'http://www.google.com:',
-            'httpwwwgooglecom',
+            'http://wwwmockcom',
+            'httpwwwmockcom',
         ]
 
         for test_case in test_cases:

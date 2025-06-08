@@ -1,3 +1,4 @@
+from typing import List, Tuple, Dict
 import unittest
 from unittest.mock import Mock
 
@@ -29,7 +30,7 @@ class MatchRulesTest(unittest.TestCase):
                 self.assertEqual(test_case[0], actual)
 
     def test_do_cookies_match(self):
-        test_cases = [
+        test_cases: List[Tuple[bool, Dict[str, str], Dict[str, str]]] = [
             (True, {}, {}),
             (True, {'matching-name': 'matching-value'}, {'matching-name': 'matching-value'}),
             (False, {'matching-name': 'matching-value'}, {}),
@@ -62,7 +63,7 @@ class MatchRulesTest(unittest.TestCase):
                 self.assertEqual(test_case[0], actual)
 
     def test_do_headers_match(self):
-        test_cases = [
+        test_cases: List[Tuple[bool, Dict[str, str], Dict[str, str]]] = [
             (True, {}, {}),
             (True, {'matching-name': 'matching-value'}, {'matching-name': 'matching-value'}),
             (False, {'matching-name': 'matching-value'}, {}),
@@ -80,7 +81,7 @@ class MatchRulesTest(unittest.TestCase):
                 self.assertEqual(test_case[0], actual)
 
     def test_do_query_params_match(self):
-        test_cases = [
+        test_cases: List[Tuple[bool, Dict[str, str], Dict[str, str]]] = [
             (True, {}, {}),
             (True, {'matching-name': 'matching-value'}, {'matching-name': 'matching-value'}),
             (False, {'matching-name': 'matching-value'}, {}),
@@ -98,7 +99,7 @@ class MatchRulesTest(unittest.TestCase):
                 self.assertEqual(test_case[0], actual)
 
     def test_do_bodies_match(self):
-        test_cases = [
+        test_cases: List[Tuple[bool, Dict[str, str] | None, Dict[str, str] | None]] = [
             (True, {}, {}),
             (True, None, None),
             (False, None, {}),

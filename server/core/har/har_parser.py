@@ -16,7 +16,7 @@ _log = logging.getLogger(__file__)
 class HarParser:
 
     def __init__(self):
-        self._har_file_contents = None
+        self._har_file_contents: List[HarFileContent] | None = None
         self._lock = Lock()
 
     def get_har_file_contents(self) -> List[HarFileContent]:
@@ -42,7 +42,7 @@ class HarParser:
         if self._har_file_contents is not None:
             return self._har_file_contents
 
-        parsed = []
+        parsed: List[HarFileContent] = []
         har_root_folder = get_root_path()
         _log.info(f'Parsing har files from folder: [{har_root_folder}]')
         for root, _, files in os.walk(har_root_folder):

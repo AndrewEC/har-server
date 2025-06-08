@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List, Type
 from functools import lru_cache
 from enum import Enum
 import copy
@@ -11,8 +11,12 @@ from server.core.config.models import RequestRewriteRules
 from server.core.har import HarEntryRequest
 from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .rules import (RemoveRequestHeaderRequestRewriteRule, RemoveQueryParamsRequestRewriteRule,
-                    RemoveCookieRequestRewriteRule, RequestRewriteRule)
+from .rules import (
+    RemoveRequestHeaderRequestRewriteRule,
+    RemoveQueryParamsRequestRewriteRule,
+    RemoveCookieRequestRewriteRule,
+    RequestRewriteRule
+)
 
 
 _log = logging.getLogger(__file__)
@@ -25,7 +29,7 @@ class ModificationType(Enum):
 
 class RequestRewriter:
 
-    _REQUEST_REWRITE_RULES = [
+    _REQUEST_REWRITE_RULES: List[Type[RequestRewriteRule]] = [
         RemoveQueryParamsRequestRewriteRule,
         RemoveRequestHeaderRequestRewriteRule,
         RemoveCookieRequestRewriteRule

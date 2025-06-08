@@ -1,4 +1,4 @@
-import logging
+from typing import List
 
 from server.core.har import HarEntry
 from server.core.config import ConfigLoader, get_prop_config_path
@@ -8,13 +8,10 @@ from server.core.rules.base import MissingConfigPropertyException
 from .base import ExclusionRule
 
 
-_log = logging.getLogger(__file__)
-
-
 class BadStatusExclusionRule(ExclusionRule):
 
     def __init__(self):
-        self._statuses = []
+        self._statuses: List[int] = []
 
     def get_name(self) -> str:
         return 'responses-with-status'

@@ -20,8 +20,8 @@ _log = logging.getLogger(__file__)
 class ConfigLoader:
 
     def __init__(self, config_parser: ConfigParser):
-        self._lock = Lock()
-        self._configs: Dict[Type, Any] = {}
+        self._lock: Lock = Lock()
+        self._configs: Dict[Type[Any], Any] = {}
         self._parsed_yml = config_parser.parse_config_yml()
 
     def read_config(self, model_type: Type[_T]) -> _T:

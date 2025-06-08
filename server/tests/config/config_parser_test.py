@@ -1,3 +1,4 @@
+from typing import Dict, Any
 import unittest
 from pathlib import Path
 
@@ -12,8 +13,9 @@ class ConfigParserTests(unittest.TestCase):
     def test_parse_config_yml(self):
         set_root_path(Path(__file__).absolute().parent)
 
-        config = ConfigParser().parse_config_yml()
+        config: Dict[Any, Any] = ConfigParser().parse_config_yml() # type: ignore
 
+        self.assertIsNotNone(config)
         self.assertIn(ConfigParserTests._EXPECTED_NAME, config)
         self.assertEqual(ConfigParserTests._EXPECTED_VALUE, config[ConfigParserTests._EXPECTED_NAME])
 

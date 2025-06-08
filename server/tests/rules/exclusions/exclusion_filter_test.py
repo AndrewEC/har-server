@@ -22,8 +22,6 @@ class ExclusionFilterTest(unittest.TestCase):
 
         for result in [True, False]:
             with self.subTest(should_filter=result):
-                mock_config_loader.read_config.reset_mock()
-
                 mock_rule = Mock(
                     get_name=Mock(return_value=_RULE_NAME),
                     should_filter_out=Mock(return_value=result)
