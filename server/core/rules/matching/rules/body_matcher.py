@@ -11,7 +11,7 @@ _log = logging.getLogger(__file__)
 class BodyMatcherRule(MatcherRule):
 
     def get_name(self) -> str:
-        return 'json-body'
+        return 'body'
 
     def initialize(self, config_loader: ConfigLoader):
         pass

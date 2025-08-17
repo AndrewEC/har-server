@@ -34,7 +34,9 @@ class RouteMap:
         self._exclusion_filter = exclusion_filter
         self._request_mapper = request_mapper
 
-        self._pre_apply_exclusion_rules = config_loader.read_config(ExclusionConfig).pre_apply
+        exclusion_config = config_loader.read_config(ExclusionConfig)
+        self._pre_apply_exclusion_rules = exclusion_config.pre_apply
+        self._exclude_duplicates = exclusion_config.exclude_duplicate_requests
         self._pre_apply_rewrite_rules = config_loader.read_config(RequestRewriteConfig).pre_apply
 
         self._entries: List[HarEntry] = self._flatten_entries(har_parser.get_har_file_contents())
@@ -51,10 +53,25 @@ class RouteMap:
             _log.info('Pre-rewriting entry requests.')
             for entry in entries:
                 entry.request = self._request_rewriter.apply_entry_request_rewrite_rules(entry.request)
+        
+        if self._exclude_duplicates:
+            entries = self._remove_duplicate_entries(entries)
 
         _log.info(f'[{len(entries)}] har entries are available.')
 
         return entries
+    
+    def _remove_duplicate_entries(self, entries: List[HarEntry]) -> List[HarEntry]:
+        _log.info('Excluding duplicate entries by request.')
+
+        indexes_to_exclude: List[int] = []
+        for i in range(len(entries)):
+            for j in range(i + 1, len(entries)):
+                if self._request_matcher.do_requests_match(entries[i].request, entries[j].request):
+                    indexes_to_exclude.append(j)
+                    break
+        
+        return [value for i, value in enumerate(entries) if i not in indexes_to_exclude]
 
     async def find_entry_for_request(self, request: Request) -> HarEntry | None:
         """

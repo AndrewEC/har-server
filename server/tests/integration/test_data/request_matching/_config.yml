@@ -9,7 +9,7 @@ request-matching:
     - headers
     - cookies
     - query-params
-    - json-body
+    - body
 
 rewrite:
   request:

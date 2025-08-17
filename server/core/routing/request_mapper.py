@@ -1,6 +1,7 @@
 from typing import Dict, List, Any
 from functools import lru_cache
 import logging
+import urllib.parse
 
 from fastapi import Request
 
@@ -11,6 +12,9 @@ _log = logging.getLogger(__file__)
 
 
 class RequestMapper:
+
+    _APPLICATION_JSON_CONTENT_TYPE = 'application/json'
+    _FORM_URL_ENCODED_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
     async def map_to_har_request(self, request: Request) -> HarEntryRequest:
         """
@@ -34,20 +38,43 @@ class RequestMapper:
         }
 
         request_body = await request.body()
-        if len(request_body) > 0 and self._is_json_request_body(request_options):
-            request_options['postData'] = {
-                'text': request_body,
-                'mimeType': 'application/json'
-            }
+        if len(request_body) > 0:
+            if self._has_json_body(request_options):
+                request_options['postData'] = {
+                    'text': request_body,
+                    'mimeType': RequestMapper._APPLICATION_JSON_CONTENT_TYPE
+                }
+            elif self._has_form_url_encoded_body(request_options):
+                request_options['postData'] = {
+                    'params': self._parse_form_url_encoded_body(request_body),
+                    'mimeType': RequestMapper._FORM_URL_ENCODED_CONTENT_TYPE
+                }
 
         _log.debug(f'Mapping request options to har entry: [{request_options}]')
 
         return HarEntryRequest(request_options)
+    
+    def _parse_form_url_encoded_body(self, request_body: bytes) -> List[Dict[str, str]]:
+        decoded_url_params = request_body.decode('utf-8')
+        decoded_request_body = dict(urllib.parse.parse_qsl(decoded_url_params, keep_blank_values=True))
+        return [{'name': key, 'value': value} for key, value in decoded_request_body.items()]
+    
+    def _has_json_body(self, request: Dict[str, Any]) -> bool:
+        return self._has_content_type(request, RequestMapper._APPLICATION_JSON_CONTENT_TYPE)
+    
+    def _has_form_url_encoded_body(self, request: Dict[str, Any]) -> bool:
+        return self._has_content_type(request, RequestMapper._FORM_URL_ENCODED_CONTENT_TYPE)
 
-    def _is_json_request_body(self, request: Dict[str, Any]) -> bool:
-        headers = request['headers']
-        content_type_header = next((header for header in headers if 'content-type' == header['name'].lower()), None)
-        return content_type_header is not None and 'application/json' in content_type_header['value']
+    def _has_content_type(self, request: Dict[str, Any], content_type: str) -> bool:
+        content_type_header = self._get_header(request['headers'], 'content-type')
+        return content_type_header is not None and content_type in content_type_header
+    
+    def _get_header(self, headers: List[Dict[str, str | None]], name: str) -> str | None:
+        for header in headers:
+            header_name = header.get('name')
+            if header_name and header_name.lower() == name:
+                return header['value']
+        return None
 
 
 @lru_cache()

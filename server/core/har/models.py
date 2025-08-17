@@ -11,11 +11,19 @@ def _parse_request_body(request: Dict[Any, Any]) -> Dict[Any, Any] | None:
         return None
 
     mimetype = post_data.get('mimeType')
-    if mimetype is None or mimetype != 'application/json':
+    if mimetype is None:
         return
 
-    text = post_data.get('text')
-    return json.loads(text) if text is not None else None
+    if mimetype == 'application/json':
+        text = post_data.get('text')
+        return json.loads(text) if text is not None else None
+    elif mimetype == 'application/x-www-form-urlencoded':
+        params = post_data.get('params')
+        if params is None:
+            return None
+        return {param['name']: param['value'] for param in params}
+
+    return None
 
 
 class HarParseError(Exception):

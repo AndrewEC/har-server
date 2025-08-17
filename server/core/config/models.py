@@ -71,6 +71,7 @@ class ExclusionConfig(BaseModel):
     removable_statuses: List[int] = []
     removable_http_methods: List[str] = []
     pre_apply: bool = False
+    exclude_duplicate_requests: bool = False
 
     def post_construct(self):
         self.removable_http_methods = make_lowercase(self.removable_http_methods)
