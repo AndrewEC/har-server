@@ -4,7 +4,6 @@ import webbrowser
 import logging
 
 from server.core.config import ConfigLoader
-from server.core.config.models import Debug
 
 
 _log = logging.getLogger(__file__)
@@ -16,7 +15,7 @@ def _do_open_browser(url: str):
 
 
 def open_browser_in_background(config_loader: ConfigLoader):
-    url = config_loader.read_config(Debug).open_browser
+    url = config_loader.get_app_config().debug.open_browser
     if url is None:
         return
     _log.info(f'Browser will be opened to: [{url}]')

@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch, PropertyMock
 
-from server.core.config import ConfigLoader
-from server.core.config.models import ExclusionRules
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.exclusions import ExclusionFilter
 from server.core.rules.base import RuleFailedException
 
@@ -22,19 +21,21 @@ class ExclusionFilterTest(unittest.TestCase):
 
         for result in [True, False]:
             with self.subTest(should_filter=result):
+                stub_config = AppConfig()
+                stub_config.exclusions.rules = [_RULE_NAME]
+                mock_config_loader.get_app_config = Mock(return_value=stub_config)
+
                 mock_rule = Mock(
                     get_name=Mock(return_value=_RULE_NAME),
                     should_filter_out=Mock(return_value=result)
                 )
                 mock_rules.return_value = [Mock(return_value=mock_rule)]
 
-                mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
-
                 entry = Mock()
                 actual = ExclusionFilter(mock_config_loader).should_exclude_entry(entry)
                 self.assertEqual(result, actual)
 
-                mock_config_loader.read_config.assert_called_once_with(ExclusionRules)
+                mock_config_loader.get_app_config.assert_called_once()
                 mock_rule.should_filter_out.assert_called_once_with(entry)
 
     @patch(fully_qualified_property_name(ExclusionFilter, '_EXCLUSION_RULES'), new_callable=PropertyMock)
@@ -43,7 +44,10 @@ class ExclusionFilterTest(unittest.TestCase):
                                                                                         mock_config_loader: ConfigLoader,
                                                                                         mock_rules: Mock):
 
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.exclusions.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
+
         mock_rule = Mock(
             get_name=Mock(return_value=_RULE_NAME),
             should_filter_out=Mock(side_effect=Exception())
@@ -56,5 +60,5 @@ class ExclusionFilterTest(unittest.TestCase):
 
         self.assertIn(_RULE_NAME, str(context.exception))
 
-        mock_config_loader.read_config.assert_called_once_with(ExclusionRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_rule.should_filter_out.assert_called_once_with(entry)

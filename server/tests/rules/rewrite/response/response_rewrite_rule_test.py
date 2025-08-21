@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from server.core.config import ConfigLoader
-from server.core.config.models import ResponseRuleConfig
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.response.rules import RemoveHeaderResponseRewriteRule, RemoveCookiesResponseRewriteRule
 
 from server.tests.util import fully_qualified_name
@@ -16,7 +15,9 @@ class ResponseRewriteRuleTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_cookies_from_response(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = Mock(return_value=Mock(removable_cookies=[_REMOVABLE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.config.removable_cookies = [_REMOVABLE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         response = Mock(cookies={
             _REMOVABLE_NAME: 'removable-value',
@@ -30,11 +31,13 @@ class ResponseRewriteRuleTest(unittest.TestCase):
         self.assertNotIn(_REMOVABLE_NAME, actual.cookies)
         self.assertIn(_NON_REMOVABLE_NAME, actual.cookies)
 
-        mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
+        mock_config_loader.get_app_config.assert_called_once()
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_remove_headers_from_response(self, mock_config_loader: ConfigLoader):
-        mock_config_loader.read_config = Mock(return_value=Mock(removable_headers=[_REMOVABLE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.config.removable_headers = [_REMOVABLE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         response = Mock(headers={
             _REMOVABLE_NAME: 'removable-value',
@@ -48,4 +51,4 @@ class ResponseRewriteRuleTest(unittest.TestCase):
         self.assertNotIn(_REMOVABLE_NAME, actual.headers)
         self.assertIn(_NON_REMOVABLE_NAME, actual.headers)
 
-        mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
+        mock_config_loader.get_app_config.assert_called_once()

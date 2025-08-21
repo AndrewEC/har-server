@@ -1,8 +1,7 @@
 from typing import List
 
 from server.core.har import HarEntryRequest
-from server.core.config import ConfigLoader, get_prop_config_path
-from server.core.config.models import RequestRewriteConfig
+from server.core.config import ConfigLoader
 from server.core.rules.base import MissingConfigPropertyException
 
 from .base import RequestRewriteRule
@@ -17,10 +16,9 @@ class RemoveRequestHeaderRequestRewriteRule(RequestRewriteRule):
         return 'remove-headers'
 
     def initialize(self, config_loader: ConfigLoader):
-        self._removable_headers = config_loader.read_config(RequestRewriteConfig).removable_headers
+        self._removable_headers = config_loader.get_app_config().rewrite.request.config.removable_headers
         if len(self._removable_headers) == 0:
-            property_path = get_prop_config_path(RequestRewriteConfig, 'removable_headers')
-            raise MissingConfigPropertyException(self.get_name(), property_path)
+            raise MissingConfigPropertyException(self.get_name(), 'removable_headers')
 
     def rewrite_incoming_http_request(self, request: HarEntryRequest) -> HarEntryRequest:
         return self._remove_header_from_request(request)

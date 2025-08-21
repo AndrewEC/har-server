@@ -2,7 +2,6 @@ from typing import Dict, Any
 from functools import lru_cache
 import logging
 import copy
-from threading import Lock
 
 import yaml
 
@@ -15,23 +14,16 @@ class ConfigParser:
 
     def __init__(self):
         self._cached_contents: Dict[Any, Any] | None = None
-        self._lock = Lock()
 
     def parse_config_yml(self) -> Dict[Any, Any] | None:
         """
         Attempts to parse the yml configuration file.
 
-        If the file has been previously parsed this will return a copy of the cached version of the parsed file
-        contents.
-
-        If no configuration file exists in the applications root_path this will return None.
+        If no configuration file exists within the root of the folder the
+        user specified when starting the app this will return None.
 
         :return: The parsed contents of the configuration file.
         """
-        with self._lock:
-            return self._parse_config_yml()
-
-    def _parse_config_yml(self) -> Dict[Any, Any] | None:
         if self._cached_contents is not None:
             return copy.deepcopy(self._cached_contents)
 

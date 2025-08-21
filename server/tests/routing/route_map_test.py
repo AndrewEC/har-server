@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch, AsyncMock
 
-from server.core.config import ConfigLoader
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.matching import RequestMatcher
 from server.core.rules.rewrite.request import RequestRewriter
 from server.core.routing.request_mapper import RequestMapper
@@ -30,10 +30,10 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
         pre_apply_values = [True, False]
         for pre_apply_value in pre_apply_values:
             with self.subTest(pre_apply=pre_apply_value):
-
-                mock_rewrite_config = Mock(pre_apply=pre_apply_value)
-                mock_exclusion_config = Mock(pre_apply=pre_apply_value)
-                mock_config_loader.read_config = Mock(side_effect=[mock_exclusion_config, mock_rewrite_config])
+                stub_config = AppConfig()
+                stub_config.rewrite.request.config.pre_apply = pre_apply_value
+                stub_config.exclusions.config.pre_apply = pre_apply_value
+                mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
                 incoming_request = Mock()
                 mock_request_mapper.map_to_har_request = AsyncMock(return_value=incoming_request)
@@ -65,6 +65,7 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
 
                 self.assertIsNotNone(actual)
 
+                mock_config_loader.get_app_config.assert_called_once()
                 mock_har_parser.get_har_file_contents.assert_called_once()
                 mock_request_mapper.map_to_har_request.assert_called_once_with(request)
                 mock_request_rewriter.apply_browser_request_rewrite_rules.assert_called_once_with(incoming_request)

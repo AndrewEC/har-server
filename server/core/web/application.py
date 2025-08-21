@@ -4,7 +4,6 @@ import logging
 from fastapi import FastAPI, Request, Depends, HTTPException, Response
 
 from server.core.config import with_config_loader, with_config_parser
-from server.core.config.models import Debug
 from server.core.routing import RouteMap, with_route_map
 
 from .response_transformer import with_response_transformer, ResponseTransformer
@@ -40,6 +39,7 @@ async def get(request: Request,
 @app.exception_handler(Exception)
 def handle_exception(request: Request, exception: Exception):
     _log.error(f'Handling uncaught exception: [{exception}]')
-    if with_config_loader(with_config_parser()).read_config(Debug).log_stack_traces:
+    config_loader = with_config_loader(with_config_parser())
+    if config_loader.get_app_config().debug.log_stack_traces:
         _log.exception(exception)
     return Response(status_code=500)

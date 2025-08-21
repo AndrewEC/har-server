@@ -6,7 +6,6 @@ import logging
 from fastapi import Depends
 
 from server.core.config import ConfigLoader, with_config_loader
-from server.core.config.models import ResponseRewriteRules
 from server.core.har import HarEntryResponse
 from server.core.rules.base import RuleContainer, RuleFailedException
 
@@ -35,7 +34,7 @@ class ResponseRewriter:
             ResponseRewriter._RESPONSE_REWRITE_RULES
         )
 
-        rules = config_loader.read_config(ResponseRewriteRules).rules
+        rules = config_loader.get_app_config().rewrite.response.rules
         _log.info(f'Configured response rewrite rules: [{rules}]')
         self._rule_container.enable_rules(config_loader, rules)
 

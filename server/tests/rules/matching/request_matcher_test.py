@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock, PropertyMock
 
-from server.core.config import ConfigLoader
-from server.core.config.models import Matchers
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.matching import RequestMatcher
 from server.core.rules.base import RuleFailedException
 
@@ -28,14 +27,16 @@ class RequestMatcherTest(unittest.TestCase):
                     matches=Mock(return_value=test_case)
                 )
                 mock_rule_type = Mock(return_value=mock_rule)
-
                 mock_rules.return_value = [mock_rule_type]
-                mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+
+                stub_config = AppConfig()
+                stub_config.request_matching.rules = [_RULE_NAME]
+                mock_config_loader.get_app_config = Mock(return_value = stub_config)
 
                 actual = RequestMatcher(mock_config_loader).do_requests_match(entry, request)
                 self.assertEqual(test_case, actual)
 
-                mock_config_loader.read_config.assert_called_once_with(Matchers)
+                mock_config_loader.get_app_config.assert_called_once()
                 mock_rule.matches.assert_called_once_with(entry, request)
 
     @patch(fully_qualified_property_name(RequestMatcher, '_MATCHERS'), new_callable=PropertyMock)
@@ -48,13 +49,15 @@ class RequestMatcherTest(unittest.TestCase):
             matches=Mock(side_effect=Exception())
         )
         mock_rule_type = Mock(return_value=mock_rule)
-
         mock_rules.return_value = [mock_rule_type]
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+
+        stub_config = AppConfig()
+        stub_config.request_matching.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value = stub_config)
 
         with self.assertRaises(RuleFailedException) as context:
             RequestMatcher(mock_config_loader).do_requests_match(Mock(), Mock())
 
         self.assertIn(_RULE_NAME, str(context.exception))
 
-        mock_config_loader.read_config.assert_called_once_with(Matchers)
+        mock_config_loader.get_app_config.assert_called_once()

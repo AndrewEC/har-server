@@ -3,8 +3,7 @@ from unittest.mock import Mock, patch, PropertyMock
 
 import copy
 
-from server.core.config import ConfigLoader
-from server.core.config.models import RequestRewriteRules
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.request import RequestRewriter
 from server.core.rules.base import RuleFailedException
 
@@ -24,7 +23,9 @@ class RequestRewriterTest(unittest.TestCase):
                                                  mock_rules: Mock,
                                                  mock_deep_copy: Mock):
 
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.request.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         request_copy = Mock()
         mock_deep_copy.return_value = request_copy
@@ -42,7 +43,7 @@ class RequestRewriterTest(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-        mock_config_loader.read_config.assert_called_once_with(RequestRewriteRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_deep_copy.assert_called_once_with(request)
         mock_rule.rewrite_incoming_http_request.assert_called_once_with(request_copy)
         mock_rule.rewrite_har_entry_request.assert_not_called()
@@ -54,7 +55,9 @@ class RequestRewriterTest(unittest.TestCase):
                                                mock_config_loader: ConfigLoader,
                                                mock_rules: Mock,
                                                mock_deep_copy: Mock):
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.request.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         expected = Mock()
         mock_rule = Mock(
@@ -72,7 +75,7 @@ class RequestRewriterTest(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-        mock_config_loader.read_config.assert_called_once_with(RequestRewriteRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_deep_copy.assert_called_once_with(request)
         mock_rule.rewrite_har_entry_request.assert_called_once_with(request_copy)
         mock_rule.rewrite_incoming_http_request.assert_not_called()
@@ -84,7 +87,9 @@ class RequestRewriterTest(unittest.TestCase):
                                                                                              mock_config_loader: ConfigLoader,
                                                                                              mock_rules: Mock,
                                                                                              mock_deep_copy: Mock):
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.request.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         mock_rule = Mock(
             get_name=Mock(return_value=_RULE_NAME),
@@ -102,7 +107,7 @@ class RequestRewriterTest(unittest.TestCase):
 
         self.assertIn(_RULE_NAME, str(context.exception))
 
-        mock_config_loader.read_config.assert_called_once_with(RequestRewriteRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_deep_copy.assert_called_once_with(request)
         mock_rule.rewrite_incoming_http_request.assert_called_once_with(request_copy)
         mock_rule.rewrite_har_entry_request.assert_not_called()

@@ -98,7 +98,7 @@ class UrlOriginCaptor:
         last_character_index = self._start_index + self._captured_length - 1
         # To handle instances where there is a colon after the domain but no
         # port number.
-        if (self._value[last_character_index] == ':'):
+        if self._value[last_character_index] == ':':
             self._captured_length -= 1
         self._capture_results.append(CapturedOrigin(self._start_index, self._captured_length))
         self._reset()

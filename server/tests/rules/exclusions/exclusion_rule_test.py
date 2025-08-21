@@ -1,10 +1,12 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from server.core.config import ConfigLoader
-from server.core.config.models import ExclusionConfig
-from server.core.rules.exclusions.rules import (BadStatusExclusionRule, InvalidSizeExclusionRule,
-                                                HttpMethodExclusionRule)
+from server.core.config import ConfigLoader, AppConfig
+from server.core.rules.exclusions.rules import (
+    BadStatusExclusionRule,
+    InvalidSizeExclusionRule,
+    HttpMethodExclusionRule
+)
 
 from server.tests.util import fully_qualified_name
 
@@ -17,7 +19,9 @@ class ExclusionRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(method=test_case[1]):
-                mock_config_loader.read_config = Mock(return_value=Mock(removable_http_methods=['HEAD']))
+                stub_config = AppConfig()
+                stub_config.exclusions.config.removable_http_methods = ['HEAD']
+                mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
                 entry = Mock(
                     request=Mock(
@@ -32,7 +36,7 @@ class ExclusionRuleTest(unittest.TestCase):
                 self.assertEqual('requests-with-http-method', rule.get_name())
                 self.assertEqual(test_case[0], actual)
 
-                mock_config_loader.read_config.assert_called_once_with(ExclusionConfig)
+                mock_config_loader.get_app_config.assert_called_once()
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_bad_status_exclusion_rule(self, mock_config_loader: ConfigLoader):
@@ -40,7 +44,9 @@ class ExclusionRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(status=test_case[1], filter_out=test_case[0]):
-                mock_config_loader.read_config = Mock(return_value=Mock(removable_statuses=[304]))
+                stub_config = AppConfig()
+                stub_config.exclusions.config.removable_statuses = [304]
+                mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
                 entry = Mock(
                     response=Mock(
@@ -54,7 +60,7 @@ class ExclusionRuleTest(unittest.TestCase):
 
                 self.assertEqual(test_case[0], actual)
 
-                mock_config_loader.read_config.assert_called_once_with(ExclusionConfig)
+                mock_config_loader.get_app_config.assert_called_once()
 
     def test_invalid_size_exclusion_rule(self):
         test_cases = [

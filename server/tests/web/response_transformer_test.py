@@ -35,3 +35,27 @@ class ResponseTransformerTest(unittest.TestCase):
             self.assertEqual(rewritten_response.headers[header], actual.headers[header])
 
         mock_response_rewriter.apply_response_rewrite_rules.assert_called_once_with(initial_response)
+    
+    @patch(fully_qualified_name(ResponseRewriter))
+    def test_map_to_fastapi_response_base64_content(self, mock_response_rewriter: ResponseRewriter):
+        mock_response_rewriter.apply_response_rewrite_rules = Mock()
+
+        initial_response = Mock(
+            status=200,
+            content=Mock(
+                encoding='base64',
+                text='cmVzcG9uc2VfY29udGVudA==',
+                mime_type='image/png'
+            ),
+            headers={'header-name': 'header-value'},
+            cookies={'cookie-name': 'cookie-value'}
+        )
+
+        actual = ResponseTransformer(mock_response_rewriter).map_to_fastapi_response(initial_response)
+
+        self.assertIsNotNone(actual)
+        self.assertEqual('response_content', actual.body.decode('utf-8'))  # type: ignore
+        self.assertEqual(initial_response.status, actual.status_code)
+        self.assertEqual(initial_response.content.mime_type, actual.media_type)
+
+        mock_response_rewriter.apply_response_rewrite_rules.assert_not_called()

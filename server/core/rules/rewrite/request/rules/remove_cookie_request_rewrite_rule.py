@@ -1,8 +1,7 @@
 from typing import List
 
 from server.core.har import HarEntryRequest
-from server.core.config import ConfigLoader, get_prop_config_path
-from server.core.config.models import RequestRewriteConfig
+from server.core.config import ConfigLoader
 from server.core.rules.base import MissingConfigPropertyException
 
 from .base import RequestRewriteRule
@@ -17,10 +16,9 @@ class RemoveCookieRequestRewriteRule(RequestRewriteRule):
         return 'remove-cookies'
 
     def initialize(self, config_loader: ConfigLoader):
-        self._removable = config_loader.read_config(RequestRewriteConfig).removable_cookies
+        self._removable = config_loader.get_app_config().rewrite.request.config.removable_cookies
         if len(self._removable) == 0:
-            prop_path = get_prop_config_path(RequestRewriteConfig, 'removable_cookies')
-            raise MissingConfigPropertyException(self.get_name(), prop_path)
+            raise MissingConfigPropertyException(self.get_name(), 'removable_cookies')
 
     def rewrite_incoming_http_request(self, request: HarEntryRequest) -> HarEntryRequest:
         return self._remove_cookies(request)

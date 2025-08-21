@@ -40,7 +40,7 @@ class ContainerRulesAlreadyEnabledException(Exception):
 
 class MissingConfigPropertyException(Exception):
 
-    _MESSAGE_TEMPLATE = 'Rule [{}] has been enabled but the [{}] property has not been defined.'
+    _MESSAGE_TEMPLATE = 'Rule [{}] has been enabled but the [{}] config has not been defined.'
 
     def __init__(self, rule_name: str, property_path: str):
         super().__init__(MissingConfigPropertyException._MESSAGE_TEMPLATE.format(rule_name, property_path))

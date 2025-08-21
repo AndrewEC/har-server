@@ -53,22 +53,22 @@ class RequestMapper:
         _log.debug(f'Mapping request options to har entry: [{request_options}]')
 
         return HarEntryRequest(request_options)
-    
+
     def _parse_form_url_encoded_body(self, request_body: bytes) -> List[Dict[str, str]]:
         decoded_url_params = request_body.decode('utf-8')
         decoded_request_body = dict(urllib.parse.parse_qsl(decoded_url_params, keep_blank_values=True))
         return [{'name': key, 'value': value} for key, value in decoded_request_body.items()]
-    
+
     def _has_json_body(self, request: Dict[str, Any]) -> bool:
         return self._has_content_type(request, RequestMapper._APPLICATION_JSON_CONTENT_TYPE)
-    
+
     def _has_form_url_encoded_body(self, request: Dict[str, Any]) -> bool:
         return self._has_content_type(request, RequestMapper._FORM_URL_ENCODED_CONTENT_TYPE)
 
     def _has_content_type(self, request: Dict[str, Any], content_type: str) -> bool:
         content_type_header = self._get_header(request['headers'], 'content-type')
         return content_type_header is not None and content_type in content_type_header
-    
+
     def _get_header(self, headers: List[Dict[str, str | None]], name: str) -> str | None:
         for header in headers:
             header_name = header.get('name')

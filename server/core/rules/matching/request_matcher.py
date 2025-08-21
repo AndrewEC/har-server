@@ -5,7 +5,6 @@ import logging
 from fastapi import Depends
 
 from server.core.config import ConfigLoader, with_config_loader
-from server.core.config.models import Matchers
 from server.core.har import HarEntryRequest
 from server.core.rules.base import RuleContainer, RuleFailedException
 
@@ -37,7 +36,7 @@ class RequestMatcher:
     def __init__(self, config_loader: ConfigLoader):
         self._rule_container = RuleContainer[MatcherRule]('request-matcher', RequestMatcher._MATCHERS)
 
-        rules = config_loader.read_config(Matchers).rules
+        rules = config_loader.get_app_config().request_matching.rules
         _log.info(f'Configured request matching rules: [{rules}]')
         self._rule_container.enable_rules(config_loader, rules)
 

@@ -7,7 +7,6 @@ import logging
 from fastapi import Depends
 
 from server.core.config import with_config_loader, ConfigLoader
-from server.core.config.models import RequestRewriteRules
 from server.core.har import HarEntryRequest
 from server.core.rules.base import RuleContainer, RuleFailedException
 
@@ -22,7 +21,7 @@ from .rules import (
 _log = logging.getLogger(__file__)
 
 
-class ModificationType(Enum):
+class _ModificationType(Enum):
     REQUEST = 1
     ENTRY = 2
 
@@ -41,11 +40,11 @@ class RequestRewriter:
             RequestRewriter._REQUEST_REWRITE_RULES
         )
 
-        rewrite_rules = config_loader.read_config(RequestRewriteRules).rules
+        rewrite_rules = rewrite_rules = config_loader.get_app_config().rewrite.request.rules
         _log.info(f'Configured request rewrite rules: [{rewrite_rules}]')
         self._rule_container.enable_rules(config_loader, rewrite_rules)
 
-    def _apply_request_rewrite_rules(self, request: HarEntryRequest, modification_type: ModificationType)\
+    def _apply_request_rewrite_rules(self, request: HarEntryRequest, modification_type: _ModificationType)\
             -> HarEntryRequest:
 
         if not self._rule_container.has_any_rules_enabled():
@@ -54,7 +53,7 @@ class RequestRewriter:
         request_copy = copy.deepcopy(request)
         for name, rule in self._rule_container.get_enabled_rules().items():
             try:
-                if modification_type == ModificationType.ENTRY:
+                if modification_type == _ModificationType.ENTRY:
                     request_copy = rule.rewrite_har_entry_request(request_copy)
                 else:
                     request_copy = rule.rewrite_incoming_http_request(request_copy)
@@ -77,7 +76,7 @@ class RequestRewriter:
         :raise RequestRuleNotFoundException: if one of the request rewrite rules configured could not be found.
         :raise RequestRuleFailedException: if any of the rewrite rules raised an exception.
         """
-        return self._apply_request_rewrite_rules(request, ModificationType.REQUEST)
+        return self._apply_request_rewrite_rules(request, _ModificationType.REQUEST)
 
     def apply_entry_request_rewrite_rules(self, request: HarEntryRequest) -> HarEntryRequest:
         """
@@ -94,7 +93,7 @@ class RequestRewriter:
         :raise RequestRuleNotFoundException: if one of the request rewrite rules configured could not be found.
         :raise RequestRuleFailedException: if any of the rewrite rules raised an exception.
         """
-        return self._apply_request_rewrite_rules(request, ModificationType.ENTRY)
+        return self._apply_request_rewrite_rules(request, _ModificationType.ENTRY)
 
 
 @lru_cache()

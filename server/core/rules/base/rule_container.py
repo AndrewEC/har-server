@@ -2,8 +2,12 @@ from typing import Generic, TypeVar, Type, List, Dict
 
 from server.core.config import ConfigLoader
 
-from .error import (DuplicateRuleException, RuleNotFoundException,
-                    RuleInitializationFailedException, ContainerRulesAlreadyEnabledException)
+from .error import (
+    DuplicateRuleException,
+    RuleNotFoundException,
+    RuleInitializationFailedException,
+    ContainerRulesAlreadyEnabledException
+)
 from .rule_dict import RuleDict
 from .rule import Rule
 
@@ -46,8 +50,14 @@ class RuleContainer(Generic[_T]):
         """
         if self.has_any_rules_enabled():
             raise ContainerRulesAlreadyEnabledException(self._container_name)
+
         for name in names:
-            self._initialize_rule(config_loader, name)
+            rule = self._get_rule(name)
+            try:
+                rule.initialize(config_loader)
+            except Exception as e:
+                raise RuleInitializationFailedException(self._container_name, name, e) from e
+            self._enabled_rules.append(name)
 
     def _get_rule(self, name: str) -> _T:
         if name not in self._rules:
@@ -69,14 +79,6 @@ class RuleContainer(Generic[_T]):
         if name in self._rules:
             raise DuplicateRuleException(self._container_name, name)
         self._rules[name] = rule_instance
-
-    def _initialize_rule(self, config_loader: ConfigLoader, name: str):
-        rule = self._get_rule(name)
-        try:
-            rule.initialize(config_loader)
-        except Exception as e:
-            raise RuleInitializationFailedException(self._container_name, name, e) from e
-        self._enabled_rules.append(name)
 
     def has_any_rules_enabled(self) -> bool:
         """

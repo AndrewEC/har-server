@@ -3,8 +3,7 @@ from unittest.mock import Mock, patch, PropertyMock
 
 import copy
 
-from server.core.config import ConfigLoader
-from server.core.config.models import ResponseRewriteRules
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.response import ResponseRewriter
 from server.core.rules.base import RuleFailedException
 
@@ -35,13 +34,15 @@ class ResponseRewriterTest(unittest.TestCase):
         )
         mock_rules.return_value = [Mock(return_value=mock_rule)]
 
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         actual = ResponseRewriter(mock_config_loader).apply_response_rewrite_rules(response)
 
         self.assertEqual(expected, actual)
 
-        mock_config_loader.read_config.assert_called_once_with(ResponseRewriteRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_deep_copy.assert_called_once_with(response)
         mock_rule.rewrite_response.assert_called_once_with(response_copy)
 
@@ -62,13 +63,15 @@ class ResponseRewriterTest(unittest.TestCase):
         )
         mock_rules.return_value = [Mock(return_value=mock_rule)]
 
-        mock_config_loader.read_config = Mock(return_value=Mock(rules=[_RULE_NAME]))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.rules = [_RULE_NAME]
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         with self.assertRaises(RuleFailedException) as context:
             ResponseRewriter(mock_config_loader).apply_response_rewrite_rules(response)
 
         self.assertIn(_RULE_NAME, str(context.exception))
 
-        mock_config_loader.read_config.assert_called_once_with(ResponseRewriteRules)
+        mock_config_loader.get_app_config.assert_called_once()
         mock_deep_copy.assert_called_once_with(response)
         mock_rule.rewrite_response.assert_called_once_with(response_copy)

@@ -3,7 +3,6 @@ from typing import List
 import logging
 
 from server.core.config import ConfigLoader
-from server.core.config.models import ResponseRuleConfig
 from server.core.har import HarEntryResponse
 
 from .base import ResponseRewriteRule
@@ -25,7 +24,7 @@ class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
         return 'urls-in-response'
 
     def initialize(self, config_loader: ConfigLoader):
-        self._excluded_domains = config_loader.read_config(ResponseRuleConfig).excluded_domains
+        self._excluded_domains = config_loader.get_app_config().rewrite.response.config.excluded_domains
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
         content = response.content.text

@@ -5,11 +5,15 @@ import logging
 from fastapi import Depends
 
 from server.core.config import ConfigLoader, with_config_loader
-from server.core.config.models import ExclusionRules
 from server.core.har import HarEntry
 from server.core.rules.base import RuleContainer, RuleFailedException
 
-from .rules import ExclusionRule, BadStatusExclusionRule, InvalidSizeExclusionRule, HttpMethodExclusionRule
+from .rules import (
+    ExclusionRule,
+    BadStatusExclusionRule,
+    InvalidSizeExclusionRule,
+    HttpMethodExclusionRule
+)
 
 
 _log = logging.getLogger(__file__)
@@ -26,7 +30,7 @@ class ExclusionFilter:
     def __init__(self, config_loader: ConfigLoader):
         self._rule_container = RuleContainer[ExclusionRule]('exclusion', ExclusionFilter._EXCLUSION_RULES)
 
-        exclusion_rules = config_loader.read_config(ExclusionRules).rules
+        exclusion_rules = config_loader.get_app_config().exclusions.rules
         _log.info(f'Configured exclusion rules: [{exclusion_rules}]')
         self._rule_container.enable_rules(config_loader, exclusion_rules)
 

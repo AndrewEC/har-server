@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from server.core.config.models import ResponseRuleConfig
-from server.core.config import ConfigLoader
+from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.response.rules import RewriteUrlResponseRewriteRule
 
 from server.tests.util import fully_qualified_name
@@ -17,7 +16,9 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls(self, mock_config_loader: ConfigLoader):
 
-        mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=[]))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.config.excluded_domains = []
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         test_cases = [
             'https://www.mock.ca',
@@ -31,7 +32,7 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(origin=test_case):
-                mock_config_loader.read_config.reset_mock()
+                mock_config_loader.get_app_config.reset_mock()
 
                 response = Mock(content=Mock(text=_CONTENT_TEMPLATE.format(test_case)))
                 rule = RewriteUrlResponseRewriteRule()
@@ -41,12 +42,14 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
                 expected = _CONTENT_TEMPLATE.format(_LOCALHOST)
                 self.assertEqual(expected, actual.content.text)
 
-                mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
+                mock_config_loader.get_app_config.assert_called_once()
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls_replaces_nothing_when_no_origin_is_found(self, mock_config_loader: ConfigLoader):
 
-        mock_config_loader.read_config = Mock(return_value=Mock(excluded_domains=['http://www.google.com']))
+        stub_config = AppConfig()
+        stub_config.rewrite.response.config.excluded_domains = []
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
         test_cases = [
             '//.',
@@ -62,7 +65,7 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
 
         for test_case in test_cases:
             with self.subTest(origin=test_case):
-                mock_config_loader.read_config.reset_mock()
+                mock_config_loader.get_app_config.reset_mock()
 
                 expected = _CONTENT_TEMPLATE.format(test_case)
                 response = Mock(content=Mock(text=expected))
@@ -73,4 +76,4 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
 
                 self.assertEqual(expected, actual.content.text)
 
-                mock_config_loader.read_config.assert_called_once_with(ResponseRuleConfig)
+                mock_config_loader.get_app_config.assert_called_once()
