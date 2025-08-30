@@ -24,10 +24,9 @@
 ||remove-cookies||Removes response cookies by the cookie name.|
 |||rewrite.response.config.removable-cookies|A list of cookie names (case-insensitive) to be removed from all matched responses before returning said response.|
 |rewrite.request.config|||Configuration values to control the behaviour of the request and response rewrite rules.|
-||pre-apply||If True the configured request rewrite rules will be applied to all non-excluded har entries upon initialization of the server and not during the processing of a request.|
 |exclusions.rules|||A sequentially executed set of rules that will filter out entries from each har file. Entries that are excluded will never be can never be matched or returned by the running har-server. By default the rules will be executed during the processing of every incoming HTTP request.|
 ||responses-with-status||Filter out any responses that have a matching HTTP status.|
 |||exclusions.config.removable-statuses|The list of HTTP status codes to be excluded.|
 ||responses-with-invalid-size||Filter out responses that are empty but don't have a 204 response status.|
 |exclusions.config|||Configuration values to control the behaviour of the exclusion rules.|
-||pre-apply||If True the exclusion rules will be applied to all .har entries upon initialization of the server and not during the processing of a request.|
+||Remove-duplicate-requests||"Checks for and removes ""duplicate"" entries from the har files being served. A ""duplicate"" entry is any two entries that have the same request as determined by the request matching criteria specified."|

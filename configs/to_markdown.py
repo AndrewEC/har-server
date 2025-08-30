@@ -5,10 +5,11 @@ from pathlib import Path
 
 
 def _convert():
-    docs = Path('./configuration_properties_docs.csv')
+    docs = Path('./configuration_properties_docs.csv').absolute()
     if not docs.is_file():
         raise Exception(f'Could not find input csv file in expected location of [{docs}].')
 
+    print(f'Reading contents of csv file: [{docs}].')
     with open(docs, 'r', encoding='utf-8') as file:
         lines = [line.strip() for line in file.readlines()]
 
@@ -16,6 +17,7 @@ def _convert():
     if markdown.is_file():
         markdown.unlink()
 
+    print(f'Writing markdown contents to: [{markdown}].')
     with open(markdown, 'w', encoding='utf-8') as file:
         file.write(_to_markdown_line(lines[0]))
         file.write(_create_heading_separator(lines[0]))
