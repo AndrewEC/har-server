@@ -73,5 +73,4 @@ class HarFileContent:
 
     def __init__(self, file: Path, contents: Dict[Any, Any]):
         self.source_file = file
-        self.title: str = contents['log']['pages'][0]['title']
         self.entries = [HarEntry(self, entry) for entry in contents['log']['entries']]

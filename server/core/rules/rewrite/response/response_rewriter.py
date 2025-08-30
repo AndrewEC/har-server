@@ -58,7 +58,7 @@ class ResponseRewriter:
             return response
 
         response_copy = copy.deepcopy(response)
-        for name, rule in self._rule_container.get_enabled_rules().items():
+        for name, rule in self._rule_container.get_enabled_rules():
             try:
                 response_copy = rule.rewrite_response(response_copy)
             except Exception as e:

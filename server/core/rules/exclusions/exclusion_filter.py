@@ -51,7 +51,7 @@ class ExclusionFilter:
         if not self._rule_container.has_any_rules_enabled():
             return False
 
-        for name, rule in self._rule_container.get_enabled_rules().items():
+        for name, rule in self._rule_container.get_enabled_rules():
             try:
                 if rule.should_filter_out(entry):
                     return True

@@ -51,7 +51,7 @@ class RequestRewriter:
             return request
 
         request_copy = copy.deepcopy(request)
-        for name, rule in self._rule_container.get_enabled_rules().items():
+        for name, rule in self._rule_container.get_enabled_rules():
             try:
                 if modification_type == _ModificationType.ENTRY:
                     request_copy = rule.rewrite_har_entry_request(request_copy)

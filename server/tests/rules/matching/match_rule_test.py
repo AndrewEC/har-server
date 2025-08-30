@@ -17,7 +17,11 @@ class MatchRulesTest(unittest.TestCase):
     def test_do_paths_match(self):
         test_cases = [
             (True, 'matching_path', 'matching_path'),
-            (False, 'matching_path', 'non_matching_path')
+            (False, 'matching_path', 'non_matching_path'),
+            (True, '/user/*/address', '/user/23/address'),
+            (True, '/user/*/address', '/user/23/address'),
+            (False, '/user/*/address', '/user/23/addres'),
+            (False, '/user/*/address', '/user/address')
         ]
 
         for test_case in test_cases:
@@ -25,7 +29,9 @@ class MatchRulesTest(unittest.TestCase):
                 entry = Mock(path=test_case[1])
                 request = Mock(path=test_case[2])
 
-                actual = PathMatcherRule().matches(entry, request)
+                matcher = PathMatcherRule()
+                matcher.initialize(Mock())
+                actual = matcher.matches(entry, request)
 
                 self.assertEqual(test_case[0], actual)
 

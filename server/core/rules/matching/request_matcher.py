@@ -54,7 +54,7 @@ class RequestMatcher:
         :raise MatchRuleFailedException: if any of the matchers raised an exception.
         """
 
-        for name, rule in self._rule_container.get_enabled_rules().items():
+        for name, rule in self._rule_container.get_enabled_rules():
             try:
                 if not rule.matches(entry, request):
                     return False

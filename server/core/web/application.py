@@ -29,11 +29,7 @@ async def get(request: Request,
     entry = await route_map.find_entry_for_request(request)
     if entry is None:
         raise HTTPException(status_code=404, detail='No har entry matching request found.')
-
-    _log.debug(f'Request [{request.method} {request.url}] matched to [{entry.request.method} {entry.request.url}] '
-               f'in .har file [{entry.parent.source_file}]')
-
-    return response_transformer.map_to_fastapi_response(entry.response)
+    return response_transformer.map_to_fastapi_response(entry)
 
 
 @app.exception_handler(Exception)

@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Type, List, Dict
+from typing import Generic, TypeVar, Type, List, Generator, Tuple
 
 from server.core.config import ConfigLoader
 
@@ -21,6 +21,7 @@ class RuleContainer(Generic[_T]):
         self._container_name = container_name
         self._rules = RuleDict()
         self._enabled_rules: List[str] = []
+        self._has_rules_enabled = False
         for rule in rules:
             self._register_rule(rule)
 
@@ -58,20 +59,22 @@ class RuleContainer(Generic[_T]):
             except Exception as e:
                 raise RuleInitializationFailedException(self._container_name, name, e) from e
             self._enabled_rules.append(name)
+            self._has_rules_enabled = True
 
     def _get_rule(self, name: str) -> _T:
         if name not in self._rules:
             raise RuleNotFoundException(self._container_name, name)
         return self._rules[name]
 
-    def get_enabled_rules(self) -> Dict[str, _T]:
+    def get_enabled_rules(self) -> Generator[Tuple[str, _T], None, None]:
         """
         Gets a dict of the currently enabled rules and all their names.
 
         :return: A dictionary containing a mapping of the rules (values) and their
             respective names (keys).
         """
-        return {name: self._get_rule(name) for name in self._enabled_rules}
+        for rule_name in self._enabled_rules:
+            yield rule_name, self._rules[rule_name]
 
     def _register_rule(self, rule: Type[_T]):
         rule_instance = rule()
@@ -86,4 +89,4 @@ class RuleContainer(Generic[_T]):
 
         :return: True if at least one rule is enabled. Otherwise, false.
         """
-        return len(self._enabled_rules) > 0
+        return self._has_rules_enabled
