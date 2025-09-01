@@ -17,6 +17,13 @@ where `<path_to_har_folder>` needs to be replaced with the relative or absolute 
 
 har-server listens to port 8080 and can be accessed using the URL: http://localhost:8080/
 
+## Runtime Metrics
+Optional runtime metrics can be enabled on the server. To enable runtime metrics set the `debug.enable-metrics` configuration property to `true`.
+
+Once enable the server will record which requests mached to which responses. If no match is made on a request then nothing will be recorded.
+
+The recorded metrics can be retrieved using the `GET /__metrics__` endpoint.
+
 ## Configuration
 A breakdown of the available properties and what they do can be found in the [Configuration Properties](./ConfigurationProperties.md) docs.
 

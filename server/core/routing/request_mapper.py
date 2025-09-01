@@ -46,6 +46,7 @@ class RequestMapper:
                 }
             elif self._has_form_url_encoded_body(request_options):
                 request_options['postData'] = {
+                    'text': request_body,
                     'params': self._parse_form_url_encoded_body(request_body),
                     'mimeType': RequestMapper._FORM_URL_ENCODED_CONTENT_TYPE
                 }

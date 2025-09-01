@@ -5,6 +5,7 @@ from fastapi import Depends
 from fastapi.requests import Request
 
 from server.core.har import with_har_parser, HarParser, HarEntry, HarEntryResponse
+from server.core.metrics import MetricRecorder, with_metric_recorder
 from server.core.rules.rewrite.request import RequestRewriter, with_request_rewriter
 from server.core.rules.rewrite.response import ResponseRewriter, with_response_rewriter
 from server.core.rules.matching import with_request_matcher, RequestMatcher
@@ -21,12 +22,14 @@ class RouteMap:
                  request_matcher: RequestMatcher,
                  request_mapper: RequestMapper,
                  response_rewriter: ResponseRewriter,
-                 pre_processor: PreProcessor):
+                 pre_processor: PreProcessor,
+                 metric_recorder: MetricRecorder):
 
         self._request_rewriter = request_rewriter
         self._request_matcher = request_matcher
         self._request_mapper = request_mapper
         self._response_rewriter = response_rewriter
+        self._metric_recorder = metric_recorder
 
         self._entries: List[HarEntry] = pre_processor.process_entries(har_parser.get_har_file_contents())
 
@@ -47,7 +50,10 @@ class RouteMap:
         rewritten_incoming_request = self._request_rewriter.apply_browser_request_rewrite_rules(incoming_request)
         for entry in self._entries:
             if self._request_matcher.do_requests_match(entry.request, rewritten_incoming_request):
-                return self._response_rewriter.apply_response_rewrite_rules(entry.response)
+                rewritten_response = self._response_rewriter.apply_response_rewrite_rules(entry.response)
+                if self._metric_recorder.is_enabled():
+                    self._metric_recorder.record(entry.id, rewritten_incoming_request, rewritten_response)
+                return rewritten_response
         return None
 
 
@@ -57,7 +63,8 @@ def with_route_map(har_parser: Annotated[HarParser, Depends(with_har_parser)],
                    request_matcher: Annotated[RequestMatcher, Depends(with_request_matcher)],
                    request_mapper: Annotated[RequestMapper, Depends(with_request_mapper)],
                    response_rewriter: Annotated[ResponseRewriter, Depends(with_response_rewriter)],
-                   preprocessor: Annotated[PreProcessor, Depends(with_pre_processor)]) -> RouteMap:
+                   preprocessor: Annotated[PreProcessor, Depends(with_pre_processor)],
+                   metric_recorder: Annotated[MetricRecorder, Depends(with_metric_recorder)]) -> RouteMap:
 
     return RouteMap(
         har_parser,
@@ -65,5 +72,6 @@ def with_route_map(har_parser: Annotated[HarParser, Depends(with_har_parser)],
         request_matcher,
         request_mapper,
         response_rewriter,
-        preprocessor
+        preprocessor,
+        metric_recorder
     )

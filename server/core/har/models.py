@@ -1,27 +1,30 @@
 from __future__ import annotations
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 import json
+import uuid
 
 
-def _parse_request_body(request: Dict[Any, Any]) -> Dict[Any, Any] | None:
+def _parse_request_body(request: Dict[Any, Any]) -> Tuple[str, Dict[Any, Any] | None] | None:
     post_data = request.get('postData')
     if post_data is None:
         return None
 
     mimetype = post_data.get('mimeType')
     if mimetype is None:
-        return
+        return None
 
     if mimetype == 'application/json':
         text = post_data.get('text')
-        return json.loads(text) if text is not None else None
+        payload = json.loads(text) if text is not None else None
+        return text, payload
     elif mimetype == 'application/x-www-form-urlencoded':
+        text = post_data.get('text')
         params = post_data.get('params')
         if params is None:
             return None
-        return {param['name']: param['value'] for param in params}
+        return text, {param['name']: param['value'] for param in params}
 
     return None
 
@@ -41,7 +44,23 @@ class HarEntryRequest:
         self.query_params: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['queryString']}
         self.headers: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['headers']}
         self.cookies: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['cookies']}
-        self.body = _parse_request_body(request)
+        self.body = None
+        self.body_string = None
+
+        result = _parse_request_body(request)
+        if result is not None:
+            self.body_string = result[0]
+            self.body = result[1]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'method': self.method,
+            'path': self.path,
+            'query_params': self.query_params,
+            'headers': self.headers,
+            'cookies': self.cookies,
+            'body': self.body
+        }
 
 
 class HarEntryResponseContent:
@@ -50,6 +69,13 @@ class HarEntryResponseContent:
         self.mime_type: str | None = content.get('mimeType')
         self.encoding: str | None = content.get('encoding')
         self.text: str | None = content.get('text')
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'mime_type': self.mime_type,
+            'encoding': self.encoding,
+            'text': self.text
+        }
 
 
 class HarEntryResponse:
@@ -60,10 +86,19 @@ class HarEntryResponse:
         self.content = HarEntryResponseContent(response['content'])
         self.cookies = {cookie['name'].lower(): cookie['value'] for cookie in response['cookies']}
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'status': self.status,
+            'headers': self.headers,
+            'cookies': self.cookies,
+            'content': self.content.to_dict()
+        }
+
 
 class HarEntry:
 
     def __init__(self, parent: HarFileContent, entry: Dict[Any, Any]):
+        self.id = entry['id'] if 'id' in entry else str(uuid.uuid4())
         self.parent = parent
         self.request = HarEntryRequest(entry['request'])
         self.response = HarEntryResponse(entry['response'])

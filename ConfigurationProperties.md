@@ -3,6 +3,7 @@
 |debug.enable-debug-logs|||Enable more granular logging statements.|
 |debug.log-stack-traces|||Log the full stack trace whenever an exception is thrown while the server is running.|
 |debug.open-browser|||The URL to launch in your default browser once the server has started.|
+|debug.enable-metrics|||Enables recording information about which requests match to which entries. Once enable metrics can be retrieved using the GET /__metrics__ endpoint.|
 |request-matching.rules|||The sequentially executed set of predicate functions to determine if an incoming HTTP request matches a previously recorded request pulled from a har file.|
 ||method||Match requests by HTTP method.|
 ||path||Match requests by path segments. (This will exclude the host/port and will fully decode the request path.)|
@@ -29,4 +30,4 @@
 |||exclusions.config.removable-statuses|The list of HTTP status codes to be excluded.|
 ||responses-with-invalid-size||Filter out responses that are empty but don't have a 204 response status.|
 |exclusions.config|||Configuration values to control the behaviour of the exclusion rules.|
-||Remove-duplicate-requests||"Checks for and removes ""duplicate"" entries from the har files being served. A ""duplicate"" entry is any two entries that have the same request as determined by the request matching criteria specified."|
+||remove-duplicate-requests||Checks for and removes 'duplicate' entries from the har files being served. A 'duplicate' entry is any two entries that have the same request as determined by the request matching criteria specified.|

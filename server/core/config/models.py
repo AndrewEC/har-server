@@ -9,6 +9,7 @@ class Debug(BaseModel):
     enable_debug_logs: bool = False
     log_stack_traces: bool = False
     open_browser: str | None = None
+    enable_metrics: bool = False
 
 
 class Matchers(BaseModel):

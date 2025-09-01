@@ -46,3 +46,19 @@ class IntegrationTests(unittest.TestCase):
                 self.assertFalse('response-cookie-name' in response.cookies)
                 self.assertTrue('second-response-cookie-name' in response.cookies)
                 self.assertEqual('second-response-cookie-value', response.cookies['second-response-cookie-name'])
+    
+    def test_metrics(self):
+        with TestData('metrics'):
+            with TestClient(app) as client:
+                response = client.get('/matching/endpoint')
+                self.assertEqual(200, response.status_code)
+
+                metric_response = client.get('/__metrics__')
+                self.assertEqual(200, metric_response.status_code)
+
+                body = metric_response.json()
+                self.assertEqual(1, len(body))
+                self.assertEqual('test-entry-1', body[0]['entry_id'])
+                self.assertEqual(1, len(body[0]['requests']))
+                self.assertIsNotNone(body[0].get('response'))
+
