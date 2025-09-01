@@ -42,6 +42,7 @@ class RequestMapper:
             if self._has_json_body(request_options):
                 request_options['postData'] = {
                     'text': request_body,
+                    'params': [],
                     'mimeType': RequestMapper._APPLICATION_JSON_CONTENT_TYPE
                 }
             elif self._has_form_url_encoded_body(request_options):
@@ -53,7 +54,7 @@ class RequestMapper:
 
         _log.debug(f'Mapping request options to har entry: [{request_options}]')
 
-        return HarEntryRequest(request_options)
+        return HarEntryRequest(**request_options)
 
     def _parse_form_url_encoded_body(self, request_body: bytes) -> List[Dict[str, str]]:
         decoded_url_params = request_body.decode('utf-8')

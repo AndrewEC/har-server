@@ -31,7 +31,7 @@ class PreProcessor:
         self._exclude_duplicates = app_config.exclusions.config.exclude_duplicate_requests
 
     def process_entries(self, har_file_contents: List[HarFileContent]) -> List[HarEntry]:
-        entries = list(chain(*[content.entries for content in har_file_contents]))
+        entries = list(chain(*[content.log.entries for content in har_file_contents]))
         _log.info(f"[{len(entries)}] entries will be processed.")
 
         entries = self._apply_exclusion_rules(entries)

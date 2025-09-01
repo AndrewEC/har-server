@@ -27,8 +27,5 @@ class RemoveCookieRequestRewriteRule(RequestRewriteRule):
         return self._remove_cookies(request)
 
     def _remove_cookies(self, request: HarEntryRequest) -> HarEntryRequest:
-        for cookie in self._removable:
-            if cookie not in request.cookies:
-                continue
-            request.cookies.pop(cookie)
+        request.cookies = [cookie for cookie in request.cookies if cookie.name not in self._removable]
         return request

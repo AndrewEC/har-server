@@ -28,7 +28,7 @@ class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
         content = response.content.text
-        if content is None or len(content) == 0:
+        if len(content) == 0:
             return response
 
         capture_results = UrlOriginCaptor(content).capture_origin_locations().get_capture_results()

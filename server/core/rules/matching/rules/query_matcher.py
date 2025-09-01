@@ -3,7 +3,7 @@ import logging
 from server.core.config import ConfigLoader
 from server.core.har import HarEntryRequest
 
-from .base import MatcherRule
+from .base import MatcherRule, do_name_value_pairs_match
 
 
 _log = logging.getLogger(__file__)
@@ -19,4 +19,4 @@ class QueryMatcherRule(MatcherRule):
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
         _log.debug(f'Comparing entry query [{entry.query_params}] to incoming query [{incoming_request.query_params}].')
-        return entry.query_params == incoming_request.query_params
+        return do_name_value_pairs_match(entry.query_params, incoming_request.query_params)

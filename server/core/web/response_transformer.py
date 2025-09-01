@@ -15,7 +15,7 @@ class ResponseTransformer:
             return self._map_text_response(response)
 
     def _map_base64_response(self, response: HarEntryResponse) -> Response:
-        if response.content.text is not None:
+        if response.content.text != '':
             content = base64.b64decode(response.content.text)
         else:
             content = ''
@@ -27,14 +27,15 @@ class ResponseTransformer:
         )
 
     def _map_text_response(self, response: HarEntryResponse) -> Response:
+        headers = {header.name: header.value for header in response.headers}
         api_response = Response(
             content=response.content.text,
             status_code=response.status,
             media_type=response.content.mime_type,
-            headers=response.headers
+            headers=headers
         )
-        for name, value in response.cookies.items():
-            api_response.set_cookie(name, value)
+        for cookie in response.cookies:
+            api_response.set_cookie(cookie.name, cookie.value)
         return api_response
 
 

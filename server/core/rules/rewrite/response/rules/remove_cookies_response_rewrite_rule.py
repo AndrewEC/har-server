@@ -21,8 +21,5 @@ class RemoveCookiesResponseRewriteRule(ResponseRewriteRule):
             raise MissingConfigPropertyException(self.get_name(), 'removable_cookies')
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
-        for cookie in self._removable:
-            if cookie not in response.cookies:
-                continue
-            response.cookies.pop(cookie)
+        response.cookies = [cookie for cookie in response.cookies if cookie.name not in self._removable]
         return response

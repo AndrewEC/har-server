@@ -3,7 +3,7 @@ import logging
 from server.core.config import ConfigLoader
 from server.core.har import HarEntryRequest
 
-from .base import MatcherRule
+from .base import MatcherRule, do_name_value_pairs_match
 
 
 _log = logging.getLogger(__file__)
@@ -19,4 +19,4 @@ class HeadersMatcherRule(MatcherRule):
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
         _log.debug(f'Comparing entry headers [{entry.headers}] to incoming header [{incoming_request.headers}].')
-        return entry.headers == incoming_request.headers
+        return do_name_value_pairs_match(entry.headers, incoming_request.headers)

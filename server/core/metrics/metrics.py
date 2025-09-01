@@ -18,8 +18,8 @@ class Metric:
     def to_dict(self) -> Dict[str, Any]:
         return {
             'entry_id': self.entry_id,
-            'response': self.response.to_dict(),
-            'requests': [request.to_dict() for request in self.requests]
+            'response': self.response.model_dump(),
+            'requests': [request.model_dump() for request in self.requests]
         }
 
 

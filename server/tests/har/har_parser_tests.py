@@ -1,10 +1,10 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 from pathlib import Path
 
 import unittest
 
 from server.core.config import set_root_path, get_root_path
-from server.core.har import HarParser, HarEntryRequest, HarEntryResponse
+from server.core.har import HarParser, HarEntryRequest, HarEntryResponse, NameValuePair
 
 
 class HarParserTest(unittest.TestCase):
@@ -30,11 +30,11 @@ class HarParserTest(unittest.TestCase):
 
             self.assertIsNotNone(har_file_contents)
             self.assertEqual(1, len(har_file_contents))
-            self.assertEqual(1, len(har_file_contents[0].entries))
+            self.assertEqual(1, len(har_file_contents[0].log.entries))
 
-            self._assert_request(har_file_contents[0].entries[0].request)
+            self._assert_request(har_file_contents[0].log.entries[0].request)
 
-            self._assert_response(har_file_contents[0].entries[0].response)
+            self._assert_response(har_file_contents[0].log.entries[0].response)
 
         finally:
             set_root_path(previous_path)
@@ -58,8 +58,7 @@ class HarParserTest(unittest.TestCase):
             "query-param-name": "query-param-value"
         }, query_params)
 
-        request_body: Dict[Any, Any] = request.body # type: ignore
-        self.assertIsNotNone(request_body)
+        request_body = request.post_data.parsed_json
 
         request_body_name = request_body.get('name')
         self.assertEqual('test_name', request_body_name)
@@ -70,13 +69,13 @@ class HarParserTest(unittest.TestCase):
     def _assert_response(self, response: HarEntryResponse):
         self.assertIsNotNone(response)
     
-    def _assert_has_entries(self, expected: Dict[str, str], actual: Dict[str, str]):
-        self.assertIsNotNone(actual)
+    def _assert_has_entries(self, expected: Dict[str, str], actual: List[NameValuePair]):
+        actual_dit = {a.name: a.value for a in actual}
         self.assertEqual(len(expected), len(actual))
         for key, value in expected.items():
-            self._assert_has_entry(key, value, actual)
+            self._assert_has_entry(key, value, actual_dit)
 
-    def _assert_has_entry(self, name: str, value: str, entries: Dict[str, str]):
+    def _assert_has_entry(self, name: str, value: str, entries: Dict[str, Any]):
         entry_value = entries.get(name)
         self.assertIsNotNone(entry_value, f'Expected dict to contain entry with key [{name}]')
         self.assertEqual(entry_value, value, f'Expected entry [{name}] to have a value of [{value}].')

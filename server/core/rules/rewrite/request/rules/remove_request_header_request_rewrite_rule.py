@@ -27,8 +27,5 @@ class RemoveRequestHeaderRequestRewriteRule(RequestRewriteRule):
         return self._remove_header_from_request(request)
 
     def _remove_header_from_request(self, request: HarEntryRequest) -> HarEntryRequest:
-        for removable in self._removable_headers:
-            if removable not in request.headers:
-                continue
-            request.headers.pop(removable)
+        request.headers = [header for header in request.headers if header.name not in self._removable_headers]
         return request

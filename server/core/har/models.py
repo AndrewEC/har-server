@@ -1,32 +1,10 @@
 from __future__ import annotations
-from typing import Dict, Any, Tuple
-from pathlib import Path
+from typing import Any, List, Dict
 from urllib.parse import unquote, urlparse
-import json
 import uuid
+import json
 
-
-def _parse_request_body(request: Dict[Any, Any]) -> Tuple[str, Dict[Any, Any] | None] | None:
-    post_data = request.get('postData')
-    if post_data is None:
-        return None
-
-    mimetype = post_data.get('mimeType')
-    if mimetype is None:
-        return None
-
-    if mimetype == 'application/json':
-        text = post_data.get('text')
-        payload = json.loads(text) if text is not None else None
-        return text, payload
-    elif mimetype == 'application/x-www-form-urlencoded':
-        text = post_data.get('text')
-        params = post_data.get('params')
-        if params is None:
-            return None
-        return text, {param['name']: param['value'] for param in params}
-
-    return None
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HarParseError(Exception):
@@ -35,77 +13,77 @@ class HarParseError(Exception):
         super().__init__(message, e)
 
 
-class HarEntryRequest:
+class NameValuePair(BaseModel):
+    name: str
+    value: str
 
-    def __init__(self, request: Dict[Any, Any]):
-        self.method: str = request['method']
-        self.url: str = request['url']
-        self.path: str = unquote(urlparse(self.url).path)
-        self.query_params: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['queryString']}
-        self.headers: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['headers']}
-        self.cookies: Dict[str, str] = {param['name'].lower(): param['value'] for param in request['cookies']}
-        self.body = None
-        self.body_string = None
-
-        result = _parse_request_body(request)
-        if result is not None:
-            self.body_string = result[0]
-            self.body = result[1]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'method': self.method,
-            'path': self.path,
-            'query_params': self.query_params,
-            'headers': self.headers,
-            'cookies': self.cookies,
-            'body': self.body
-        }
+    def model_post_init(self, context: Any):
+        self.name = self.name.lower()
 
 
-class HarEntryResponseContent:
+class RequestPostData(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
 
-    def __init__(self, content: Dict[Any, Any]):
-        self.mime_type: str | None = content.get('mimeType')
-        self.encoding: str | None = content.get('encoding')
-        self.text: str | None = content.get('text')
+    mime_type: str = Field(alias='mimeType', default='')
+    params: List[NameValuePair] = []
+    text: str = ''
+    parsed_json: Dict[str, Any] = {}
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'mime_type': self.mime_type,
-            'encoding': self.encoding,
-            'text': self.text
-        }
-
-
-class HarEntryResponse:
-
-    def __init__(self, response: Dict[Any, Any]):
-        self.status: int = response['status']
-        self.headers = {header['name'].lower(): header['value'] for header in response['headers']}
-        self.content = HarEntryResponseContent(response['content'])
-        self.cookies = {cookie['name'].lower(): cookie['value'] for cookie in response['cookies']}
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'status': self.status,
-            'headers': self.headers,
-            'cookies': self.cookies,
-            'content': self.content.to_dict()
-        }
+    def model_post_init(self, context: Any):
+        self.mime_type = self.mime_type.lower()
+        if 'application/json' in self.mime_type:
+            self.parsed_json = json.loads(self.text)
 
 
-class HarEntry:
+class HarEntryRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
 
-    def __init__(self, parent: HarFileContent, entry: Dict[Any, Any]):
-        self.id = entry['id'] if 'id' in entry else str(uuid.uuid4())
-        self.parent = parent
-        self.request = HarEntryRequest(entry['request'])
-        self.response = HarEntryResponse(entry['response'])
+    method: str
+    url: str
+    path: str | None = None
+    query_params: List[NameValuePair] = Field(alias='queryString')
+    headers: List[NameValuePair]
+    cookies: List[NameValuePair]
+    post_data: RequestPostData = Field(alias='postData', default=RequestPostData())
+
+    def model_post_init(self, context: Any):
+        self.path = unquote(urlparse(self.url).path)
+        self.method = self.method.lower()
 
 
-class HarFileContent:
+class ResponseContent(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
 
-    def __init__(self, file: Path, contents: Dict[Any, Any]):
-        self.source_file = file
-        self.entries = [HarEntry(self, entry) for entry in contents['log']['entries']]
+    mime_type: str = Field(alias='mimeType', default='')
+    encoding: str = ''
+    text: str = ''
+
+
+class HarEntryResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+
+    status: int
+    headers: List[NameValuePair]
+    cookies: List[NameValuePair]
+    content: ResponseContent
+
+
+class HarEntry(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    id: str = ''
+    request: HarEntryRequest
+    response: HarEntryResponse
+
+    def model_post_init(self, context: Any):
+        if self.id == '':
+            self.id = str(uuid.uuid4())
+
+
+class Log(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    entries: List[HarEntry]
+
+
+class HarFileContent(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    log: Log

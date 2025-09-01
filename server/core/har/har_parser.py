@@ -48,7 +48,7 @@ class HarParser:
                 _log.info(f'Parsing har file: [{file_path}]')
 
                 parsed_har_file = self._parse_har_file(file_path)
-                if len(parsed_har_file.entries) == 0:
+                if len(parsed_har_file.log.entries) == 0:
                     _log.info(f'Excluding har file since it has no entries: [{file_path}]')
                     continue
 
@@ -61,7 +61,7 @@ class HarParser:
     def _do_parse_har_file(self, har_path: Path) -> HarFileContent:
         with open(har_path, 'r', encoding='utf-8') as file:
             contents = ''.join(file.readlines())
-            return HarFileContent(har_path, json.loads(contents))
+            return HarFileContent(**json.loads(contents))
 
     def _parse_har_file(self, har_path: Path) -> HarFileContent:
         try:

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
+from server.core.har import NameValuePair
 from server.core.web.response_transformer import ResponseTransformer
 
 
@@ -13,8 +14,8 @@ class ResponseTransformerTest(unittest.TestCase):
                 text='response_content',
                 mime_type='text/plain'
             ),
-            headers={'header-name': 'header-value'},
-            cookies={'cookie-name': 'cookie-value'}
+            headers=[NameValuePair(name='header-name', value='header-value')],
+            cookies=[NameValuePair(name='cookie-name', value='cookie-value')]
         )
 
         actual = ResponseTransformer().map_to_fastapi_response(initial_response)
@@ -24,8 +25,8 @@ class ResponseTransformerTest(unittest.TestCase):
         self.assertEqual(initial_response.content.text, actual.body.decode('utf-8')) # type: ignore
 
         for header in initial_response.headers:
-            self.assertIn(header, actual.headers)
-            self.assertEqual(initial_response.headers[header], actual.headers[header])
+            self.assertIn(header.name, actual.headers)
+            self.assertEqual(header.value, actual.headers[header.name])
     
     def test_map_to_fastapi_response_base64_content(self):
         initial_response = Mock(
@@ -35,8 +36,8 @@ class ResponseTransformerTest(unittest.TestCase):
                 text='cmVzcG9uc2VfY29udGVudA==',
                 mime_type='image/png'
             ),
-            headers={'header-name': 'header-value'},
-            cookies={'cookie-name': 'cookie-value'}
+            headers=[NameValuePair(name='header-name', value='header-value')],
+            cookies=[NameValuePair(name='cookie-name', value='cookie-value')]
         )
 
         actual = ResponseTransformer().map_to_fastapi_response(initial_response)

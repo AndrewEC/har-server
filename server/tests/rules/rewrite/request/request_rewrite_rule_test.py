@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
+from server.core.har import NameValuePair
 from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.request.rules import (
     RemoveQueryParamsRequestRewriteRule,
@@ -23,18 +24,17 @@ class RequestRewriteRuleTest(unittest.TestCase):
         stub_config.rewrite.request.config.removable_query_params = [_REMOVABLE_PARAM]
         mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
-        request = Mock(query_params={
-            _REMOVABLE_PARAM: 'removable-value',
-            _NON_REMOVABLE_PARAM: 'non-removable-value'
-        })
+        request = Mock(query_params=[
+            NameValuePair(name=_REMOVABLE_PARAM, value='removable-value'),
+            NameValuePair(name=_NON_REMOVABLE_PARAM, value='non-removable-value')
+        ])
 
         rule = RemoveQueryParamsRequestRewriteRule()
         rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.query_params))
-        self.assertNotIn(_REMOVABLE_PARAM, request.query_params)
-        self.assertIn(_NON_REMOVABLE_PARAM, request.query_params)
+        self.assertEqual(_NON_REMOVABLE_PARAM, request.query_params[0].name)
 
         mock_config_loader.get_app_config.assert_called_once()
 
@@ -44,18 +44,17 @@ class RequestRewriteRuleTest(unittest.TestCase):
         stub_config.rewrite.request.config.removable_cookies = [_REMOVABLE_PARAM]
         mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
-        request = Mock(cookies={
-            _REMOVABLE_PARAM: 'removable-value',
-            _NON_REMOVABLE_PARAM: 'non-removable-value'
-        })
+        request = Mock(cookies=[
+            NameValuePair(name=_REMOVABLE_PARAM, value='removable-value'),
+            NameValuePair(name=_NON_REMOVABLE_PARAM, value='non-removable-value')
+        ])
 
         rule = RemoveCookieRequestRewriteRule()
         rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.cookies))
-        self.assertNotIn(_REMOVABLE_PARAM, request.cookies)
-        self.assertIn(_NON_REMOVABLE_PARAM, request.cookies)
+        self.assertEqual(_NON_REMOVABLE_PARAM, request.cookies[0].name)
 
         mock_config_loader.get_app_config.assert_called_once()
 
@@ -65,17 +64,16 @@ class RequestRewriteRuleTest(unittest.TestCase):
         stub_config.rewrite.request.config.removable_headers = [_REMOVABLE_PARAM]
         mock_config_loader.get_app_config = Mock(return_value=stub_config)
 
-        request = Mock(headers={
-            _REMOVABLE_PARAM: 'removable-value',
-            _NON_REMOVABLE_PARAM: 'non-removable-value'
-        })
+        request = Mock(headers=[
+            NameValuePair(name=_REMOVABLE_PARAM, value='removable-value'),
+            NameValuePair(name=_NON_REMOVABLE_PARAM, value='non-removable-value')
+        ])
 
         rule = RemoveRequestHeaderRequestRewriteRule()
         rule.initialize(mock_config_loader)
         request = rule.rewrite_incoming_http_request(request)
 
         self.assertEqual(1, len(request.headers))
-        self.assertNotIn(_REMOVABLE_PARAM, request.headers)
-        self.assertIn(_NON_REMOVABLE_PARAM, request.headers)
+        self.assertEqual(_NON_REMOVABLE_PARAM, request.headers[0].name)
 
         mock_config_loader.get_app_config.assert_called_once()

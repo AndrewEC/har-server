@@ -27,8 +27,5 @@ class RemoveQueryParamsRequestRewriteRule(RequestRewriteRule):
         return self._remove_params(request)
 
     def _remove_params(self, request: HarEntryRequest) -> HarEntryRequest:
-        for param in self._removable:
-            if param not in request.query_params:
-                continue
-            request.query_params.pop(param)
+        request.query_params = [param for param in request.query_params if param.name not in self._removable]
         return request

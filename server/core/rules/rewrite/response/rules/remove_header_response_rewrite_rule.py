@@ -21,8 +21,5 @@ class RemoveHeaderResponseRewriteRule(ResponseRewriteRule):
             raise MissingConfigPropertyException(self.get_name(), 'removable_headers')
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
-        for removable in self._removable:
-            if removable not in response.headers:
-                continue
-            response.headers.pop(removable)
+        response.headers = [header for header in response.headers if header.name not in self._removable]
         return response
