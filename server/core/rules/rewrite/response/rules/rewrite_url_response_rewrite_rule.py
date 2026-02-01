@@ -61,6 +61,7 @@ class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
         start_index = captured.start_index - modifier
         origin = content[start_index:start_index + captured.length]
         if origin in excluded_domains:
+            _log.debug(f'Skipping excluded domain: [{origin}]')
             return content
         _log.debug(f'Replacing with localhost: [{origin}]')
         return content[:start_index] + _LOCALHOST + content[start_index + captured.length:]

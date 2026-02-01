@@ -4,7 +4,6 @@ from fastapi import FastAPI
 
 from server.core.config import with_config_loader, with_config_parser
 from server.core.debug import enable_debug_logs
-from server.core.har import with_har_parser
 
 from .browser_open import open_browser_in_background
 
@@ -17,7 +16,5 @@ async def lifespan(app: FastAPI):
         enable_debug_logs()
 
     open_browser_in_background(config_loader)
-
-    with_har_parser().get_har_file_contents()
 
     yield

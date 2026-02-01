@@ -2,6 +2,7 @@ from typing import Dict, Any, Annotated
 import logging
 from functools import lru_cache
 import copy
+import json
 
 from fastapi import Depends
 
@@ -18,10 +19,10 @@ class ConfigLoader:
         user_defined_config = config_parser.parse_config_yml()
         if user_defined_config is not None:
             updated_config = self._rewrite_keys(user_defined_config)
-            _log.info(f'Loading user defined app config of: [{updated_config}].')
             self._app_config = AppConfig(**updated_config)
+            _log.info(f'Loaded user defined app config of: [{json.dumps(updated_config, indent=4)}].')
         else:
-            _log.info('No user defined app config provided. Loading default app config.')
+            _log.info('No user defined config provided. Using default config.')
             self._app_config = AppConfig()
 
     def _rewrite_keys(self, config: Dict[Any, Any]) -> Dict[Any, Any]:
@@ -34,10 +35,11 @@ class ConfigLoader:
         updated: Dict[Any, Any] = dict()
 
         for key, value in config.items():
-            updated[key.replace('-', '_')] = value
-
+            updated_key = key.replace('-', '_')
             if isinstance(value, dict):
-                updated[key] = self._rewrite_keys(value)  # type: ignore
+                updated[updated_key] = self._rewrite_keys(value)  # type: ignore
+            else:
+                updated[updated_key] = value
 
         return updated
 

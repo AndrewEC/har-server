@@ -14,17 +14,11 @@ _log = logging.getLogger(__file__)
 
 class HarParser:
 
-    def __init__(self):
-        self._har_file_contents: List[HarFileContent] | None = None
-
     def get_har_file_contents(self) -> List[HarFileContent]:
         """
         Parses all the files within the har folder that have a .har extension.
 
         This will also search through nested directories to find addition files with the .har extension.
-
-        This will cache the parsing results after the first invocation and will return the cached result
-        on subsequent invocations.
 
         :return: The list of parsed har files. This will return the parsed har file content even if the har file
             did not contain any entries. (Meaning the file is effectively empty and won't change the behaviour of the
@@ -32,8 +26,6 @@ class HarParser:
         :raise HarParseError: if an error occurs while parsing any of the har files. This error will contain
             the original error that caused the parsing to fail.
         """
-        if self._har_file_contents is not None:
-            return self._har_file_contents
 
         parsed: List[HarFileContent] = []
         har_root_folder = get_root_path()
@@ -53,8 +45,6 @@ class HarParser:
                     continue
 
                 parsed.append(parsed_har_file)
-
-        self._har_file_contents = parsed
 
         return parsed
 

@@ -4,6 +4,10 @@
 from pathlib import Path
 
 
+_DESTINATION_NAME = 'ConfigurationProperties.md'
+_TEMP_NAME = 'temp-ConfigurationProperties.md'
+
+
 def _convert():
     docs = Path('./configuration_properties_docs.csv').absolute()
     if not docs.is_file():
@@ -13,7 +17,7 @@ def _convert():
     with open(docs, 'r', encoding='utf-8') as file:
         lines = [line.strip() for line in file.readlines()]
 
-    markdown = Path(__file__).absolute().parent.parent.joinpath('ConfigurationProperties.md')
+    markdown = Path(__file__).absolute().parent.parent.joinpath(_TEMP_NAME)
     if markdown.is_file():
         markdown.unlink()
 
@@ -23,6 +27,14 @@ def _convert():
         file.write(_create_heading_separator(lines[0]))
         for i in range(1, len(lines)):
             file.write(_to_markdown_line(lines[i]))
+
+    final_destination = markdown.parent.joinpath(_DESTINATION_NAME)
+    if final_destination.is_file():
+        print(f'Removing old markdown file from: [{final_destination}].')
+        final_destination.unlink()
+
+    print(f'Renaming [{_TEMP_NAME}] to [{_DESTINATION_NAME}].')
+    markdown.rename(final_destination)
 
 
 def _to_markdown_line(line: str) -> str:

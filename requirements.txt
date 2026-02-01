@@ -1,9 +1,9 @@
-click==8.2.1
-fastapi==0.116.1
-uvicorn==0.35.0
-PyYAML==6.0.2
+click==8.3.1
+fastapi==0.128.0
+uvicorn==0.40.0
+PyYAML==6.0.3
 httpx==0.28.1
-coverage==7.10.4
+coverage==7.13.2
 flake8==7.3.0
-pip_audit==2.9.0
-flake8-bugbear==24.12.12
+pip_audit==2.10.0
+flake8-bugbear==25.11.29

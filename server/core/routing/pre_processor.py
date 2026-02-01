@@ -73,7 +73,7 @@ class PreProcessor:
         return [value for i, value in enumerate(entries) if i not in indexes_to_exclude]
 
 
-@lru_cache
+@lru_cache()
 def with_pre_processor(config_loader: Annotated[ConfigLoader, Depends(with_config_loader)],
                        exclusion_filter: Annotated[ExclusionFilter, Depends(with_exclusion_filter)],
                        request_rewriter: Annotated[RequestRewriter, Depends(with_request_rewriter)],

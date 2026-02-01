@@ -27,10 +27,10 @@ async def get(request: Request,
               full_path: str,
               route_map: Annotated[RouteMap, Depends(with_route_map)],
               response_transformer: Annotated[ResponseTransformer, Depends(with_response_transformer)],
-              metrics: Annotated[MetricRecorder, Depends(with_metric_recorder)]):
+              metric_recorder: Annotated[MetricRecorder, Depends(with_metric_recorder)]):
 
-    if metrics.is_enabled() and full_path == '__metrics__':
-        mets = metrics.get_metrics()
+    if metric_recorder.is_enabled() and full_path == '__metrics__':
+        mets = metric_recorder.get_metrics()
         _log.debug(f'Serving metrics [{mets}]')
         return JSONResponse(mets)
 
