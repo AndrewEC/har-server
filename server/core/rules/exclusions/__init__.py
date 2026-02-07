@@ -1,1 +1,1 @@
-from .exclusion_filter import with_exclusion_filter, ExclusionFilter
+from .exclusion_filter import with_exclusion_filter as with_exclusion_filter, ExclusionFilter as ExclusionFilter

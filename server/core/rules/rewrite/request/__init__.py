@@ -1,1 +1,1 @@
-from .request_rewriter import RequestRewriter, with_request_rewriter
+from .request_rewriter import RequestRewriter as RequestRewriter, with_request_rewriter as with_request_rewriter

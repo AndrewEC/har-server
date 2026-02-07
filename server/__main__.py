@@ -1,15 +1,18 @@
+from pathlib import Path
+
 import click
 import uvicorn
 
 from server.core.config import set_root_path
 from server.core.web import app
 
-from server.logging_conf import *  # Required to enable logging
+from server.logging_conf import configure_logging
 
 
 @click.command()
 @click.argument('har')
 def run(har: str):
+    configure_logging()
     har_folder = Path(har)
     if not har_folder.is_dir():
         return print('Har argument must point to a directory.')

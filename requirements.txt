@@ -4,6 +4,6 @@ uvicorn==0.40.0
 PyYAML==6.0.3
 httpx==0.28.1
 coverage==7.13.2
-flake8==7.3.0
 pip_audit==2.10.0
-flake8-bugbear==25.11.29
+ruff==0.15.0
+

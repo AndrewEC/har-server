@@ -1,1 +1,2 @@
-from .response_rewriter import ResponseRewriter, with_response_rewriter
+from .response_rewriter import ResponseRewriter as ResponseRewriter, with_response_rewriter as with_response_rewriter
+

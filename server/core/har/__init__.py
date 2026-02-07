@@ -1,11 +1,11 @@
-from .har_parser import HarParser, with_har_parser
+from .har_parser import HarParser as HarParser, with_har_parser as with_har_parser
 from .models import (
-    HarFileContent,
-    HarEntry,
-    HarEntryRequest,
-    HarEntryResponse,
-    HarParseError,
-    ResponseContent,
-    NameValuePair,
-    RequestPostData
+    HarFileContent as HarFileContent,
+    HarEntry as HarEntry,
+    HarEntryRequest as HarEntryRequest,
+    HarEntryResponse as HarEntryResponse,
+    HarParseError as HarParseError,
+    ResponseContent as ResponseContent,
+    NameValuePair as NameValuePair,
+    RequestPostData as RequestPostData
 )

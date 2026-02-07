@@ -3,7 +3,7 @@ param(
         "Activate",
         "All",
         "Audit",
-        "Flake",
+        "Lint",
         "Install",
         "IntegrationTests",
         "Tests"
@@ -18,7 +18,7 @@ Invoke-ActivateScript
 switch ($ScriptAction) {
     "All" {
         Invoke-InstallScript
-        Invoke-FlakeScript
+        Invoke-RuffScript
         Invoke-TestScript 80 {
             coverage run `
                 --omit=./server/tests/* `
@@ -32,7 +32,7 @@ switch ($ScriptAction) {
         Invoke-AuditScript
     }
     "Audit" { Invoke-AuditScript }
-    "Flake" { Invoke-FlakeScript }
+    "Lint" { Invoke-RuffScript }
     "Install" { Invoke-InstallScript }
     "IntegrationTests" {
         Invoke-OtherScript "Running integration tests" @(0) {

@@ -3,12 +3,16 @@ import unittest
 from fastapi.testclient import TestClient
 
 from server.core.web import app
-from server.logging_conf import *
+from server.logging_conf import configure_logging
 
 from .test_data import TestData
 
 
 class IntegrationTests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        configure_logging()
 
     def test_match_request(self):
         with TestData('request_matching'):
@@ -46,7 +50,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertFalse('response-cookie-name' in response.cookies)
                 self.assertTrue('second-response-cookie-name' in response.cookies)
                 self.assertEqual('second-response-cookie-value', response.cookies['second-response-cookie-name'])
-    
+
     def test_metrics(self):
         with TestData('metrics'):
             with TestClient(app) as client:

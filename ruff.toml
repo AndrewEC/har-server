@@ -1,0 +1,15 @@
+[lint]
+# Enable flake8-bugbear (`B`) rules, in addition to the defaults.
+select = ["E4", "E7", "E9", "F", "B"]
+
+# Disable the line-length rule (E501).
+ignore = ["E501"]
+
+# Ignore import violations.
+[lint.per-file-ignores]
+"**/tests/**/__init__.py" = ["F401", "E402", "F403"]
+"**/__run_all.py" = ["F401", "E402", "F403"]
+
+[format]
+quote-style = "single"
+

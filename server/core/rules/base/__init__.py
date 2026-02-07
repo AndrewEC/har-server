@@ -1,10 +1,10 @@
-from .rule_container import RuleContainer
-from .rule import Rule
+from .rule_container import RuleContainer as RuleContainer
+from .rule import Rule as Rule
 from .error import (
-    RuleNotFoundException,
-    DuplicateRuleException,
-    RuleInitializationFailedException,
-    ContainerRulesAlreadyEnabledException,
-    RuleFailedException,
-    MissingConfigPropertyException
+    RuleNotFoundException as RuleNotFoundException,
+    DuplicateRuleException as DuplicateRuleException,
+    RuleInitializationFailedException as RuleInitializationFailedException,
+    ContainerRulesAlreadyEnabledException as ContainerRulesAlreadyEnabledException,
+    RuleFailedException as RuleFailedException,
+    MissingConfigPropertyException as MissingConfigPropertyException
 )

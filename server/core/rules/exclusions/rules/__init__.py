@@ -1,4 +1,4 @@
-from .bad_status_exclusion_rule import BadStatusExclusionRule
-from .invalid_size_exclusion_rule import InvalidSizeExclusionRule
-from .http_method_exclusion_rule import HttpMethodExclusionRule
-from .base import ExclusionRule
+from .bad_status_exclusion_rule import BadStatusExclusionRule as BadStatusExclusionRule
+from .invalid_size_exclusion_rule import InvalidSizeExclusionRule as InvalidSizeExclusionRule
+from .http_method_exclusion_rule import HttpMethodExclusionRule as HttpMethodExclusionRule
+from .base import ExclusionRule as ExclusionRule
