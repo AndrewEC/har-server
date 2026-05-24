@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type
+from typing import Annotated, List, Type, Final
 from functools import lru_cache
 import logging
 
@@ -24,7 +24,7 @@ _log = logging.getLogger(__file__)
 
 class RequestMatcher:
 
-    _MATCHERS: List[Type[MatcherRule]] = [
+    _MATCHERS: Final[List[Type[MatcherRule]]] = [
         MethodMatcherRule,
         PathMatcherRule,
         QueryMatcherRule,

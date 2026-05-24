@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type
+from typing import Annotated, List, Type, Final
 from functools import lru_cache
 import copy
 import logging
@@ -22,7 +22,7 @@ _log = logging.getLogger(__file__)
 
 class ResponseRewriter:
 
-    _RESPONSE_REWRITE_RULES: List[Type[ResponseRewriteRule]] = [
+    _RESPONSE_REWRITE_RULES: Final[List[Type[ResponseRewriteRule]]] = [
         RewriteUrlResponseRewriteRule,
         RemoveHeaderResponseRewriteRule,
         RemoveCookiesResponseRewriteRule

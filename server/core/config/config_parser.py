@@ -1,5 +1,4 @@
 from typing import Dict, Any
-from functools import lru_cache
 import logging
 import copy
 
@@ -41,6 +40,16 @@ class ConfigParser:
         return copy.deepcopy(self._cached_contents)
 
 
-@lru_cache()
+_global_config_parser: ConfigParser | None = None
+
 def with_config_parser() -> ConfigParser:
-    return ConfigParser()
+    global _global_config_parser
+    if _global_config_parser is not None:
+        return _global_config_parser
+    _global_config_parser = ConfigParser()
+    return _global_config_parser
+
+
+def reset_config_parser():
+    global _global_config_parser
+    _global_config_parser = None

@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type
+from typing import Annotated, List, Type, Final
 from functools import lru_cache
 import logging
 
@@ -21,7 +21,7 @@ _log = logging.getLogger(__file__)
 
 class ExclusionFilter:
 
-    _EXCLUSION_RULES: List[Type[ExclusionRule]] = [
+    _EXCLUSION_RULES: Final[List[Type[ExclusionRule]]] = [
         BadStatusExclusionRule,
         InvalidSizeExclusionRule,
         HttpMethodExclusionRule

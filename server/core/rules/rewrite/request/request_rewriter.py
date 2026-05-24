@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type
+from typing import Annotated, List, Type, Final
 from functools import lru_cache
 from enum import Enum
 import copy
@@ -28,7 +28,7 @@ class _ModificationType(Enum):
 
 class RequestRewriter:
 
-    _REQUEST_REWRITE_RULES: List[Type[RequestRewriteRule]] = [
+    _REQUEST_REWRITE_RULES: Final[List[Type[RequestRewriteRule]]] = [
         RemoveQueryParamsRequestRewriteRule,
         RemoveRequestHeaderRequestRewriteRule,
         RemoveCookieRequestRewriteRule
@@ -40,7 +40,7 @@ class RequestRewriter:
             RequestRewriter._REQUEST_REWRITE_RULES
         )
 
-        rewrite_rules = rewrite_rules = config_loader.get_app_config().rewrite.request.rules
+        rewrite_rules = config_loader.get_app_config().rewrite.request.rules
         _log.info(f'Configured request rewrite rules: [{rewrite_rules}]')
         self._rule_container.enable_rules(config_loader, rewrite_rules)
 

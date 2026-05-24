@@ -1,6 +1,5 @@
 from typing import Dict, Any, Annotated
 import logging
-from functools import lru_cache
 import copy
 import json
 
@@ -47,6 +46,17 @@ class ConfigLoader:
         return copy.deepcopy(self._app_config)
 
 
-@lru_cache()
+_global_config: ConfigLoader | None = None
+
+
 def with_config_loader(parser: Annotated[ConfigParser, Depends(with_config_parser)]) -> ConfigLoader:
-    return ConfigLoader(parser)
+    global _global_config
+    if _global_config is not None:
+        return _global_config
+    _global_config = ConfigLoader(parser)
+    return _global_config
+
+
+def reset_config_loader():
+    global _global_config
+    _global_config = None

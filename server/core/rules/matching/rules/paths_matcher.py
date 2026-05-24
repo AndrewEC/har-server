@@ -23,7 +23,7 @@ class PathMatcherRule(MatcherRule):
 
     def matches(self, entry: HarEntryRequest, incoming_request: HarEntryRequest) -> bool:
         _log.debug(f'Comparing entry paths [{entry.path}] to incoming path [{incoming_request.path}].')
-        if PathMatcherRule._WILDCARD in entry.path:
+        if entry.path is not None and incoming_request.path is not None and PathMatcherRule._WILDCARD in entry.path:
             compiled = self._expressions.get(entry.path)
             if compiled is None:
                 expression = '^' + entry.path.replace('*', '.*').replace('/', '\\/') + '$'
