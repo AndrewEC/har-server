@@ -1,0 +1,37 @@
+debug:
+  enable-debug-logs: True
+  log-stack-traces: True
+
+request-matching:
+  rules:
+    - method
+    - path
+    - headers
+    - cookies
+    - query-params
+    - body
+
+rewrite:
+  request:
+    rules:
+      - remove-headers
+    config:
+      removable-headers:
+        - host
+        - accept
+        - accept-encoding
+        - connection
+        - content-length
+        - user-agent
+        - cookie
+  response:
+    rules:
+      - remove-headers
+    config:
+      removable-headers:
+        - host
+        - accept
+        - accept-encoding
+        - connection
+        - user-agent
+        - cookie

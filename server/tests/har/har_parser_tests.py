@@ -15,7 +15,7 @@ class HarParserTest(unittest.TestCase):
                          .parent
                          .joinpath('integration')
                          .joinpath('test_data')
-                         .joinpath('request_matching'))
+                         .joinpath('json_request_matching'))
         if not test_har_path.is_dir():
             raise ValueError(f'Could not find test data dir in expected location of: [{test_har_path}]')
 

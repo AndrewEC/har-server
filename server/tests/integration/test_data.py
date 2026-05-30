@@ -21,6 +21,12 @@ _CACHES: List[Any] = [
 
 class TestData:
 
+    class DataSets:
+        JSON_REQUEST_MATCHING = 'json_request_matching'
+        FORM_REQUEST_MATCHING = 'form_request_matching'
+        REWRITE_RESPONSE = 'rewrite_response'
+        METRICS = 'metrics'
+
     def __init__(self, folder_name: str):
         self._test_data_path = Path(__file__).absolute().parent.joinpath('test_data').joinpath(folder_name)
         if not self._test_data_path.is_dir():

@@ -1,63 +1,50 @@
 import unittest
-from unittest.mock import patch, Mock, PropertyMock
+from unittest.mock import patch, Mock, MagicMock
 
 from server.core.config import ConfigLoader, AppConfig
+from server.core.config.models import Matchers
+from server.core.har.models import RequestHashes
 from server.core.rules.matching import RequestMatcher
-from server.core.rules.base import RuleFailedException
 
-from server.tests.util import fully_qualified_name, fully_qualified_property_name
-
-
-_RULE_NAME = 'test-rule'
+from server.tests.util import fully_qualified_name
 
 
 class RequestMatcherTest(unittest.TestCase):
 
-    @patch(fully_qualified_property_name(RequestMatcher, '_MATCHERS'), new_callable=PropertyMock)
     @patch(fully_qualified_name(ConfigLoader))
-    def test_do_requests_match(self, mock_config_loader: ConfigLoader, mock_rules: Mock):
+    def test_find_matching_entry(self, mock_config_loader: ConfigLoader):
 
-        for test_case in [True, False]:
-            with self.subTest(expected=test_case):
-                request = Mock()
-                entry = Mock()
+        hashes = RequestHashes(query_params='query', headers='hashes', cookies='cookies', post_data='post-data')
+        different_hashes = RequestHashes(query_params='diff_query', headers='hashes', cookies='cookies', post_data='post-data')
 
-                mock_rule = Mock(
-                    get_name=Mock(return_value=_RULE_NAME),
-                    matches=Mock(return_value=test_case)
-                )
-                mock_rule_type = Mock(return_value=mock_rule)
-                mock_rules.return_value = [mock_rule_type]
+        arguments = [
+            (hashes, hashes, True),
+            (hashes, different_hashes, False)
+        ]
 
-                stub_config = AppConfig()
-                stub_config.request_matching.rules = [_RULE_NAME]
-                mock_config_loader.get_app_config = Mock(return_value = stub_config)
+        for sub_arguments in arguments:
+            with self.subTest(sub_arguments):
+                all_rules = [
+                    'method',
+                    'path',
+                    'query-params',
+                    'headers',
+                    'cookies',
+                    'body'
+                ]
+                mock_config_loader.get_app_config = Mock(return_value=AppConfig(request_matching=Matchers(rules=all_rules)))
 
-                actual = RequestMatcher(mock_config_loader).do_requests_match(entry, request)
-                self.assertEqual(test_case, actual)
+                har_entry = MagicMock(request=MagicMock(hashes=sub_arguments[0], path='/path', method='GET'))
+                request = MagicMock(hashes=sub_arguments[1], path='/path', method='GET')
+
+                request_matcher = RequestMatcher(mock_config_loader)
+                request_matcher.prime([har_entry])
+
+                actual = request_matcher.find_matching_entry(request)
+
+                if sub_arguments[2]:
+                    self.assertEqual(har_entry, actual)
+                else:
+                    self.assertIsNone(actual)
 
                 mock_config_loader.get_app_config.assert_called_once()
-                mock_rule.matches.assert_called_once_with(entry, request)
-
-    @patch(fully_qualified_property_name(RequestMatcher, '_MATCHERS'), new_callable=PropertyMock)
-    @patch(fully_qualified_name(ConfigLoader))
-    def test_do_requests_match_raises_exception_when_rule_raises_exception(self,
-                                                                           mock_config_loader: ConfigLoader,
-                                                                           mock_rules: Mock):
-        mock_rule = Mock(
-            get_name=Mock(return_value=_RULE_NAME),
-            matches=Mock(side_effect=Exception())
-        )
-        mock_rule_type = Mock(return_value=mock_rule)
-        mock_rules.return_value = [mock_rule_type]
-
-        stub_config = AppConfig()
-        stub_config.request_matching.rules = [_RULE_NAME]
-        mock_config_loader.get_app_config = Mock(return_value = stub_config)
-
-        with self.assertRaises(RuleFailedException) as context:
-            RequestMatcher(mock_config_loader).do_requests_match(Mock(), Mock())
-
-        self.assertIn(_RULE_NAME, str(context.exception))
-
-        mock_config_loader.get_app_config.assert_called_once()

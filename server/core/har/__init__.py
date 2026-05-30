@@ -7,5 +7,6 @@ from .models import (
     HarParseError as HarParseError,
     ResponseContent as ResponseContent,
     NameValuePair as NameValuePair,
-    RequestPostData as RequestPostData
+    RequestPostData as RequestPostData,
+    SupportedBodyContentTypes as SupportedBodyContentTypes
 )

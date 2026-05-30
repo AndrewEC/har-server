@@ -32,13 +32,10 @@ class PreProcessor:
 
     def process_entries(self, har_file_contents: List[HarFileContent]) -> List[HarEntry]:
         entries = list(chain(*[content.log.entries for content in har_file_contents]))
-        _log.info(f"[{len(entries)}] entries will be processed.")
+        _log.info(f"A total of [{len(entries)}] har entries were loaded.")
 
         entries = self._apply_exclusion_rules(entries)
         self._apply_rewrite_rules(entries)
-        entries = self._remove_duplicate_entries(entries)
-
-        _log.info(f'[{len(entries)}] har entries remain available.')
 
         return entries
 
@@ -56,21 +53,6 @@ class PreProcessor:
         _log.info('Pre-rewriting entry requests.')
         for entry in entries:
             entry.request = self._request_rewriter.apply_entry_request_rewrite_rules(entry.request)
-
-    def _remove_duplicate_entries(self, entries: List[HarEntry]) -> List[HarEntry]:
-        if not self._exclude_duplicates:
-            return entries
-
-        _log.info('Excluding duplicate entries by request.')
-
-        indexes_to_exclude: List[int] = []
-        for i in range(len(entries) - 1, -1, -1):
-            for j in range(i - 1, -1, -1):
-                if self._request_matcher.do_requests_match(entries[i].request, entries[j].request):
-                    indexes_to_exclude.append(i)
-                    break
-
-        return [value for i, value in enumerate(entries) if i not in indexes_to_exclude]
 
 
 @lru_cache()

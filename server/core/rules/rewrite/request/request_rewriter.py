@@ -59,6 +59,7 @@ class RequestRewriter:
                     request_copy = rule.rewrite_incoming_http_request(request_copy)
             except Exception as e:
                 raise RuleFailedException(self._rule_container.get_name(), name, e) from e
+        request_copy.compute_hashes()
         return request_copy
 
     def apply_browser_request_rewrite_rules(self, request: HarEntryRequest) -> HarEntryRequest:

@@ -40,10 +40,10 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
             incoming_request = Mock()
             mock_request_mapper.map_to_har_request = AsyncMock(return_value=incoming_request)
 
-            mock_request_matcher.do_requests_match = Mock(return_value=True)
-
             rewritten_incoming_request = Mock()
             mock_request_rewriter.apply_browser_request_rewrite_rules = Mock(return_value=rewritten_incoming_request)
+
+            mock_request_matcher.find_matching_entry = Mock(return_value=har_entry)
 
             rewritten_response = Mock()
             mock_response_rewriter.apply_response_rewrite_rules = Mock(return_value=rewritten_response)
@@ -70,7 +70,8 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
             mock_har_parser.get_har_file_contents.assert_called_once()
             mock_request_mapper.map_to_har_request.assert_called_once_with(request)
             mock_request_rewriter.apply_browser_request_rewrite_rules.assert_called_once_with(incoming_request)
-            mock_request_matcher.do_requests_match.assert_called_once_with(har_entry.request, rewritten_incoming_request)
+            mock_request_matcher.find_matching_entry.assert_called_once_with(rewritten_incoming_request)
+            mock_request_matcher.prime.assert_called_once()  # type: ignore
             mock_pre_processor.process_entries.assert_called_once_with(entries)
             mock_response_rewriter.apply_response_rewrite_rules.assert_called_once_with(har_entry_response)
             mock_metric_recorder.is_enabled.assert_called_once()

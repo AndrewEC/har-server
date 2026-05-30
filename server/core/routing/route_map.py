@@ -1,10 +1,10 @@
-from typing import Annotated, List
+from typing import Annotated
 from functools import lru_cache
 
 from fastapi import Depends
 from fastapi.requests import Request
 
-from server.core.har import with_har_parser, HarParser, HarEntry, HarEntryResponse
+from server.core.har import with_har_parser, HarParser, HarEntryResponse
 from server.core.metrics import MetricRecorder, with_metric_recorder
 from server.core.rules.rewrite.request import RequestRewriter, with_request_rewriter
 from server.core.rules.rewrite.response import ResponseRewriter, with_response_rewriter
@@ -31,7 +31,8 @@ class RouteMap:
         self._response_rewriter = response_rewriter
         self._metric_recorder = metric_recorder
 
-        self._entries: List[HarEntry] = pre_processor.process_entries(har_parser.get_har_file_contents())
+        entries = pre_processor.process_entries(har_parser.get_har_file_contents())
+        self._request_matcher.prime(entries)
 
     async def find_entry_for_request(self, request: Request) -> HarEntryResponse | None:
         """
@@ -48,13 +49,15 @@ class RouteMap:
         """
         incoming_request = await self._request_mapper.map_to_har_request(request)
         rewritten_incoming_request = self._request_rewriter.apply_browser_request_rewrite_rules(incoming_request)
-        for entry in self._entries:
-            if self._request_matcher.do_requests_match(entry.request, rewritten_incoming_request):
-                rewritten_response = self._response_rewriter.apply_response_rewrite_rules(entry.response)
-                if self._metric_recorder.is_enabled():
-                    self._metric_recorder.record(entry.id, rewritten_incoming_request, rewritten_response)
-                return rewritten_response
-        return None
+
+        matching_entry = self._request_matcher.find_matching_entry(rewritten_incoming_request)
+        if matching_entry is None:
+            return None
+
+        rewritten_response = self._response_rewriter.apply_response_rewrite_rules(matching_entry.response)
+        if self._metric_recorder.is_enabled():
+            self._metric_recorder.record(matching_entry.id, rewritten_incoming_request, rewritten_response)
+        return rewritten_response
 
 
 @lru_cache()

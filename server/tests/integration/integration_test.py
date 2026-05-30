@@ -14,8 +14,8 @@ class IntegrationTests(unittest.TestCase):
     def setUpClass(cls):
         configure_logging()
 
-    def test_match_request(self):
-        with TestData('request_matching'):
+    def test_match_json_request(self):
+        with TestData(TestData.DataSets.JSON_REQUEST_MATCHING):
             with TestClient(app) as client:
                 client.cookies = {'request-cookie-name': 'request-cookie-value'}
                 response = client.post(
@@ -35,9 +35,34 @@ class IntegrationTests(unittest.TestCase):
 
                 self.assertTrue('response-cookie-name' in response.cookies)
                 self.assertEqual('response-cookie-value', response.cookies['response-cookie-name'])
+    
+    def test_match_form_request(self):
+        with TestData(TestData.DataSets.FORM_REQUEST_MATCHING):
+            with TestClient(app) as client:
+                client.cookies = {'request-cookie-name': 'request-cookie-value'}
+                response = client.post(
+                    '/matching/endpoint',
+                    headers={
+                        'request-header-name': 'request-header-value',
+                        'content-type': 'application/x-www-form-urlencoded'
+                    },
+                    params={'query-param-name': 'query-param-value'},
+                    data={
+                        'name': 'test_name',
+                        'password': 'test_password'
+                    }
+                )
+                self.assertEqual(200, response.status_code)
+                self.assertEqual('Test Matching Response', response.content.decode('utf-8'))
+
+                self.assertTrue('response-header-name' in response.headers)
+                self.assertEqual('response-header-value', response.headers['response-header-name'])
+
+                self.assertTrue('response-cookie-name' in response.cookies)
+                self.assertEqual('response-cookie-value', response.cookies['response-cookie-name'])
 
     def test_rewrite_response(self):
-        with TestData('rewrite_response'):
+        with TestData(TestData.DataSets.REWRITE_RESPONSE):
             with TestClient(app) as client:
                 response = client.get('/rewrite/endpoint')
                 self.assertEqual(200, response.status_code)
@@ -52,7 +77,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertEqual('second-response-cookie-value', response.cookies['second-response-cookie-name'])
 
     def test_metrics(self):
-        with TestData('metrics'):
+        with TestData(TestData.DataSets.METRICS):
             with TestClient(app) as client:
                 response = client.get('/matching/endpoint')
                 self.assertEqual(200, response.status_code)

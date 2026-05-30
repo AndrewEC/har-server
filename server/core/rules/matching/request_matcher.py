@@ -1,22 +1,12 @@
-from typing import Annotated, List, Type, Final
+from typing import Annotated, List, Final, Dict, Callable
 from functools import lru_cache
 import logging
 
 from fastapi import Depends
 
 from server.core.config import ConfigLoader, with_config_loader
-from server.core.har import HarEntryRequest
-from server.core.rules.base import RuleContainer, RuleFailedException
-
-from .rules import (
-    MethodMatcherRule,
-    PathMatcherRule,
-    QueryMatcherRule,
-    HeadersMatcherRule,
-    CookieMatcherRule,
-    MatcherRule,
-    BodyMatcherRule
-)
+from server.core.har import HarEntryRequest, HarEntry
+from server.core.rules.base.error import RuleNotFoundException
 
 
 _log = logging.getLogger(__file__)
@@ -24,43 +14,43 @@ _log = logging.getLogger(__file__)
 
 class RequestMatcher:
 
-    _MATCHERS: Final[List[Type[MatcherRule]]] = [
-        MethodMatcherRule,
-        PathMatcherRule,
-        QueryMatcherRule,
-        HeadersMatcherRule,
-        CookieMatcherRule,
-        BodyMatcherRule
-    ]
+    _HASH_FUNCTIONS: Final[Dict[str, Callable[[HarEntryRequest], str]]] = {
+        'method': lambda request: request.method,
+        'path': lambda request: request.path if request.path is not None else '',
+        'query-params': lambda request: request.hashes.query_params,
+        'headers': lambda request: request.hashes.headers,
+        'cookies': lambda request: request.hashes.cookies,
+        'body': lambda request: request.hashes.post_data
+    }
 
     def __init__(self, config_loader: ConfigLoader):
-        self._rule_container = RuleContainer[MatcherRule]('request-matcher', RequestMatcher._MATCHERS)
+        self._enabled_rules = config_loader.get_app_config().request_matching.rules
+        _log.info(f'Configured request matching rules: [{self._enabled_rules}]')
 
-        rules = config_loader.get_app_config().request_matching.rules
-        _log.info(f'Configured request matching rules: [{rules}]')
-        self._rule_container.enable_rules(config_loader, rules)
+        all_rules = list(self._HASH_FUNCTIONS.keys())
+        for enabled_rule in self._enabled_rules:
+            if enabled_rule not in all_rules:
+                raise RuleNotFoundException('request-matcher', enabled_rule)
 
-    def do_requests_match(self, entry: HarEntryRequest, request: HarEntryRequest) -> bool:
-        """
-        This attempts to apply the configured matchers to test the har entry request against the incoming Http request
-        to determine if the incoming Http request matches the har entry request.
+        self._available_entries: Dict[str, HarEntry] = dict()
 
-        This will return false upon any matcher rule not matching the incoming request.
+    def prime(self, entries: List[HarEntry]):
+        _log.info('Priming request matcher hashes...')
+        for entry in entries:
+            key = self._get_complete_hash(entry.request)
+            if key not in self._available_entries:
+                self._available_entries[key] = entry
+        _log.info(f'[{len(self._available_entries)}] entries are available for request matching.')
 
-        :param entry: The request pulled from a har file to be tested against the incoming Http request.
-        :param request: The incoming Http request to be tested against the entry request.
-        :return: True if the incoming Http request matching the har entry request. Otherwise, false.
-        :raise MatchRuleNotFound: if any of the configured match rules could not be found.
-        :raise MatchRuleFailedException: if any of the matchers raised an exception.
-        """
-
-        for name, rule in self._rule_container.get_enabled_rules():
-            try:
-                if not rule.matches(entry, request):
-                    return False
-            except Exception as e:
-                raise RuleFailedException(self._rule_container.get_name(), name, e) from e
-        return True
+    def find_matching_entry(self, request: HarEntryRequest) -> HarEntry | None:
+        return self._available_entries.get(self._get_complete_hash(request))
+    
+    def _get_complete_hash(self, request: HarEntryRequest) -> str:
+        entry_hash = ''
+        for key in RequestMatcher._HASH_FUNCTIONS.keys():
+            if key in self._enabled_rules:
+                entry_hash = entry_hash + '-' + RequestMatcher._HASH_FUNCTIONS[key](request)
+        return entry_hash
 
 
 @lru_cache()
