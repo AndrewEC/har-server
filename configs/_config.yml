@@ -51,8 +51,6 @@ exclusions:
     - responses-with-invalid-size
     - requests-with-http-method
   config:
-    exclude-duplicate-requests: True
-    pre-apply: True
     removable-http-methods:
       - HEAD
     removable-statuses:

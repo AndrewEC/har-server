@@ -21,7 +21,6 @@ class RequestRewriteConfig(BaseModel):
     removable_cookies: List[str] = []
     removable_query_params: List[str] = []
     removable_headers: List[str] = []
-    pre_apply: bool = False
 
     def model_post_init(self, context: Any):
         self.removable_cookies = make_lowercase(self.removable_cookies)
@@ -58,8 +57,6 @@ class ResponseRewriteRules(BaseModel):
 class ExclusionConfig(BaseModel):
     removable_statuses: List[int] = []
     removable_http_methods: List[str] = []
-    pre_apply: bool = False
-    exclude_duplicate_requests: bool = False
 
     def model_post_init(self, context: Any):
         self.removable_http_methods = make_lowercase(self.removable_http_methods)

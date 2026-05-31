@@ -5,7 +5,6 @@ import logging
 
 from fastapi import Depends
 
-from server.core.config import ConfigLoader, with_config_loader
 from server.core.har.models import HarFileContent, HarEntry
 from server.core.rules.exclusions import ExclusionFilter, with_exclusion_filter
 from server.core.rules.rewrite.request import RequestRewriter, with_request_rewriter
@@ -17,18 +16,14 @@ _log = logging.getLogger(__file__)
 
 class PreProcessor:
 
-    def __init__(self, config_loader: ConfigLoader,
+    def __init__(self,
                  exclusion_filter: ExclusionFilter,
                  request_rewriter: RequestRewriter,
                  request_matcher: RequestMatcher):
 
-        app_config = config_loader.get_app_config()
-
         self._exclusion_filter = exclusion_filter
         self._request_rewriter = request_rewriter
         self._request_matcher = request_matcher
-
-        self._exclude_duplicates = app_config.exclusions.config.exclude_duplicate_requests
 
     def process_entries(self, har_file_contents: List[HarFileContent]) -> List[HarEntry]:
         entries = list(chain(*[content.log.entries for content in har_file_contents]))
@@ -56,9 +51,8 @@ class PreProcessor:
 
 
 @lru_cache()
-def with_pre_processor(config_loader: Annotated[ConfigLoader, Depends(with_config_loader)],
-                       exclusion_filter: Annotated[ExclusionFilter, Depends(with_exclusion_filter)],
+def with_pre_processor(exclusion_filter: Annotated[ExclusionFilter, Depends(with_exclusion_filter)],
                        request_rewriter: Annotated[RequestRewriter, Depends(with_request_rewriter)],
                        request_matcher: Annotated[RequestMatcher, Depends(with_request_matcher)]) -> PreProcessor:
 
-    return PreProcessor(config_loader, exclusion_filter, request_rewriter, request_matcher)
+    return PreProcessor(exclusion_filter, request_rewriter, request_matcher)
