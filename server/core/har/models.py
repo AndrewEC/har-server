@@ -63,10 +63,6 @@ class HarEntryRequest(BaseModel):
     def model_post_init(self, context: Any):
         self.path = unquote(urlparse(self.url).path)
         self.method = self.method.lower()
-        self.compute_hashes()
-
-    def compute_hashes(self):
-        self.hashes = _hash_request_properties(self)
 
 
 class ResponseContent(BaseModel):
@@ -105,32 +101,3 @@ class Log(BaseModel):
 class HarFileContent(BaseModel):
     model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
     log: Log
-
-
-def _hash_pairs(pairs: List[NameValuePair]) -> str:
-    if len(pairs) == 0:
-        return ''
-
-    sorted_pairs = sorted(pairs, key=lambda x: x.name)
-    pairs_string = '&'.join([f'{pair.name}={pair.value}' for pair in sorted_pairs])
-    return str(hash(pairs_string))
-
-
-def _hash_body(request: HarEntryRequest) -> str:
-    if request.post_data.mime_type == SupportedBodyContentTypes.APPLICATION_JSON:
-        json_text = json.dumps(request.post_data.parsed_json, sort_keys=True)
-        return str(hash(json_text))
-    elif request.post_data.mime_type == SupportedBodyContentTypes.FORM_URL_ENCODED:
-        return _hash_pairs(request.post_data.params)
-    return ''
-
-
-def _hash_request_properties(request: HarEntryRequest) -> RequestHashes:
-    hashes: Dict[str, str] = dict()
-
-    hashes['query_params'] = _hash_pairs(request.query_params)
-    hashes['headers'] = _hash_pairs(request.headers)
-    hashes['cookies'] = _hash_pairs(request.cookies)
-    hashes['post_data'] = _hash_body(request)
-
-    return RequestHashes(**hashes)

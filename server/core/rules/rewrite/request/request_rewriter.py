@@ -1,13 +1,14 @@
-from typing import Annotated, List, Type, Final
+from typing import Annotated, List, Type, Final, Dict
 from functools import lru_cache
 from enum import Enum
-import copy
 import logging
+import json
 
 from fastapi import Depends
 
 from server.core.config import with_config_loader, ConfigLoader
 from server.core.har import HarEntryRequest
+from server.core.har.models import NameValuePair, RequestHashes, SupportedBodyContentTypes
 from server.core.rules.base import RuleContainer, RuleFailedException
 
 from .rules import (
@@ -48,19 +49,21 @@ class RequestRewriter:
             -> HarEntryRequest:
 
         if not self._rule_container.has_any_rules_enabled():
+            request.hashes = self._hash_request_properties(request)
             return request
 
-        request_copy = copy.deepcopy(request)
         for name, rule in self._rule_container.get_enabled_rules():
             try:
                 if modification_type == _ModificationType.ENTRY:
-                    request_copy = rule.rewrite_har_entry_request(request_copy)
+                    request = rule.rewrite_har_entry_request(request)
                 else:
-                    request_copy = rule.rewrite_incoming_http_request(request_copy)
+                    request = rule.rewrite_incoming_http_request(request)
             except Exception as e:
                 raise RuleFailedException(self._rule_container.get_name(), name, e) from e
-        request_copy.compute_hashes()
-        return request_copy
+
+        request.hashes = self._hash_request_properties(request)
+
+        return request
 
     def apply_browser_request_rewrite_rules(self, request: HarEntryRequest) -> HarEntryRequest:
         """
@@ -95,6 +98,32 @@ class RequestRewriter:
         :raise RequestRuleFailedException: if any of the rewrite rules raised an exception.
         """
         return self._apply_request_rewrite_rules(request, _ModificationType.ENTRY)
+    
+    def _hash_pairs(self, pairs: List[NameValuePair]) -> str:
+        if len(pairs) == 0:
+            return ''
+
+        sorted_pairs = sorted(pairs, key=lambda x: x.name)
+        pairs_string = '&'.join([f'{pair.name}={pair.value}' for pair in sorted_pairs])
+        return str(hash(pairs_string))
+
+    def _hash_body(self, request: HarEntryRequest) -> str:
+        if request.post_data.mime_type == SupportedBodyContentTypes.APPLICATION_JSON:
+            json_text = json.dumps(request.post_data.parsed_json, sort_keys=True)
+            return str(hash(json_text))
+        elif request.post_data.mime_type == SupportedBodyContentTypes.FORM_URL_ENCODED:
+            return self._hash_pairs(request.post_data.params)
+        return ''
+
+    def _hash_request_properties(self, request: HarEntryRequest) -> RequestHashes:
+        hashes: Dict[str, str] = dict()
+
+        hashes['query_params'] = self._hash_pairs(request.query_params)
+        hashes['headers'] = self._hash_pairs(request.headers)
+        hashes['cookies'] = self._hash_pairs(request.cookies)
+        hashes['post_data'] = self._hash_body(request)
+
+        return RequestHashes(**hashes)
 
 
 @lru_cache()

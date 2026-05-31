@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import Mock, patch, PropertyMock
 
-import copy
-
 from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.rewrite.response import ResponseRewriter
 from server.core.rules.base import RuleFailedException
@@ -15,17 +13,13 @@ _RULE_NAME = 'test-rule'
 
 class ResponseRewriterTest(unittest.TestCase):
 
-    @patch(fully_qualified_name(copy.deepcopy))
     @patch(fully_qualified_property_name(ResponseRewriter, '_RESPONSE_REWRITE_RULES'), new_callable=PropertyMock)
     @patch(fully_qualified_name(ConfigLoader))
     def test_apply_response_rewrite_rules(self,
                                           mock_config_loader: ConfigLoader,
-                                          mock_rules: Mock,
-                                          mock_deep_copy: Mock):
+                                          mock_rules: Mock):
 
         response = Mock()
-        response_copy = Mock()
-        mock_deep_copy.return_value = response_copy
 
         expected = Mock()
         mock_rule = Mock(
@@ -43,19 +37,14 @@ class ResponseRewriterTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
         mock_config_loader.get_app_config.assert_called_once()
-        mock_deep_copy.assert_called_once_with(response)
-        mock_rule.rewrite_response.assert_called_once_with(response_copy)
+        mock_rule.rewrite_response.assert_called_once_with(response)
 
-    @patch(fully_qualified_name(copy.deepcopy))
     @patch(fully_qualified_property_name(ResponseRewriter, '_RESPONSE_REWRITE_RULES'), new_callable=PropertyMock)
     @patch(fully_qualified_name(ConfigLoader))
     def test_apply_response_rewrite_rules_raises_exception_when_rule_raises_exception(self,
                                                                                       mock_config_loader: ConfigLoader,
-                                                                                      mock_rules: Mock,
-                                                                                      mock_deep_copy: Mock):
+                                                                                      mock_rules: Mock):
         response = Mock()
-        response_copy = Mock()
-        mock_deep_copy.return_value = response_copy
 
         mock_rule = Mock(
             get_name=Mock(return_value=_RULE_NAME),
@@ -73,5 +62,4 @@ class ResponseRewriterTest(unittest.TestCase):
         self.assertIn(_RULE_NAME, str(context.exception))
 
         mock_config_loader.get_app_config.assert_called_once()
-        mock_deep_copy.assert_called_once_with(response)
-        mock_rule.rewrite_response.assert_called_once_with(response_copy)
+        mock_rule.rewrite_response.assert_called_once_with(response)

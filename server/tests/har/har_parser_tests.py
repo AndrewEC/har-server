@@ -26,7 +26,7 @@ class HarParserTest(unittest.TestCase):
             set_root_path(test_har_path)
 
             parser = HarParser()
-            har_file_contents = parser.get_har_file_contents()
+            har_file_contents = list(parser.get_har_file_contents())
 
             self.assertIsNotNone(har_file_contents)
             self.assertEqual(1, len(har_file_contents))

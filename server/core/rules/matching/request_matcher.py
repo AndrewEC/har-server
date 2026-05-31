@@ -1,5 +1,6 @@
-from typing import Annotated, List, Final, Dict, Callable
+from typing import Annotated, Final, Dict, Callable
 from functools import lru_cache
+import copy
 import logging
 
 from fastapi import Depends
@@ -34,16 +35,18 @@ class RequestMatcher:
 
         self._available_entries: Dict[str, HarEntry] = dict()
 
-    def prime(self, entries: List[HarEntry]):
-        _log.info('Priming request matcher hashes...')
-        for entry in entries:
-            key = self._get_complete_hash(entry.request)
-            if key not in self._available_entries:
-                self._available_entries[key] = entry
-        _log.info(f'[{len(self._available_entries)}] entries are available for request matching.')
+    def accumulate(self, entry: HarEntry) -> bool:
+        key = self._get_complete_hash(entry.request)
+        if key not in self._available_entries:
+            self._available_entries[key] = entry
+            return True
+        return False
 
     def find_matching_entry(self, request: HarEntryRequest) -> HarEntry | None:
-        return self._available_entries.get(self._get_complete_hash(request))
+        matching = self._available_entries.get(self._get_complete_hash(request))
+        if matching is not None:
+            return copy.deepcopy(matching)
+        return None
     
     def _get_complete_hash(self, request: HarEntryRequest) -> str:
         entry_hash = ''

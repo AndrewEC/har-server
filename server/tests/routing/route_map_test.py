@@ -1,10 +1,9 @@
 import unittest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import MagicMock, Mock, patch, AsyncMock
 
 from server.core.rules.matching import RequestMatcher
 from server.core.metrics import MetricRecorder
 from server.core.rules.rewrite.request import RequestRewriter
-from server.core.rules.rewrite.response import ResponseRewriter
 from server.core.routing.request_mapper import RequestMapper
 from server.core.har import HarParser
 from server.core.routing import RouteMap, PreProcessor
@@ -16,7 +15,6 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
 
     @patch(fully_qualified_name(MetricRecorder))
     @patch(fully_qualified_name(PreProcessor))
-    @patch(fully_qualified_name(ResponseRewriter))
     @patch(fully_qualified_name(RequestMapper))
     @patch(fully_qualified_name(RequestMatcher))
     @patch(fully_qualified_name(RequestRewriter))
@@ -26,16 +24,15 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
                                           mock_request_rewriter: RequestRewriter,
                                           mock_request_matcher: RequestMatcher,
                                           mock_request_mapper: RequestMapper,
-                                          mock_response_rewriter: ResponseRewriter,
                                           mock_pre_processor: PreProcessor,
                                           mock_metric_recorder: MetricRecorder):
-            
-            har_entry_request = Mock()
-            har_entry_response = Mock()
-            har_entry = Mock(request=har_entry_request, response=har_entry_response, id='entry-id')
+
+            har_entry = MagicMock(request=Mock(), response=Mock(), id='entry-id')
             entries = [har_entry]
-            mock_har_parser.get_har_file_contents = Mock(return_value=entries)
-            mock_pre_processor.process_entries = Mock(return_value=entries)
+
+            mock_pre_processor.process_content = Mock()
+            har_content = MagicMock(log=MagicMock(entries=entries))
+            mock_har_parser.get_har_file_contents = Mock(return_value=iter([har_content]))
 
             incoming_request = Mock()
             mock_request_mapper.map_to_har_request = AsyncMock(return_value=incoming_request)
@@ -45,9 +42,6 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
 
             mock_request_matcher.find_matching_entry = Mock(return_value=har_entry)
 
-            rewritten_response = Mock()
-            mock_response_rewriter.apply_response_rewrite_rules = Mock(return_value=rewritten_response)
-
             mock_metric_recorder.record = Mock()
             mock_metric_recorder.is_enabled = Mock(return_value=True)
 
@@ -56,7 +50,6 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
                 mock_request_rewriter,
                 mock_request_matcher,
                 mock_request_mapper,
-                mock_response_rewriter,
                 mock_pre_processor,
                 mock_metric_recorder
             )
@@ -65,14 +58,11 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
             actual = await sut.find_entry_for_request(request)
 
             self.assertIsNotNone(actual)
-            self.assertEqual(rewritten_response, actual)
 
             mock_har_parser.get_har_file_contents.assert_called_once()
             mock_request_mapper.map_to_har_request.assert_called_once_with(request)
             mock_request_rewriter.apply_browser_request_rewrite_rules.assert_called_once_with(incoming_request)
             mock_request_matcher.find_matching_entry.assert_called_once_with(rewritten_incoming_request)
-            mock_request_matcher.prime.assert_called_once()  # type: ignore
-            mock_pre_processor.process_entries.assert_called_once_with(entries)
-            mock_response_rewriter.apply_response_rewrite_rules.assert_called_once_with(har_entry_response)
+            mock_pre_processor.process_content.assert_called_once_with(har_content)
             mock_metric_recorder.is_enabled.assert_called_once()
-            mock_metric_recorder.record.assert_called_once_with(har_entry.id, rewritten_incoming_request, rewritten_response)
+            mock_metric_recorder.record.assert_called_once_with(har_entry.id, rewritten_incoming_request, har_entry.response)

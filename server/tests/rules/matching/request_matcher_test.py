@@ -38,7 +38,7 @@ class RequestMatcherTest(unittest.TestCase):
                 request = MagicMock(hashes=sub_arguments[1], path='/path', method='GET')
 
                 request_matcher = RequestMatcher(mock_config_loader)
-                request_matcher.prime([har_entry])
+                request_matcher.accumulate(har_entry)
 
                 actual = request_matcher.find_matching_entry(request)
 

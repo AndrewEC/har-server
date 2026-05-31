@@ -1,4 +1,4 @@
-from typing import List
+from typing import Generator
 from functools import lru_cache
 from pathlib import Path
 import json
@@ -14,20 +14,18 @@ _log = logging.getLogger(__file__)
 
 class HarParser:
 
-    def get_har_file_contents(self) -> List[HarFileContent]:
+    def get_har_file_contents(self) -> Generator[HarFileContent, None, None]:
         """
-        Parses all the files within the har folder that have a .har extension.
+        Parses and returns the contents of a .har file one by one.
 
         This will also search through nested directories to find addition files with the .har extension.
 
-        :return: The list of parsed har files. This will return the parsed har file content even if the har file
-            did not contain any entries. (Meaning the file is effectively empty and won't change the behaviour of the
-            har-server)
+        :return: The list of parsed har files. This will not yield any entries if the .har file
+            does not contain any entries.
         :raise HarParseError: if an error occurs while parsing any of the har files. This error will contain
             the original error that caused the parsing to fail.
         """
 
-        parsed: List[HarFileContent] = []
         har_root_folder = get_root_path()
         _log.info(f'Parsing har files from folder: [{har_root_folder}]')
         for root, _, files in os.walk(har_root_folder):
@@ -44,20 +42,18 @@ class HarParser:
                     _log.info(f'Excluding har file since it has no entries: [{file_path}]')
                     continue
 
-                parsed.append(parsed_har_file)
-
-        return parsed
-
-    def _do_parse_har_file(self, har_path: Path) -> HarFileContent:
-        with open(har_path, 'r', encoding='utf-8') as file:
-            contents = ''.join(file.readlines())
-            return HarFileContent(**json.loads(contents))
+                yield parsed_har_file
 
     def _parse_har_file(self, har_path: Path) -> HarFileContent:
         try:
             return self._do_parse_har_file(har_path)
         except Exception as e:
             raise HarParseError(f'Could not parse har file [{har_path}]', e) from e
+    
+    def _do_parse_har_file(self, har_path: Path) -> HarFileContent:
+        with open(har_path, 'r', encoding='utf-8') as file:
+            contents = ''.join(file.readlines())
+            return HarFileContent(**json.loads(contents))
 
 
 @lru_cache()

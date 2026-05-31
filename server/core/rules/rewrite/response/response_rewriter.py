@@ -1,6 +1,5 @@
 from typing import Annotated, List, Type, Final
 from functools import lru_cache
-import copy
 import logging
 
 from fastapi import Depends
@@ -57,13 +56,12 @@ class ResponseRewriter:
         if not self._rule_container.has_any_rules_enabled():
             return response
 
-        response_copy = copy.deepcopy(response)
         for name, rule in self._rule_container.get_enabled_rules():
             try:
-                response_copy = rule.rewrite_response(response_copy)
+                response = rule.rewrite_response(response)
             except Exception as e:
                 raise RuleFailedException(self._rule_container.get_name(), name, e) from e
-        return response_copy
+        return response
 
 
 @lru_cache()
