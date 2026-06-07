@@ -5,7 +5,8 @@ from server.core.config import ConfigLoader, AppConfig
 from server.core.rules.exclusions.rules import (
     BadStatusExclusionRule,
     InvalidSizeExclusionRule,
-    HttpMethodExclusionRule
+    HttpMethodExclusionRule,
+    UrlMatchingExclusionRule
 )
 
 from server.tests.util import fully_qualified_name
@@ -86,3 +87,29 @@ class ExclusionRuleTest(unittest.TestCase):
                 actual = rule.should_filter_out(entry)
                 
                 self.assertEqual(test_case[0], actual)
+    
+    @patch(fully_qualified_name(ConfigLoader))
+    def test_url_matching_exclusion_rule(self, mock_config_loader: ConfigLoader):
+        test_cases = [
+            ('^https:\\/\\/www\\.youtube\\.com\\/embed\\/.*', 'https://www.youtube.com/embed/', True),
+            ('^https:\\/\\/www\\.youtube\\.com\\/embed\\/.*', 'not_matching_url', False)
+        ]
+
+        for test_case in test_cases:
+            stub_config = AppConfig()
+            stub_config.exclusions.config.removable_url_expressions = [test_case[0]]
+
+            mock_config_loader.get_app_config = Mock(return_value=stub_config)
+
+            rule = UrlMatchingExclusionRule()
+            rule.initialize(mock_config_loader)
+
+            entry = Mock(
+                request=Mock(
+                    url=test_case[1]
+                )
+            )
+
+            actual = rule.should_filter_out(entry)
+
+            self.assertEqual(test_case[2], actual)

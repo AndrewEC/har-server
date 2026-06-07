@@ -31,9 +31,9 @@ class PreProcessor:
     def process_content(self, har_file_contents: HarFileContent):
         entries = har_file_contents.log.entries
         _log.debug(f'Har file contains [{len(entries)}] entries.')
+
         # filterfalse because we only want the list of entries to contain
         # entries that are NOT excluded through the configured exclusion rules.
-
         _log.debug('Applying entry exclusion rules...')
         entries = list(filterfalse(self._exclusion_filter.should_exclude_entry, entries))
         _log.debug(f'[{len(entries)}] remain after applying exclusion rules.')

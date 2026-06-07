@@ -12,7 +12,8 @@ from .rules import (
     ExclusionRule,
     BadStatusExclusionRule,
     InvalidSizeExclusionRule,
-    HttpMethodExclusionRule
+    HttpMethodExclusionRule,
+    UrlMatchingExclusionRule
 )
 
 
@@ -24,7 +25,8 @@ class ExclusionFilter:
     _EXCLUSION_RULES: Final[List[Type[ExclusionRule]]] = [
         BadStatusExclusionRule,
         InvalidSizeExclusionRule,
-        HttpMethodExclusionRule
+        HttpMethodExclusionRule,
+        UrlMatchingExclusionRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

@@ -27,12 +27,12 @@ class NameValuePair(BaseModel):
 
 
 class RequestPostData(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     mime_type: str = Field(alias='mimeType', default='')
     params: List[NameValuePair] = []
     text: str = ''
-    parsed_json: Dict[str, Any] = {}
+    parsed_json: Dict[str, Any] = Field(exclude=True, default={})
 
     def model_post_init(self, context: Any):
         self.mime_type = self.mime_type.lower()
@@ -48,11 +48,11 @@ class RequestHashes(BaseModel):
 
 
 class HarEntryRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     method: str
     url: str
-    path: str | None = None
+    path: str = Field(default='')
     query_params: List[NameValuePair] = Field(alias='queryString')
     headers: List[NameValuePair]
     cookies: List[NameValuePair]
@@ -66,7 +66,7 @@ class HarEntryRequest(BaseModel):
 
 
 class ResponseContent(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     mime_type: str = Field(alias='mimeType', default='')
     encoding: str = ''
@@ -74,7 +74,7 @@ class ResponseContent(BaseModel):
 
 
 class HarEntryResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     status: int
     headers: List[NameValuePair]
@@ -83,7 +83,8 @@ class HarEntryResponse(BaseModel):
 
 
 class HarEntry(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
     id: str = ''
     request: HarEntryRequest
     response: HarEntryResponse
@@ -94,10 +95,10 @@ class HarEntry(BaseModel):
 
 
 class Log(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
     entries: List[HarEntry]
 
 
 class HarFileContent(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)  # type: ignore
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
     log: Log

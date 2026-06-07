@@ -57,6 +57,7 @@ class ResponseRewriteRules(BaseModel):
 class ExclusionConfig(BaseModel):
     removable_statuses: List[int] = []
     removable_http_methods: List[str] = []
+    removable_url_expressions: List[str] = []
 
     def model_post_init(self, context: Any):
         self.removable_http_methods = make_lowercase(self.removable_http_methods)

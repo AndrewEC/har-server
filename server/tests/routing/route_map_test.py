@@ -6,13 +6,14 @@ from server.core.metrics import MetricRecorder
 from server.core.rules.rewrite.request import RequestRewriter
 from server.core.routing.request_mapper import RequestMapper
 from server.core.har import HarParser
-from server.core.routing import RouteMap, PreProcessor
+from server.core.routing import RouteMap, PreProcessor, BrowserOpen
 
 from server.tests.util import fully_qualified_name
 
 
 class RouteMapTest(unittest.IsolatedAsyncioTestCase):
 
+    @patch(fully_qualified_name(BrowserOpen))
     @patch(fully_qualified_name(MetricRecorder))
     @patch(fully_qualified_name(PreProcessor))
     @patch(fully_qualified_name(RequestMapper))
@@ -25,7 +26,10 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
                                           mock_request_matcher: RequestMatcher,
                                           mock_request_mapper: RequestMapper,
                                           mock_pre_processor: PreProcessor,
-                                          mock_metric_recorder: MetricRecorder):
+                                          mock_metric_recorder: MetricRecorder,
+                                          mock_browser_open: BrowserOpen):
+
+            mock_browser_open.open_browser_in_background = Mock()
 
             har_entry = MagicMock(request=Mock(), response=Mock(), id='entry-id')
             entries = [har_entry]
@@ -51,7 +55,8 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
                 mock_request_matcher,
                 mock_request_mapper,
                 mock_pre_processor,
-                mock_metric_recorder
+                mock_metric_recorder,
+                mock_browser_open
             )
 
             request = Mock()
@@ -66,3 +71,4 @@ class RouteMapTest(unittest.IsolatedAsyncioTestCase):
             mock_pre_processor.process_content.assert_called_once_with(har_content)
             mock_metric_recorder.is_enabled.assert_called_once()
             mock_metric_recorder.record.assert_called_once_with(har_entry.id, rewritten_incoming_request, har_entry.response)
+            mock_browser_open.open_browser_in_background.assert_called_once()

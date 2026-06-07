@@ -30,9 +30,9 @@ async def get(request: Request,
               metric_recorder: Annotated[MetricRecorder, Depends(with_metric_recorder)]):
 
     if metric_recorder.is_enabled() and full_path == '__metrics__':
-        mets = metric_recorder.get_metrics()
-        _log.debug(f'Serving metrics [{mets}]')
-        return JSONResponse(mets)
+        metrics = metric_recorder.get_metrics()
+        _log.debug(f'Serving metrics [{metrics}]')
+        return JSONResponse(metrics)
 
     entry = await route_map.find_entry_for_request(request)
     if entry is None:

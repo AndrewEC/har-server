@@ -9,6 +9,7 @@
 ||path||Match requests by path segments. (This will exclude the host/port and will fully decode the request path.)|
 ||query-params||Match requests by their query parameters. (This will fully decode all query parameters before matching.)|
 ||headers||Match requests by their request headers.|
+||cookies||Match requests by their cookies.|
 ||body||Match requests by their body. This only supports application/json and application/x-www-form-urlencoded formats.|
 |rewrite.request.rules|||The sequentially executed set of functions to modify an incoming request or a previously recorded request pulled from a har file. By default these rules are executed each time an incoming request is processed.|
 ||remove-query-params||Removes query params by name from the incoming and recorded request.|
@@ -27,6 +28,8 @@
 |exclusions.rules|||A sequentially executed set of rules that will filter out entries from each har file. Entries that are excluded will never be can never be matched or returned by the running har-server. By default the rules will be executed during the processing of every incoming HTTP request.|
 ||responses-with-status||Filter out any responses that have a matching HTTP status.|
 |||exclusions.config.removable-statuses|The list of HTTP status codes to be excluded.|
-||responses-with-invalid-size||Filter out responses that are empty but don't have a 204 response status.|
-||requests-with-http-method||Exclude HAR entries that have with a specific HTTP verb.|
-|||exclusions.config.removable-http-methods|The list of HTTP method to be excluded.|
+||responses-with-invalid-size||Exclude HAR entries that have an empty response body but don't have a 204 response status.|
+||requests-with-http-method||Exclude HAR entries that have a request with a specific HTTP verb.|
+|||exclusions.config.removable-http-methods|The list of HTTP methods to be excluded.|
+||Requests-with-matching-url||Exclude HAR entries that have a request with a URL matching one of the provided regular expressions.|
+|||exclusions.config.removable-url-expressions|The list of regular expressions to match request URLs by.|

@@ -1,5 +1,6 @@
 # Converts the configuration_properties_docs.csv file to
-# a markdown file containing a single table.
+# markdown content and writes the content to ConfigurationProperties.md
+# in the root of the project.
 
 from pathlib import Path
 
@@ -13,28 +14,29 @@ def _convert():
     if not docs.is_file():
         raise Exception(f'Could not find input csv file in expected location of [{docs}].')
 
-    print(f'Reading contents of csv file: [{docs}].')
+    print(f'Reading contents of CSV file: [{docs}].')
     with open(docs, 'r', encoding='utf-8') as file:
         lines = [line.strip() for line in file.readlines()]
 
-    markdown = Path(__file__).absolute().parent.parent.joinpath(_TEMP_NAME)
-    if markdown.is_file():
-        markdown.unlink()
+    markdown_file = Path(__file__).absolute().parent.parent.joinpath(_TEMP_NAME)
+    if markdown_file.is_file():
+        print(f'Temp file already exists. Deleting file: [{markdown_file}]')
+        markdown_file.unlink()
 
-    print(f'Writing markdown contents to: [{markdown}].')
-    with open(markdown, 'w', encoding='utf-8') as file:
+    print(f'Writing markdown contents to: [{markdown_file}].')
+    with open(markdown_file, 'w', encoding='utf-8') as file:
         file.write(_to_markdown_line(lines[0]))
         file.write(_create_heading_separator(lines[0]))
         for i in range(1, len(lines)):
             file.write(_to_markdown_line(lines[i]))
 
-    final_destination = markdown.parent.joinpath(_DESTINATION_NAME)
-    if final_destination.is_file():
-        print(f'Removing old markdown file from: [{final_destination}].')
-        final_destination.unlink()
+    final_markdown_file = markdown_file.parent.joinpath(_DESTINATION_NAME)
+    if final_markdown_file.is_file():
+        print(f'Removing old markdown file from: [{final_markdown_file}].')
+        final_markdown_file.unlink()
 
     print(f'Renaming [{_TEMP_NAME}] to [{_DESTINATION_NAME}].')
-    markdown.rename(final_destination)
+    markdown_file.rename(final_markdown_file)
 
 
 def _to_markdown_line(line: str) -> str:

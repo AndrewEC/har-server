@@ -11,6 +11,7 @@ from server.core.rules.matching import with_request_matcher, RequestMatcher
 
 from .request_mapper import RequestMapper, with_request_mapper
 from .pre_processor import PreProcessor, with_pre_processor
+from .browser_open import BrowserOpen, with_browser_open
 
 
 class RouteMap:
@@ -21,7 +22,8 @@ class RouteMap:
                  request_matcher: RequestMatcher,
                  request_mapper: RequestMapper,
                  pre_processor: PreProcessor,
-                 metric_recorder: MetricRecorder):
+                 metric_recorder: MetricRecorder,
+                 browser_open: BrowserOpen):
 
         self._request_rewriter = request_rewriter
         self._request_matcher = request_matcher
@@ -30,6 +32,8 @@ class RouteMap:
 
         for content in har_parser.get_har_file_contents():
             pre_processor.process_content(content)
+        
+        browser_open.open_browser_in_background()
 
     async def find_entry_for_request(self, request: Request) -> HarEntryResponse | None:
         """
@@ -62,7 +66,8 @@ def with_route_map(har_parser: Annotated[HarParser, Depends(with_har_parser)],
                    request_matcher: Annotated[RequestMatcher, Depends(with_request_matcher)],
                    request_mapper: Annotated[RequestMapper, Depends(with_request_mapper)],
                    preprocessor: Annotated[PreProcessor, Depends(with_pre_processor)],
-                   metric_recorder: Annotated[MetricRecorder, Depends(with_metric_recorder)]) -> RouteMap:
+                   metric_recorder: Annotated[MetricRecorder, Depends(with_metric_recorder)],
+                   browser_open: Annotated[BrowserOpen, Depends(with_browser_open)]) -> RouteMap:
 
     return RouteMap(
         har_parser,
@@ -70,5 +75,6 @@ def with_route_map(har_parser: Annotated[HarParser, Depends(with_har_parser)],
         request_matcher,
         request_mapper,
         preprocessor,
-        metric_recorder
+        metric_recorder,
+        browser_open
     )
