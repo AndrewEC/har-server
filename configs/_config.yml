@@ -34,6 +34,7 @@ rewrite:
       - urls-in-response
       - remove-headers
       - remove-cookies
+      - remove-html-script-tags
     config:
       excluded-domains:
         - http://w3.com/

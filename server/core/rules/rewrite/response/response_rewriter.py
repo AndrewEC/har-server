@@ -9,10 +9,11 @@ from server.core.har import HarEntryResponse
 from server.core.rules.base import RuleContainer, RuleFailedException
 
 from .rules import (
+    ResponseRewriteRule,
     RewriteUrlResponseRewriteRule,
     RemoveHeaderResponseRewriteRule,
     RemoveCookiesResponseRewriteRule,
-    ResponseRewriteRule
+    RemoveHtmlScriptTagsResponseRewriteRule
 )
 
 
@@ -24,7 +25,8 @@ class ResponseRewriter:
     _RESPONSE_REWRITE_RULES: Final[List[Type[ResponseRewriteRule]]] = [
         RewriteUrlResponseRewriteRule,
         RemoveHeaderResponseRewriteRule,
-        RemoveCookiesResponseRewriteRule
+        RemoveCookiesResponseRewriteRule,
+        RemoveHtmlScriptTagsResponseRewriteRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):
