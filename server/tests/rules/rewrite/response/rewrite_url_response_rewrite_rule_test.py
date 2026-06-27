@@ -43,6 +43,24 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
                 self.assertEqual(expected, actual.content.text)
 
                 mock_config_loader.get_app_config.assert_called_once()
+    
+    @patch(fully_qualified_name(ConfigLoader))
+    def test_rewrite_response_contents_urls_when_orign_has_trailing_colon(self, mock_config_loader: ConfigLoader):
+        input_content = 'http://www.testing.ca:'
+        expected_output = 'Replace url (http://localhost:8080:) with localhost.'
+
+        stub_config = AppConfig()
+        stub_config.rewrite.response.config.excluded_domains = []
+        mock_config_loader.get_app_config = Mock(return_value=stub_config)
+
+        response = Mock(content=Mock(text=_CONTENT_TEMPLATE.format(input_content)))
+        rule = RewriteUrlResponseRewriteRule()
+        rule.initialize(mock_config_loader)
+        actual = rule.rewrite_response(response)
+
+        self.assertEqual(expected_output, actual.content.text)
+
+        mock_config_loader.get_app_config.assert_called_once()
 
     @patch(fully_qualified_name(ConfigLoader))
     def test_rewrite_response_content_urls_replaces_nothing_when_no_origin_is_found(self, mock_config_loader: ConfigLoader):

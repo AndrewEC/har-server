@@ -10,7 +10,7 @@ from server.core.rules.rewrite.response.response_rewriter import ResponseRewrite
 from ..util import fully_qualified_name
 
 
-class PreProcessTests(unittest.TestCase):
+class PreProcessTest(unittest.TestCase):
 
     @patch(fully_qualified_name(ResponseRewriter))
     @patch(fully_qualified_name(RequestMatcher))

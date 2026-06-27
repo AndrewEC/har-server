@@ -1,25 +1,25 @@
 from __future__ import annotations
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Final, Literal
 from enum import Enum
 
 
-_EMPTY_PROTOCOL_START_TOKEN = '/'
-_EMPTY_PROTOCOL_END_TOKEN = '/'
+_EMPTY_PROTOCOL_START_TOKEN: Final[Literal['/']] = '/'
+_EMPTY_PROTOCOL_END_TOKEN: Final[Literal['/']] = '/'
 
-_HTTP_START_TOKEN = 'h'
-_HTTP_PROTOCOL = 'http://'
-_HTTP_PROTOCOL_LENGTH = len(_HTTP_PROTOCOL)
-_HTTPS_PROTOCOL = 'https://'
-_HTTPS_PROTOCOL_LENGTH = len(_HTTPS_PROTOCOL)
+_HTTP_START_TOKEN: Final[Literal['h']] = 'h'
+_HTTP_PROTOCOL: Final[str] = 'http://'
+_HTTP_PROTOCOL_LENGTH: Final[int] = len(_HTTP_PROTOCOL)
+_HTTPS_PROTOCOL: Final[str] = 'https://'
+_HTTPS_PROTOCOL_LENGTH: Final[int] = len(_HTTPS_PROTOCOL)
 
-_LETTERS_MIN = ord('A')
-_LETTERS_MAX = ord('z')
-_NUMBERS_MIN = ord('0')
-_NUMBERS_MAX = ord('9')
-_DOT_CHARACTER = ord('.')
-_HYPHEN_CHARACTER = ord('-')
+_LETTERS_MIN: Final[int] = ord('A')
+_LETTERS_MAX: Final[int] = ord('z')
+_NUMBERS_MIN: Final[int] = ord('0')
+_NUMBERS_MAX: Final[int] = ord('9')
+_DOT_CHARACTER: Final[int] = ord('.')
+_HYPHEN_CHARACTER: Final[int] = ord('-')
 
-_COLON_CHARACTER = ord(':')
+_COLON_CHARACTER: Final[int] = ord(':')
 
 
 class CapturedOrigin:
@@ -43,7 +43,7 @@ class UrlOriginCaptor:
         CAPTURING_PORT = 6
 
     def __init__(self, value: str):
-        self._capture_functions: Dict[UrlOriginCaptor._State, Callable[[str, int], None]] = {
+        self._capture_functions: Final[Dict[UrlOriginCaptor._State, Callable[[str, int], None]]] = {
             UrlOriginCaptor._State.LOOKING_FOR_PROTOCOL: self._looking_for_protocol,
             UrlOriginCaptor._State.CAPTURING_EMPTY_PROTOCOL: self._capturing_empty_protocol,
             UrlOriginCaptor._State.CAPTURING_HTTP_PROTOCOL: self._capturing_http_protocol,

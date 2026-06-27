@@ -70,6 +70,19 @@ class ResponseRewriteRuleTest(unittest.TestCase):
 
         self.assertTrue('script' not in response.content.text)
     
+    def test_remove_html_script_tags_removes_nothing_when_no_content_is_not_html(self):
+        original = '<html><head><script type="text/javascript"/></head><body></body></html>'
+        response = Mock(
+            content=Mock(
+                mime_type='text/plain; charset=utf-8',
+                text=original
+            )
+        )
+
+        RemoveHtmlScriptTagsResponseRewriteRule().rewrite_response(response)
+
+        self.assertEqual(original, response.content.text)
+
     def test_remove_html_script_does_not_rethrow_exception(self):
         text_content = 'this is not html'
         response = Mock(
