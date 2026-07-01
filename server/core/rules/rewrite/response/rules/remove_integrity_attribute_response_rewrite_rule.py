@@ -38,6 +38,6 @@ class RemoveIntegrityAttributeResponseRewriteRule(ResponseRewriteRule):
 
             response.content.text = str(parsed)
         except Exception as e:
-            _log.error(f'remove-html-script-tags: Could not remove script tags because the HTML content could not be parsed: [{e}]')
+            _log.error(f'remove-integrity-attribute: Could not remove integrity attributes because the HTML content could not be parsed: [{e}]')
 
         return response
