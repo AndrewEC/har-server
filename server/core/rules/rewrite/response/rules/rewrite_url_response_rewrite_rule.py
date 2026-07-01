@@ -12,19 +12,22 @@ from .url_origin_captor import UrlOriginCaptor, CapturedOrigin
 _log = logging.getLogger(__file__)
 
 
-_LOCALHOST = 'http://localhost:8080'
+_LOCALHOST_TEMPLATE = 'http://localhost:{}'
 
 
 class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
 
     def __init__(self):
         self._excluded_domains: List[str] = []
+        self._localhost_url = _LOCALHOST_TEMPLATE.format(8080)
 
     def get_name(self) -> str:
         return 'urls-in-response'
 
     def initialize(self, config_loader: ConfigLoader):
-        self._excluded_domains = config_loader.get_app_config().rewrite.response.config.excluded_domains
+        app_config = config_loader.get_app_config()
+        self._excluded_domains = app_config.rewrite.response.config.excluded_domains
+        self._localhost_url = _LOCALHOST_TEMPLATE.format(app_config.port)
 
     def rewrite_response(self, response: HarEntryResponse) -> HarEntryResponse:
         content = response.content.text
@@ -64,4 +67,4 @@ class RewriteUrlResponseRewriteRule(ResponseRewriteRule):
             _log.debug(f'Skipping excluded domain: [{origin}]')
             return content
         _log.debug(f'Replacing with localhost: [{origin}]')
-        return content[:start_index] + _LOCALHOST + content[start_index + captured.length:]
+        return content[:start_index] + self._localhost_url + content[start_index + captured.length:]

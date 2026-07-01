@@ -13,7 +13,8 @@ from .rules import (
     RewriteUrlResponseRewriteRule,
     RemoveHeaderResponseRewriteRule,
     RemoveCookiesResponseRewriteRule,
-    RemoveHtmlScriptTagsResponseRewriteRule
+    RemoveHtmlScriptTagsResponseRewriteRule,
+    RemoveIntegrityAttributeResponseRewriteRule
 )
 
 
@@ -26,7 +27,8 @@ class ResponseRewriter:
         RewriteUrlResponseRewriteRule,
         RemoveHeaderResponseRewriteRule,
         RemoveCookiesResponseRewriteRule,
-        RemoveHtmlScriptTagsResponseRewriteRule
+        RemoveHtmlScriptTagsResponseRewriteRule,
+        RemoveIntegrityAttributeResponseRewriteRule
     ]
 
     def __init__(self, config_loader: ConfigLoader):

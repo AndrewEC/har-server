@@ -1,8 +1,9 @@
 |Property|Rule Name|Rule Config|Description|
 |---|---|---|---|
+|port|||The port to start the server on.|
+|open-browser|||The URL to launch in your default browser once the server has started. URLs can use {port} as a placeholder value that will be substituted with the real port at runtime.|
 |debug.enable-debug-logs|||Enable more granular logging statements.|
 |debug.log-stack-traces|||Log the full stack trace whenever an exception is thrown while the server is running.|
-|debug.open-browser|||The URL to launch in your default browser once the server has started.|
 |debug.enable-metrics|||Enables recording information about which requests match to which entries. Once enable metrics can be retrieved using the GET /__metrics__ endpoint.|
 |request-matching.rules|||The sequentially executed set of predicate functions to determine if an incoming HTTP request matches a previously recorded request pulled from a har file.|
 ||method||Match requests by HTTP method.|
@@ -26,6 +27,7 @@
 ||remove-cookies||Removes response cookies by the cookie name.|
 |||rewrite.response.config.removable-cookies|A list of cookie names (case-insensitive) to be removed from all matched responses before returning said response.|
 ||remove-html-script-tags||Remove all &lt;script&gt; tags from any response content that has a mimetype containing text/html.|
+||remove-integrity-attribute||"Remove the ""integrity"" attribute from script and link tags in any response content that has a mimetype containing text/html."|
 |exclusions.rules|||A sequentially executed set of rules that will filter out entries from each har file. Entries that are excluded will never be can never be matched or returned by the running har-server. By default the rules will be executed during the processing of every incoming HTTP request.|
 ||responses-with-status||Filter out any responses that have a matching HTTP status.|
 |||exclusions.config.removable-statuses|The list of HTTP status codes to be excluded.|

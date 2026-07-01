@@ -16,7 +16,10 @@ _log = logging.getLogger(__file__)
 class BrowserOpen:
 
     def __init__(self, config_loader: ConfigLoader):
-        self._url = config_loader.get_app_config().debug.open_browser
+        app_config = config_loader.get_app_config()
+        self._url = app_config.open_browser
+        if self._url is not None:
+            self._url = self._url.replace('{port}', str(app_config.port))
 
     def _do_open_browser(self, url: str):
         webbrowser.open(url)
