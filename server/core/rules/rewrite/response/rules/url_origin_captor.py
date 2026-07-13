@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import List, Dict, Callable, Final, Literal
+from typing import List, Dict, Callable, Final
 from enum import Enum
 
 
-_EMPTY_PROTOCOL_START_TOKEN: Final[Literal['/']] = '/'
-_EMPTY_PROTOCOL_END_TOKEN: Final[Literal['/']] = '/'
+_EMPTY_PROTOCOL_START_TOKEN: Final[str] = '/'
+_EMPTY_PROTOCOL_END_TOKEN: Final[str] = '/'
 
-_HTTP_START_TOKEN: Final[Literal['h']] = 'h'
+_HTTP_START_TOKEN: Final[str] = 'h'
 _HTTP_PROTOCOL: Final[str] = 'http://'
 _HTTP_PROTOCOL_LENGTH: Final[int] = len(_HTTP_PROTOCOL)
 _HTTPS_PROTOCOL: Final[str] = 'https://'
@@ -21,6 +21,8 @@ _HYPHEN_CHARACTER: Final[int] = ord('-')
 
 _COLON_CHARACTER: Final[int] = ord(':')
 
+_MAX_TLD_LENGTH: Final[int] = 5
+
 
 class CapturedOrigin:
 
@@ -33,6 +35,16 @@ class CapturedOrigin:
 
 
 class UrlOriginCaptor:
+
+    '''
+    Identifies all URL "origins" in a block of text. The origin includes the protocol,
+    subdomain, domain, and top-level domain.
+
+    For example in the sentence: "Open the browser to https://test.endpoints.com:443/example/endpoint"
+    the "origin" "https://test.endpoints.com::443" will be captured.
+
+    This also supports empty protocols. Ex: //test.endpoints.com:443
+    '''
 
     class _State(Enum):
         LOOKING_FOR_PROTOCOL = 1
@@ -93,6 +105,27 @@ class UrlOriginCaptor:
     def _first_character_captured(self, index: int):
         self._start_index = index
         self._character_captured()
+    
+    def _is_valid_top_level_domain(self, origin: str) -> bool:
+        '''
+        The top-level domain (TLD) is typically the last portion of the URL after the dot.
+
+        For example in "https://www.google.com" the last 3 characters, "com", is the TLD.
+
+        This will ensure the length of a TLD is 5 characters or less. Though not 100% valid
+        (TLDs can be longer) it will help reduce the number of false positive matches in
+        the capture logic.
+        '''
+
+        dot_index = origin.rfind('.')
+
+        colon_index = origin.rfind(':')
+        if colon_index == -1 or colon_index < dot_index:
+            colon_index = len(origin)
+        
+        top_level_domain = origin[dot_index + 1:colon_index]
+
+        return len(top_level_domain) <= _MAX_TLD_LENGTH
 
     def _origin_captured(self):
         last_character_index = self._start_index + self._captured_length - 1
@@ -100,6 +133,11 @@ class UrlOriginCaptor:
         # port number.
         if self._value[last_character_index] == ':':
             self._captured_length -= 1
+
+        captured_value = self._value[self._start_index:self._start_index + self._captured_length]
+        if not self._is_valid_top_level_domain(captured_value):
+            return self._reset()
+
         self._capture_results.append(CapturedOrigin(self._start_index, self._captured_length))
         self._reset()
 

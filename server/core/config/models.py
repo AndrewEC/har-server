@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from .functions import make_lowercase
 
 
+_PORT_PLACEHOLDER = '{port}'
+
+
 class Debug(BaseModel):
     enable_debug_logs: bool = False
     log_stack_traces: bool = False
@@ -82,3 +85,7 @@ class AppConfig(BaseModel):
 
     port: int = 8080
     open_browser: str | None = None
+
+    def model_post_init(self, context: Any):
+        if self.open_browser is not None and _PORT_PLACEHOLDER in self.open_browser:
+            self.open_browser = self.open_browser.replace(_PORT_PLACEHOLDER, str(self.port))

@@ -27,7 +27,8 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
             'http://www.mock.com:443',
             '//www.mock.com',
             '//www.mock.com:443',
-            'http://subdomain.mock.com'
+            'http://subdomain.mock.com',
+            'http://subdomain.mock.commm'
         ]
 
         for test_case in test_cases:
@@ -79,6 +80,7 @@ class RewriteUrlResponseRewriteRuleTest(unittest.TestCase):
             'https://:',
             'http://wwwmockcom',
             'httpwwwmockcom',
+            'http://subdomain.mock.commmm'
         ]
 
         for test_case in test_cases:

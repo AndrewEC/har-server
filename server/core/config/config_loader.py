@@ -1,7 +1,6 @@
 from typing import Dict, Any, Annotated
 import logging
 import copy
-import json
 
 from fastapi import Depends
 
@@ -19,7 +18,7 @@ class ConfigLoader:
         if user_defined_config is not None:
             updated_config = self._rewrite_keys(user_defined_config)
             self._app_config = AppConfig(**updated_config)
-            _log.info(f'Loaded user defined app config of: [{json.dumps(updated_config, indent=4)}].')
+            _log.info(f'Loaded user defined app config of: [{self._app_config.model_dump_json()}].')
         else:
             _log.info('No user defined config provided. Using default config.')
             self._app_config = AppConfig()
