@@ -17,7 +17,7 @@ class RequestMatcher:
 
     _HASH_FUNCTIONS: Final[Dict[str, Callable[[HarEntryRequest], str]]] = {
         'method': lambda request: request.method,
-        'path': lambda request: request.path if request.path is not None else '',
+        'path': lambda request: request.path,
         'query-params': lambda request: request.hashes.query_params,
         'headers': lambda request: request.hashes.headers,
         'cookies': lambda request: request.hashes.cookies,

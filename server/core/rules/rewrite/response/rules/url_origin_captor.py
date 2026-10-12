@@ -41,9 +41,9 @@ class UrlOriginCaptor:
     subdomain, domain, and top-level domain.
 
     For example in the sentence: "Open the browser to https://test.endpoints.com:443/example/endpoint"
-    the "origin" "https://test.endpoints.com::443" will be captured.
+    the "origin" "https://test.endpoints.com:443" will be captured.
 
-    This also supports empty protocols. Ex: //test.endpoints.com:443
+    This support http, https, and empty protocols such as: //test.endpoints.com:443
     '''
 
     class _State(Enum):
